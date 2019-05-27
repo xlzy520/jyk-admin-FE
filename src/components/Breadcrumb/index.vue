@@ -19,7 +19,10 @@ export default {
     }
   },
   watch: {
-    $route() {
+    $route(route) {
+      if (route.path.startsWith('/redirect/')) {
+        return
+      }
       this.getBreadcrumb()
     }
   },
@@ -33,7 +36,7 @@ export default {
       const first = matched[0]
 
       if (!this.isDashboard(first)) {
-        matched = [{ path: '/dashboard', meta: { title: 'Dashboard' }}].concat(matched)
+        matched = [{ path: '/dashboard', meta: { title: '首页' }}].concat(matched)
       }
 
       this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
@@ -48,7 +51,7 @@ export default {
     pathCompile(path) {
       // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
       const { params } = this.$route
-      var toPath = pathToRegexp.compile(path)
+      const toPath = pathToRegexp.compile(path)
       return toPath(params)
     },
     handleLink(item) {
