@@ -16,8 +16,7 @@
       <h3 class="title">洁雅康后台管理</h3>
       <el-form-item prop="username">
         <span class="svg-container svg-container_login">
-          <i class="fa fa-user" />
-          <!--<svg-icon icon-class="user" />-->
+          <svg-icon icon-class="user" />
         </span>
         <el-input
           v-model.trim="loginForm.username"
@@ -32,7 +31,7 @@
       </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container svg-container_login">
-          <i class="fa fa-lock" />
+          <svg-icon icon-class="password" />
         </span>
         <el-input
           v-model.trim="loginForm.password"
@@ -45,7 +44,9 @@
           placeholder="请输入密码"
           @keyup.enter.native="handleLogin"
         />
-        <span class="show-pwd" @click="showPwd"><i :class="['fa',eye]" /></span>
+        <span class="show-pwd" @click="showPwd">
+          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+        </span>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" class="login-button" :loading="loading" @click.native.prevent="handleLogin">
