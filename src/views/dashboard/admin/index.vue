@@ -25,8 +25,8 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="8">
-      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 12}" :xl="{span: 12}" style="padding-right:8px;margin-bottom:30px;">
+    <el-row>
+      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" style="margin-bottom:30px;">
         <transaction-table />
       </el-col>
     </el-row>
@@ -74,6 +74,13 @@ export default {
     return {
       lineChartData: lineChartData.newVisitis
     }
+  },
+  mounted() {
+    this.$notify({
+      title: '提示',
+      message: '所有数据均为模拟数据',
+      type: 'info'
+    })
   },
   methods: {
     handleSetLineChartData(type) {

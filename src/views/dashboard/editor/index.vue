@@ -2,7 +2,7 @@
   <div class="dashboard-editor-container">
     <div class=" clearfix">
       Your roles:
-      <span v-for="item in roles" :key="item" class="pan-info-roles">{{ item }}</span>
+      <span v-for="item in userData.roles" :key="item" class="pan-info-roles">{{ item }}</span>
       <div class="info-container">
         <span class="display_name">{{ name }}</span>
         <span style="font-size:20px;padding-top:20px;display:inline-block;">Editor's Dashboard</span>
@@ -26,7 +26,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'roles'
+      'userData'
     ])
   }
 }
