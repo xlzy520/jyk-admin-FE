@@ -1,7 +1,7 @@
 import baseRequest from './base'
 
 export default {
-  logout() {
+  transactionList() {
     return baseRequest('/transaction/list')
   }
 }
