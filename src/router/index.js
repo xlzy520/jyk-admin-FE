@@ -88,7 +88,41 @@ export const constantRoutes = [
         meta: { title: 'Form', icon: 'form' }
       }
     ]
-  }
+  },
+  
+  {
+    path: '/staff',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '员工管理',
+        component: () => import('@/views/staff/index'),
+        meta: { title: '员工管理', icon: 'staff' }
+      }
+    ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    redirect: '/user/list',
+    name: '用户管理',
+    meta: { title: '用户管理', icon: 'peoples' },
+    children: [
+      {
+        path: 'list',
+        name: '用户列表',
+        component: () => import('@/views/user/list'),
+        meta: { title: '用户列表', icon: 'user' }
+      },
+      {
+        path: 'address',
+        name: '地址列表',
+        component: () => import('@/views/user/address'),
+        meta: { title: '地址列表', icon: 'address' }
+      }
+    ]
+  },
 ]
 
 /**
