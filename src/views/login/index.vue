@@ -104,11 +104,10 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.loading = false
-            this.$router.push('/index/list')
+            this.$router.push({ path: this.redirect || '/' })
             this.$message1000('登录成功', 'success')
           }).catch(() => {
             this.loading = false
-            // this.$router.push({ path: '/' }) //  跳过后台验证
           })
         } else {
           console.log('error submit!!')
