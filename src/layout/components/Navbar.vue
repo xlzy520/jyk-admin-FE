@@ -5,26 +5,13 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
-        <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
-        </div>
+      <el-dropdown class="avatar-container" trigger="click" @command="handleDropDownCommand">
+        <div>{{ userData.name }}<i class="el-icon-arrow-down el-icon--right" /></div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>
-              Home
-            </el-dropdown-item>
+            <el-dropdown-item>主页</el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
-          <el-dropdown-item divided>
-            <span style="display:block;" @click="logout">Log Out</span>
-          </el-dropdown-item>
+          <el-dropdown-item divided command="logout">注销</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -44,16 +31,23 @@ export default {
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar'
+      'userData'
     ])
   },
   methods: {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
-    async logout() {
-      await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    logout() {
+      this.$store.dispatch('user/logout').then(() => {
+        this.$message1000('注销成功。', 'success')
+      }).finally(() => {
+        this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+        location.reload() // 为了重新实例化vue-router对象 避免bug
+      })
+    },
+    handleDropDownCommand(cmd) {
+      if (cmd === 'logout') this.logout()
     }
   }
 }
@@ -88,6 +82,7 @@ export default {
     float: right;
     height: 100%;
     line-height: 50px;
+    cursor: pointer;
 
     &:focus {
       outline: none;
@@ -113,26 +108,6 @@ export default {
 
     .avatar-container {
       margin-right: 30px;
-
-      .avatar-wrapper {
-        margin-top: 5px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
-        }
-      }
     }
   }
 }
