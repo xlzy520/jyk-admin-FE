@@ -1,79 +1,140 @@
 <template>
   <div class="app-container">
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
+    <div class="header">
+      <el-button type="primary" @click="add">新增</el-button>
+    </div>
+    <base-table
+      ref="staffTable"
+      :index="true"
+      :loading="loading"
+      :table-data="staffData"
+      :table-columns="columns"
+      header-row-class-name="ant-style-header-row"
+    />
+    <dialog
+      width="80%"
+      title="增加人员"
     >
-      <el-table-column align="center" label="ID" width="95">
-        <template slot-scope="scope">
-          {{ scope.$index }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Title">
-        <template slot-scope="scope">
-          {{ scope.row.title }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Author" width="110" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Pageviews" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.pageviews }}
-        </template>
-      </el-table-column>
-      <el-table-column class-name="status-col" label="Status" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" prop="created_at" label="Display_time" width="200">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.display_time }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
+      <el-form>
+        <el-form-item></el-form-item>
+      </el-form>
+    </dialog>
   </div>
 </template>
 
 <script>
-import { getList } from '@/api/table'
+import BaseTable from '../../components/baseTable'
+import staffApi from '../../api/staff'
 
 export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
+  name: 'Staff',
+  components: { BaseTable },
   data() {
     return {
-      list: null,
-      listLoading: true
+      staffData: [],
+      columns: [
+        {
+          label: '姓名',
+          prop: 'name',
+          align: 'center'
+        },
+        {
+          label: '手机号',
+          prop: 'phone',
+          align: 'center'
+        },
+        {
+          label: '角色',
+          prop: 'roles',
+          align: 'center',
+          render: (h, { props: { row }}) => {
+            const roles = this.statusFilter(row.roles)
+            return (
+              <el-tag type={roles.type}>{ roles.text }</el-tag>
+            )
+          }
+        },
+        {
+          label: '负责区域',
+          prop: 'region',
+          align: 'center'
+        },
+        {
+          label: '操作',
+          prop: 'region',
+          align: 'center',
+          render: (h, { props: { row }}) => {
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.update(row)}>编辑</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.delete(row.id)}>删除</span>
+              </div>
+            )
+          }
+        }
+      ],
+      loading: false,
+      type: ''
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    statusFilter(status) {
+      const statusMap = {
+        'super': 'danger',
+        'admin': 'warning',
+        'staff': 'success'
+      }
+      const statusTextMap = {
+        'super': '超级管理员',
+        'admin': '管理员',
+        'staff': '员工'
+      }
+      return {
+        text: statusTextMap[status],
+        type: statusMap[status]
+      }
+    },
     fetchData() {
-      this.listLoading = true
-      getList().then(response => {
-        this.list = response.data.items
-        this.listLoading = false
+      this.loading = true
+      staffApi.getStaff().then(res => {
+        this.staffData = res.list
+      }).finally(_ => {
+        this.loading = false
+      })
+    },
+    add() {
+
+    },
+    update(row) {
+
+    },
+    delete(id) {
+      staffApi.deleteStaff(id).then(_ => {
+        this.$message1000('删除成功')
       })
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .header{
+    padding: 0 0 20px 0;
+  }
+  .line{
+    text-align: center;
+  }
+  /deep/ .ant-style-header-row th{
+    background-color: #fafafa;
+    color: rgba(0,0,0,.85);
+    font-weight: 500;
+  }
+  /deep/ .table-action span{
+    color: #1890ff;
+    cursor: pointer;
+  }
+</style>
