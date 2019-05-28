@@ -6,6 +6,7 @@
       highlight-current-row
       :data="tableData"
       :stripe="stripe"
+      :header-row-class-name="headerRowClassName"
       @row-click="clickRow"
       @select="handleSelection"
       @select-all="selectAll"
@@ -17,6 +18,11 @@
       <el-table-column
         v-if="selection"
         type="selection"
+        width="55"
+      />
+      <el-table-column
+        v-if="index"
+        type="index"
         width="55"
       />
       <el-table-column
@@ -94,7 +100,9 @@ export default {
     pageSize: {
       type: Number,
       default: 15
-    }
+    },
+    headerRowClassName: [String, Function],
+    index: Boolean
   },
   data() {
     return {
@@ -109,11 +117,16 @@ export default {
       if (col.render) {
         temp.render = col.render
       }
+      // 显示索引号，只能允许有type=index一个属性
+      if (col.type === 'index') {
+        return { ...col }
+      }
       return {
         ...col,
         component: temp
       }
     })
+    console.log(this.columns);
   },
   methods: {
     handleCurrentChange(val) {
@@ -151,7 +164,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-  @import "@/styles/pagination.scss";
+  @import "../styles/pagination.scss";
   .base-table {
     width: 100%;
     /deep/ .double-row {
