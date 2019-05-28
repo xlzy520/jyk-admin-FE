@@ -21,7 +21,7 @@ import '@/permission' // permission control
 
 Vue.use(ElementUI)
 Vue.prototype.$message1000 = (message, type) => { // 默认消息提示持续1S
-  Element.Message({
+  ElementUI.Message({
     message: message,
     type: type,
     duration: 1000

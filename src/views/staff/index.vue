@@ -114,7 +114,7 @@ export default {
     },
     delete(id) {
       staffApi.deleteStaff(id).then(_ => {
-        this.$message1000('删除成功')
+        this.$message1000('删除成功', 'success')
       })
     }
   }
