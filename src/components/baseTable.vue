@@ -21,7 +21,6 @@
       />
       <el-table-column
         v-for="col in columns"
-        v-if="!col.hidden"
         :key="col.label"
         v-bind="col"
       >
@@ -105,7 +104,7 @@ export default {
   },
   mounted() {
     // 处理表头数据
-    this.columns = this.tableColumns.map(col => {
+    this.columns = this.tableColumns.filter(v => !v.hidden).map(col => {
       const temp = defaultComponent()
       if (col.render) {
         temp.render = col.render
