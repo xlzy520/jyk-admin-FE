@@ -33,7 +33,7 @@ service.interceptors.response.use(
       }
       return Promise.reject(res)
     } else {
-      return res
+      return res.data
     }
   },
   error => {

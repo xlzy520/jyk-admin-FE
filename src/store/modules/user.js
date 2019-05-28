@@ -19,7 +19,7 @@ const actions = {
     const password = md5(userInfo.password)
     return new Promise((resolve, reject) => {
       loginApi.login(username, password).then(response => {
-        commit('SET_USER_DATA', response.data)
+        commit('SET_USER_DATA', response)
         resolve()
       }).catch(error => {
         reject(error)
@@ -31,8 +31,8 @@ const actions = {
   getInfo({ commit }) {
     return new Promise((resolve, reject) => {
       loginApi.getInfo().then(response => {
-        commit('SET_USER_DATA', response.data)
-        resolve(response.data)
+        commit('SET_USER_DATA', response)
+        resolve(response)
       }).catch(error => {
         reject(error)
       })
