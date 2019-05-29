@@ -9,7 +9,6 @@
       :loading="loading"
       :table-data="staffData"
       :table-columns="columns"
-      header-row-class-name="ant-style-header-row"
     />
     <el-dialog
       width="40%"
