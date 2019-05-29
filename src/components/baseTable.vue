@@ -126,7 +126,6 @@ export default {
         component: temp
       }
     })
-    console.log(this.columns);
   },
   methods: {
     handleCurrentChange(val) {
