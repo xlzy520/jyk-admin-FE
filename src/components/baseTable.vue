@@ -6,7 +6,7 @@
       highlight-current-row
       :data="tableData"
       :stripe="stripe"
-      :header-row-class-name="headerRowClassName"
+      header-row-class-name="header-row"
       @row-click="clickRow"
       @select="handleSelection"
       @select-all="selectAll"
@@ -101,7 +101,6 @@ export default {
       type: Number,
       default: 15
     },
-    headerRowClassName: [String, Function],
     index: Boolean
   },
   data() {
@@ -178,6 +177,11 @@ export default {
       color: #4d4d4d;
       background: #f7f7f7;
       margin-left: 5px;
+    }
+    /deep/ .header-row th{
+      background-color: #fafafa;
+      color: rgba(0,0,0,.85);
+      font-weight: 500;
     }
   }
 </style>

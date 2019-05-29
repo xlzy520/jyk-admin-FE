@@ -210,19 +210,14 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .header{
     padding: 0 0 20px 0;
   }
   .line{
     text-align: center;
   }
-  /deep/ .ant-style-header-row th{
-    background-color: #fafafa;
-    color: rgba(0,0,0,.85);
-    font-weight: 500;
-  }
-  /deep/ .table-action span{
+  .table-action span{
     color: #1890ff;
     cursor: pointer;
   }
