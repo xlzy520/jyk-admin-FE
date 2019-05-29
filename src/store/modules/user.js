@@ -1,4 +1,4 @@
-import loginApi from '../../api/user'
+import loginApi from '../../api/user-admin'
 import md5 from 'md5'
 import { resetRouter } from '@/router'
 
