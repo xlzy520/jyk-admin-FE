@@ -46,7 +46,6 @@
 <script>
 import BaseTable from '../../components/baseTable'
 import userApi from '../../api/user'
-import { deepClone } from '../../utils/index'
 
 export default {
   name: 'UserList',
@@ -56,6 +55,7 @@ export default {
       searchForm: {
         nickname: '',
         registerTime: '',
+        // TODO 格式化时间
         lastLoginTime: ''
       },
       userListData: [],
