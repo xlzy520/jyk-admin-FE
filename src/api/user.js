@@ -1,13 +1,10 @@
 import baseRequest from './base'
 
 export default {
-  login(data) {
-    return baseRequest('/user/login', data)
+  getUserList(data) {
+    return baseRequest('/user/list', data)
   },
-  getInfo() {
-    return baseRequest('/user/info', {}, 'get')
-  },
-  logout() {
-    return baseRequest('/user/logout')
+  deleteUser(id) {
+    return baseRequest('/user/delete', id)
   }
 }
