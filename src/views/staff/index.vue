@@ -94,9 +94,9 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
-                <span onClick={() => this.update(row)}>编辑</span>
+                <span onClick={() => this.update(row)}>编 辑</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删除</span>
+                <span onClick={() => this.delete(row.id)}>删 除</span>
               </div>
             )
           }
@@ -172,9 +172,15 @@ export default {
       this.editVisible = true
     },
     delete(id) {
-      staffApi.deleteStaff(id).then(_ => {
-        this.$message1000('删除成功', 'success')
-        this.fetchData()
+      this.$confirm('此操作将删除该人员, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        staffApi.deleteStaff(id).then(_ => {
+          this.$message1000('删除成功', 'success')
+          this.fetchData()
+        })
       })
     },
     close() {
@@ -209,19 +215,6 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  .header{
-    padding: 0 0 20px 0;
-  }
-  .line{
-    text-align: center;
-  }
-  .table-action span{
-    color: #1890ff;
-    cursor: pointer;
-  }
-  .dialog-footer{
-    display: flex;
-    justify-content: center;
-  }
+<style lang="scss" scoped>
+
 </style>

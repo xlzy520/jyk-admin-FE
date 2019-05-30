@@ -62,4 +62,24 @@ div:focus {
 // main-container global css
 .app-container {
   padding: 20px;
+  .header{
+    padding: 0 0 20px 0;
+  }
+  .table-action>span{
+    color: #1890ff;
+    cursor: pointer;
+  }
+  .dialog-footer{
+    display: flex;
+    justify-content: center;
+  }
+  .is-default-icon{
+    font-size: 32px;
+    .el-icon-success{
+      color: #13c65a;
+    }
+    .el-icon-error{
+      color: #e31515;
+    }
+  }
 }
