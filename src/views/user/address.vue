@@ -1,8 +1,6 @@
 <template>
   <div class="app-container">
-    <div class="header">
-      <el-button type="primary" @click="add">新增</el-button>
-    </div>
+    <div class="header" />
     <base-table
       ref="addressTable"
       :index="true"
@@ -10,42 +8,42 @@
       :table-data="addressData"
       :table-columns="columns"
     />
-    <el-dialog
-      width="40%"
-      title="地址信息编辑"
-      :close-on-click-modal="true"
-      :visible.sync="editVisible"
-      @close="close"
-    >
-      <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="form.name" />
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" max-length="11" />
-        </el-form-item>
-        <el-form-item label="角色类型" prop="roles">
-          <el-radio-group v-model="form.roles">
-            <el-radio label="super" border>超级管理员</el-radio>
-            <el-radio label="admin" border>管理员</el-radio>
-            <el-radio label="address" border>普通员工</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="负责区域" prop="region">
-          <el-select v-model="form.region" placeholder="请选择负责区域">
-            <el-option label="上海" value="shanghai" />
-            <el-option label="深圳" value="shenzhen" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="登录密码" prop="password">
-          <el-input v-model="form.password" type="password" max-length="20" />
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-      </div>
-    </el-dialog>
+    <!--<el-dialog-->
+    <!--width="40%"-->
+    <!--title="地址信息编辑"-->
+    <!--:close-on-click-modal="true"-->
+    <!--:visible.sync="editVisible"-->
+    <!--@close="close"-->
+    <!--&gt;-->
+    <!--<el-form ref="form" :model="form" label-width="80px" :rules="rules">-->
+    <!--<el-form-item label="姓名" prop="name">-->
+    <!--<el-input v-model="form.name" />-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="手机号" prop="phone">-->
+    <!--<el-input v-model="form.phone" max-length="11" />-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="角色类型" prop="roles">-->
+    <!--<el-radio-group v-model="form.roles">-->
+    <!--<el-radio label="super" border>超级管理员</el-radio>-->
+    <!--<el-radio label="admin" border>管理员</el-radio>-->
+    <!--<el-radio label="address" border>普通员工</el-radio>-->
+    <!--</el-radio-group>-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="负责区域" prop="region">-->
+    <!--<el-select v-model="form.region" placeholder="请选择负责区域">-->
+    <!--<el-option label="上海" value="shanghai" />-->
+    <!--<el-option label="深圳" value="shenzhen" />-->
+    <!--</el-select>-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="登录密码" prop="password">-->
+    <!--<el-input v-model="form.password" type="password" max-length="20" />-->
+    <!--</el-form-item>-->
+    <!--</el-form>-->
+    <!--<div class="dialog-footer">-->
+    <!--<el-button type="primary" @click="submitForm">提交</el-button>-->
+    <!--<el-button @click="resetForm">重置</el-button>-->
+    <!--</div>-->
+    <!--</el-dialog>-->
   </div>
 </template>
 
@@ -62,50 +60,76 @@ export default {
       addressData: [],
       columns: [
         {
-          label: '微信昵称',
+          label: '昵称',
           prop: 'nickname',
-          align: 'center'
+          align: 'center',
+          width: 120
         },
         {
           label: '联系人',
           prop: 'name',
-          align: 'center'
+          align: 'center',
+          width: 100
         },
         {
           label: '手机号',
           prop: 'phone',
-          align: 'center'
-        },
-        {
-          label: '是否默认',
-          prop: 'isDefault',
-          align: 'center'
-        },
-        {
-          label: '详细地址',
-          prop: 'address',
-          align: 'center'
-        },
-        {
-          label: '角色',
-          prop: 'roles',
           align: 'center',
+          width: 110,
+          formatter: (row) => row.phone.toString()
+        },
+        {
+          label: '类型',
+          prop: 'type',
+          align: 'center',
+          width: 80,
           render: (h, { props: { row }}) => {
-            const roles = this.statusFilter(row.roles)
+            if (row.type === 'school') {
+              return (
+                <el-tag type={'danger'}>学校</el-tag>
+              )
+            }
             return (
-              <el-tag type={roles.type}>{ roles.text }</el-tag>
+              <el-tag type={'primary'}>饭馆</el-tag>
             )
           }
         },
         {
-          label: '负责区域',
-          prop: 'region',
-          align: 'center'
+          label: '详细地址',
+          prop: 'address',
+          align: 'center',
+          minWidth: 180
+        },
+        {
+          label: '是否默认',
+          prop: 'isDefault',
+          align: 'center',
+          width: 80,
+          render: (h, { props: { row }}) => {
+            return (
+              <div class='is-default-icon'>
+                <i class={'el-icon-' + (row.isDefault ? 'success' : 'error')}/>
+              </div>
+            )
+          }
+        },
+        {
+          label: '添加时间',
+          prop: 'addTime',
+          align: 'center',
+          minWidth: 80
+        },
+        {
+          label: '更新时间',
+          prop: 'updateTime',
+          align: 'center',
+          minWidth: 80
         },
         {
           label: '操作',
           prop: 'region',
           align: 'center',
+          minWidth: 120,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -151,6 +175,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    addressType(address) {
+      if (address === 'school') {
+        return '学校'
+      }
+      return '餐厅'
+    },
     fetchData() {
       this.loading = true
       addressApi.getAddress().then(res => {
@@ -160,15 +190,20 @@ export default {
       })
     },
     update(row) {
-      this.isAdd = false
       this.form = deepClone(row)
       // resetFields()会将form中的数据更改
       this.editVisible = true
     },
     delete(id) {
-      addressApi.deleteAddress(id).then(_ => {
-        this.$message1000('删除成功', 'success')
-        this.fetchData()
+      this.$confirm('此操作将删除该地址, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        addressApi.deleteAddress(id).then(_ => {
+          this.$message1000('删除成功', 'success')
+          this.fetchData()
+        })
       })
     },
     close() {
@@ -202,19 +237,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  .header{
-    padding: 0 0 20px 0;
-  }
-  .line{
-    text-align: center;
-  }
-  .table-action span{
-    color: #1890ff;
-    cursor: pointer;
-  }
-  .dialog-footer{
-    display: flex;
-    justify-content: center;
+<style lang="scss" scoped>
+  /deep/ .el-tag{
+    font-size: 16px;
   }
 </style>
