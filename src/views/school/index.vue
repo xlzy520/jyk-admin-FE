@@ -12,7 +12,7 @@
     />
     <el-dialog
       width="40%"
-      title="增加学校"
+      :title="isAdd?'增加学校信息' : '更新学校信息'"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
       @close="close"
