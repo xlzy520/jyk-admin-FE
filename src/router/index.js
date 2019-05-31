@@ -87,7 +87,19 @@ export const constantRoutes = [
         meta: { title: '地址列表', icon: 'address' }
       }
     ]
-  }
+  },
+  {
+    path: '/school',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '学校管理',
+        component: () => import('@/views/school/index'),
+        meta: { title: '学校管理', icon: 'school' }
+      }
+    ]
+  },
 ]
 
 /**
