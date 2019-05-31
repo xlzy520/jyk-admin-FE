@@ -1,6 +1,54 @@
 <template>
   <div class="app-container">
-    <div class="header" />
+    <div class="header">
+      <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
+        <el-form-item label="昵称:" prop="nickname">
+          <el-input v-model="searchForm.nickname" maxLength="11" />
+        </el-form-item>
+        <el-form-item label="联系人:" prop="name">
+          <el-input v-model="searchForm.name" maxLength="11" />
+        </el-form-item>
+        <el-form-item label="手机号:" prop="phone">
+          <el-input v-model="searchForm.phone" maxLength="11" />
+        </el-form-item>
+        <el-form-item label="用户类型:" prop="type">
+          <el-select v-model="addressForm.type" placeholder="请选择用户类型">
+            <el-option label="全部" value="" />
+            <el-option label="餐厅" value="restaurant" />
+            <el-option label="学校" value="school" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="是否默认:" prop="isDefault">
+          <el-switch v-model="searchForm.isDefault" active-color="#13ce66" inactive-color="#ff4949" />
+        </el-form-item>
+        <el-form-item label="添加时间:" prop="addTime">
+          <el-date-picker
+            v-model="searchForm.addTime"
+            type="daterange"
+            align="center"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          />
+        </el-form-item>
+        <el-form-item label="更新时间:" prop="updateTime">
+          <el-date-picker
+            v-model="searchForm.updateTime"
+            type="daterange"
+            align="center"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            @click="fetchData(searchForm)"
+          >查询</el-button>
+          <el-button type="info" @click="resetForm">清空</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
     <base-table
       ref="addressTable"
       :index="true"
@@ -58,24 +106,12 @@ export default {
           align: 'center',
           width: 120
         },
-        {
-          label: '联系人',
-          prop: 'name',
-          align: 'center',
-          width: 100
-        },
-        {
-          label: '手机号',
-          prop: 'phone',
-          align: 'center',
-          width: 110,
-          formatter: (row) => row.phone.toString()
-        },
-        {
-          label: '类型',
-          prop: 'type',
-          align: 'center',
-          width: 80,
+        { label: '联系人', prop: 'name', align: 'center', width: 100 },
+        { label: '手机号', prop: 'phone', align: 'center', width: 110, formatter: (row) => row.phone.toString() },
+        { label: '类型', prop: 'type', align: 'center', width: 80,
+          filters: [{ text: '学校', value: 'school' }, { text: '餐厅', value: 'restaurant' }],
+          filterMethod: (value, row) => row.type === value,
+          filterPlacement: 'bottom-end',
           render: (h, { props: { row }}) => {
             if (row.type === 'school') {
               return (
@@ -87,17 +123,8 @@ export default {
             )
           }
         },
-        {
-          label: '详细地址',
-          prop: 'address',
-          align: 'center',
-          minWidth: 180
-        },
-        {
-          label: '是否默认',
-          prop: 'isDefault',
-          align: 'center',
-          width: 80,
+        { label: '详细地址', prop: 'address', align: 'center', minWidth: 180 },
+        { label: '是否默认', prop: 'isDefault', align: 'center', width: 80,
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
@@ -106,23 +133,9 @@ export default {
             )
           }
         },
-        {
-          label: '添加时间',
-          prop: 'addTime',
-          align: 'center',
-          minWidth: 80
-        },
-        {
-          label: '更新时间',
-          prop: 'updateTime',
-          align: 'center',
-          minWidth: 80
-        },
-        {
-          label: '操作',
-          prop: 'region',
-          align: 'center',
-          minWidth: 120,
+        { label: '添加时间', prop: 'addTime', align: 'center', minWidth: 80 },
+        { label: '更新时间', prop: 'updateTime', align: 'center', minWidth: 80 },
+        { label: '操作', prop: 'region', align: 'center', minWidth: 120,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -136,6 +149,16 @@ export default {
       ],
       loading: false,
       editVisible: false,
+      searchForm: {
+        nickname: '',
+        name: '',
+        phone: '',
+        type: '',
+        isDefault: '',
+        addTime: '',
+        updateTime: ''
+        // TODO 格式化时间
+      },
       addressForm: {
         name: '',
         type: '',
@@ -165,15 +188,9 @@ export default {
     this.fetchData()
   },
   methods: {
-    addressType(address) {
-      if (address === 'school') {
-        return '学校'
-      }
-      return '餐厅'
-    },
-    fetchData() {
+    fetchData(data) {
       this.loading = true
-      addressApi.getAddress().then(res => {
+      addressApi.getAddress(data).then(res => {
         this.addressData = res.list
       }).finally(_ => {
         this.loading = false
