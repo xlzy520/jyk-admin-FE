@@ -17,13 +17,13 @@
     >
       <el-form ref="form" :model="addressForm" label-width="80px" :rules="rules">
         <el-form-item label="联系人" prop="name">
-          <el-input suffix-icon="el-icon-user" v-model="addressForm.name" :maxLength="15"/>
+          <el-input v-model="addressForm.name" suffix-icon="el-icon-user" maxLength="15" />
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
-          <el-input suffix-icon="el-icon-phone" v-model="addressForm.phone" :maxLength="11" />
+          <el-input v-model="addressForm.phone" suffix-icon="el-icon-phone" maxLength="11" />
         </el-form-item>
         <el-form-item label="详细地址" prop="address">
-          <el-input suffix-icon="el-icon-location" v-model="addressForm.address" :maxLength="40" type="textarea" :rows="2"/>
+          <el-input v-model="addressForm.address" suffix-icon="el-icon-location" maxLength="40" type="textarea" :rows="2" />
         </el-form-item>
         <el-form-item label="用户类型" prop="type">
           <el-radio-group v-model="addressForm.type">
