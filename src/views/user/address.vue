@@ -8,42 +8,35 @@
       :table-data="addressData"
       :table-columns="columns"
     />
-    <!--<el-dialog-->
-    <!--width="40%"-->
-    <!--title="地址信息编辑"-->
-    <!--:close-on-click-modal="true"-->
-    <!--:visible.sync="editVisible"-->
-    <!--@close="close"-->
-    <!--&gt;-->
-    <!--<el-form ref="form" :model="form" label-width="80px" :rules="rules">-->
-    <!--<el-form-item label="姓名" prop="name">-->
-    <!--<el-input v-model="form.name" />-->
-    <!--</el-form-item>-->
-    <!--<el-form-item label="手机号" prop="phone">-->
-    <!--<el-input v-model="form.phone" max-length="11" />-->
-    <!--</el-form-item>-->
-    <!--<el-form-item label="角色类型" prop="roles">-->
-    <!--<el-radio-group v-model="form.roles">-->
-    <!--<el-radio label="super" border>超级管理员</el-radio>-->
-    <!--<el-radio label="admin" border>管理员</el-radio>-->
-    <!--<el-radio label="address" border>普通员工</el-radio>-->
-    <!--</el-radio-group>-->
-    <!--</el-form-item>-->
-    <!--<el-form-item label="负责区域" prop="region">-->
-    <!--<el-select v-model="form.region" placeholder="请选择负责区域">-->
-    <!--<el-option label="上海" value="shanghai" />-->
-    <!--<el-option label="深圳" value="shenzhen" />-->
-    <!--</el-select>-->
-    <!--</el-form-item>-->
-    <!--<el-form-item label="登录密码" prop="password">-->
-    <!--<el-input v-model="form.password" type="password" max-length="20" />-->
-    <!--</el-form-item>-->
-    <!--</el-form>-->
-    <!--<div class="dialog-footer">-->
-    <!--<el-button type="primary" @click="submitForm">提交</el-button>-->
-    <!--<el-button @click="resetForm">重置</el-button>-->
-    <!--</div>-->
-    <!--</el-dialog>-->
+    <el-dialog
+      width="40%"
+      title="地址信息编辑"
+      :close-on-click-modal="true"
+      :visible.sync="editVisible"
+      @close="close"
+    >
+      <el-form ref="form" :model="addressForm" label-width="80px" :rules="rules">
+        <el-form-item label="联系人" prop="name">
+          <el-input suffix-icon="el-icon-user" v-model="addressForm.name" :maxLength="15"/>
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input suffix-icon="el-icon-phone" v-model="addressForm.phone" :maxLength="11" />
+        </el-form-item>
+        <el-form-item label="详细地址" prop="address">
+          <el-input suffix-icon="el-icon-location" v-model="addressForm.address" :maxLength="40" type="textarea" :rows="2"/>
+        </el-form-item>
+        <el-form-item label="用户类型" prop="type">
+          <el-radio-group v-model="addressForm.type">
+            <el-radio label="restaurant" border>餐厅</el-radio>
+            <el-radio label="school" border>学校</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="submitForm">提交</el-button>
+        <el-button @click="resetForm">重置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -90,7 +83,7 @@ export default {
               )
             }
             return (
-              <el-tag type={'primary'}>饭馆</el-tag>
+              <el-tag type={'primary'}>餐厅</el-tag>
             )
           }
         },
@@ -143,30 +136,27 @@ export default {
       ],
       loading: false,
       editVisible: false,
-      form: {
+      addressForm: {
         name: '',
-        roles: '',
+        type: '',
         phone: '',
-        password: '',
-        region: ''
+        address: ''
       },
       rules: {
         name: [
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { min: 2, max: 15, message: '长度在 2 到 15 个字符', trigger: 'blur' }
         ],
-        roles: [
-          { required: true, message: '请选择一个角色', trigger: 'change' }
+        type: [
+          { required: true, message: '请选择一个类型', trigger: 'change' }
         ],
         phone: [
           { required: true, message: '请填写手机号', trigger: 'blur' },
           { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
             message: '请填写符合要求的11位手机号', trigger: 'blur' }
         ],
-        password: [
-          { required: true, message: '请填写密码', trigger: 'change' },
-          { pattern: /^[^\\\\\\/:*?\s\\"<>|]+$/, message: '请不要输入特殊字符', trigger: 'blur' },
-          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+        address: [
+          { required: true, message: '请填写地址', trigger: 'blur' }
         ]
       }
     }
@@ -190,12 +180,12 @@ export default {
       })
     },
     update(row) {
-      this.form = deepClone(row)
+      this.addressForm = deepClone(row)
       // resetFields()会将form中的数据更改
       this.editVisible = true
     },
     delete(id) {
-      this.$confirm('此操作将删除该地址, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该地址信息, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -208,7 +198,7 @@ export default {
     },
     close() {
       this.editVisible = false
-      this.form = {
+      this.addressForm = {
         name: '',
         roles: '',
         phone: '',
@@ -219,7 +209,7 @@ export default {
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          addressApi.updateAddress(this.form).then(res => {
+          addressApi.updateAddress(this.addressForm).then(res => {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()
