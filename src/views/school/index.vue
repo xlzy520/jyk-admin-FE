@@ -1,8 +1,5 @@
 <template>
   <div class="app-container">
-    <div class="header">
-      <el-button type="primary" @click="add">新增</el-button>
-    </div>
     <base-table
       ref="schoolTable"
       :index="true"
@@ -10,6 +7,7 @@
       :table-data="schoolData"
       :table-columns="columns"
     />
+    <add-button @add="add" />
     <el-dialog
       width="40%"
       :title="isAdd?'增加学校信息' : '更新学校信息'"
@@ -32,12 +30,13 @@
 
 <script>
 import BaseTable from '../../components/baseTable'
+import AddButton from '../../components/AddButton'
 import schoolApi from '../../api/school'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'School',
-  components: { BaseTable },
+  components: { BaseTable, AddButton },
   data() {
     return {
       schoolData: [],
@@ -45,17 +44,17 @@ export default {
         {
           label: '学校名称',
           prop: 'name',
-          align: 'center',
+          align: 'center'
         },
         {
           label: '添加时间',
           prop: 'addTime',
-          align: 'center',
+          align: 'center'
         },
         {
           label: '更新时间',
           prop: 'updateTime',
-          align: 'center',
+          align: 'center'
         },
         {
           label: '操作',

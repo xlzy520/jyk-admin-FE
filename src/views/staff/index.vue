@@ -1,8 +1,6 @@
 <template>
   <div class="app-container">
-    <div class="header">
-      <el-button type="primary" @click="add">新增</el-button>
-    </div>
+    <add-button @add="add" />
     <base-table
       ref="staffTable"
       :index="true"
@@ -51,12 +49,13 @@
 
 <script>
 import BaseTable from '../../components/baseTable'
+import AddButton from '../../components/AddButton'
 import staffApi from '../../api/staff'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'Staff',
-  components: { BaseTable },
+  components: { BaseTable, AddButton },
   data() {
     return {
       staffData: [],
