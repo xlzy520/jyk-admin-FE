@@ -112,6 +112,51 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/goods',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '商品管理',
+        component: () => import('@/views/goods/index'),
+        meta: { title: '商品管理', icon: 'goods' }
+      }
+    ]
+  },
+  {
+    path: '/orders',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '订单管理',
+        component: () => import('@/views/orders/index'),
+        meta: { title: '订单管理', icon: 'orders' }
+      }
+    ]
+  },
+  {
+    path: '/pay-record',
+    component: Layout,
+    redirect: '/pay-record/list',
+    name: '支付记录',
+    meta: { title: '支付记录', icon: 'pay-record' },
+    children: [
+      {
+        path: 'online',
+        name: '线上支付',
+        component: () => import('@/views/pay-record/online'),
+        meta: { title: '线上支付', icon: 'online' }
+      },
+      {
+        path: 'offline',
+        name: '线下支付',
+        component: () => import('@/views/pay-record/offline'),
+        meta: { title: '线下支付', icon: 'offline' }
+      }
+    ]
+  }
 ]
 
 /**
