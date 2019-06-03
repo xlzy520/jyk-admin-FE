@@ -20,16 +20,25 @@
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="宣传图" prop="img">
-          <el-image :src="form.img"></el-image>
           <el-upload
             ref="upload"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            :action="'/partner/'+url"
             :on-preview="handlePreview"
-            :on-remove="handleRemove"
+            :on-remove="controlHideUpload"
+            :on-success="uploadOk"
+            :on-error="onError"
+            :data="form"
+            :on-change="controlHideUpload"
             :file-list="fileList"
             :auto-upload="false"
-            list-type="picture-card">
+            list-type="picture-card"
+            accept="['.png','.jpg']"
+          >
+            <i class="el-icon-plus" />
           </el-upload>
+          <el-dialog :visible.sync="imgVisible" append-to-body>
+            <el-image :src="dialogImageUrl" alt="" fit="fill" />
+          </el-dialog>
         </el-form-item>
         <el-form-item label="是否展示：" prop="display">
           <el-switch
@@ -116,31 +125,58 @@ export default {
       loading: false,
       isAdd: false,
       editVisible: false,
+      imgVisible: false,
+      dialogImageUrl: '',
       form: {
         name: '',
-        img: '',
         display: ''
       },
       rules: {
         name: [
           { required: true, message: '请输入名称', trigger: 'blur' },
           { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
-        ],
-        img: [
-          { required: true, message: '请上传一张图片', trigger: 'change' }
         ]
-      }
+      },
+      fileList: []
+    }
+  },
+  computed: {
+    url() {
+      return this.add ? 'add' : 'update'
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
+    controlHideUpload(file, fileList) {
+      if (fileList.length > 0) {
+        this.hideUpload()
+      } else {
+        this.hideUpload('')
+      }
     },
-    handlePictureCardPreview(file) {
-      this.form.img = file.url;
+    onError() {
+      this.$message1000('文件上传出错：网络错误', 'error')
+      this.editVisible = false
+    },
+    uploadOk(res) {
+      if (res.success) {
+        this.$message1000('文件上传成功', 'success')
+        this.close()
+        this.fetchData()
+        this.editVisible = false
+      } else {
+        let msg = res.msg
+        msg = '文件上传出错：' + msg
+        this.$message1000(msg, 'error')
+        this.fileList = []
+        this.editVisible = false
+      }
+    },
+    handlePreview(file) {
+      this.imgVisible = true
+      this.dialogImageUrl = file.url
     },
     fetchData() {
       this.loading = true
@@ -151,13 +187,21 @@ export default {
       })
     },
     add() {
+      this.hideUpload('')
       this.isAdd = true
       this.editVisible = true
     },
+    hideUpload(display = 'none') {
+      this.$nextTick(() => {
+        this.$refs.upload.$refs['upload-inner'].$el.style.display = display
+      })
+    },
     update(row) {
+      this.hideUpload()
       this.isAdd = false
       this.form = deepClone(row)
-      // resetFields()会将form中的数据更改
+      this.fileList = [{ name: 'food.jpg', url: 'https://img-bcy-qn.pstatp.com/user/213091/item/c0r3z/45a1ac2a95a54db08c6a5f1e5c31aa6b.jpg?imageMogr2/auto-orient/strip|watermark/2/text/wqnms73mnIgK5Y2K5qyh5YWDIC0gQUNH54ix5aW96ICF56S-5Yy6/fontsize/1824/fill/I2NjY2NjYw==/dx/59/dy/44/font/5b6u6L2v6ZuF6buR' }]
+
       this.editVisible = true
     },
     delete(id) {
@@ -173,23 +217,23 @@ export default {
       })
     },
     close() {
-      this.editVisible = false
+      this.fileList = []
       this.form = {
         name: '',
-        img: '',
-        phone: '',
-        password: '',
-        region: ''
+        display: ''
       }
     },
     submitForm() {
+      if (this.fileList.length < 1) {
+        this.$message1000('请上传图片', 'warning')
+        return
+      }
       this.$refs.form.validate(async(valid) => {
         if (valid) {
+          this.$refs.upload.submit()
           const result = await this.isAdd ? partnerApi.addPartner(this.form) : partnerApi.updatePartner(this.form)
           result.then(_ => {
-            this.$message1000('提交成功', 'success')
-            this.close()
-            this.fetchData()
+
           })
         } else {
           console.log('error submit!!')
