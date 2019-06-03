@@ -100,6 +100,18 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/partner',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '合作伙伴',
+        component: () => import('@/views/partner/index'),
+        meta: { title: '合作伙伴', icon: 'partner' }
+      }
+    ]
+  },
 ]
 
 /**

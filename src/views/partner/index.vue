@@ -1,44 +1,44 @@
 <template>
   <div class="app-container">
-    <div class="header">
-      <el-button type="primary" @click="add">新增</el-button>
-    </div>
+    <add-button @add="add" />
     <base-table
-      ref="staffTable"
+      ref="partnerTable"
       :index="true"
       :loading="loading"
-      :table-data="staffData"
+      :table-data="partnerData"
       :table-columns="columns"
     />
     <el-dialog
       width="40%"
-      :title="isAdd?'新增人员' : '人员信息更新'"
+      :title="isAdd?'新增合作伙伴' : '合作伙伴信息更新'"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
       @close="close"
     >
-      <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-        <el-form-item label="姓名" prop="name">
+      <el-form ref="form" :model="form" label-width="100px" :rules="rules">
+        <el-form-item label="名称：" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" maxLength="11" />
+        <el-form-item label="宣传图" prop="img">
+          <el-image :src="form.img"></el-image>
+          <el-upload
+            ref="upload"
+            action="https://jsonplaceholder.typicode.com/posts/"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :file-list="fileList"
+            :auto-upload="false"
+            list-type="picture-card">
+          </el-upload>
         </el-form-item>
-        <el-form-item label="角色类型" prop="roles">
-          <el-radio-group v-model="form.roles">
-            <el-radio label="super" border>超级管理员</el-radio>
-            <el-radio label="admin" border>管理员</el-radio>
-            <el-radio label="staff" border>普通员工</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="负责区域" prop="region">
-          <el-select v-model="form.region" placeholder="请选择负责区域">
-            <el-option label="上海" value="shanghai" />
-            <el-option label="深圳" value="shenzhen" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="登录密码" prop="password">
-          <el-input v-model="form.password" type="password" max-length="20" />
+        <el-form-item label="是否展示：" prop="display">
+          <el-switch
+            v-model="form.display"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="展示"
+            inactive-text="隐藏"
+          />
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -51,40 +51,51 @@
 
 <script>
 import BaseTable from '../../components/baseTable'
-import staffApi from '../../api/staff'
+import AddButton from '../../components/AddButton'
+import partnerApi from '../../api/partner'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'Partner',
-  components: { BaseTable },
+  components: { BaseTable, AddButton },
   data() {
     return {
-      staffData: [],
+      partnerData: [],
       columns: [
         {
-          label: '姓名',
+          label: '名称',
           prop: 'name',
           align: 'center'
         },
         {
-          label: '手机号',
-          prop: 'phone',
-          align: 'center'
-        },
-        {
-          label: '角色',
-          prop: 'roles',
+          label: '宣传图',
+          prop: 'img',
           align: 'center',
           render: (h, { props: { row }}) => {
-            const roles = this.statusFilter(row.roles)
             return (
-              <el-tag type={roles.type}>{ roles.text }</el-tag>
+              <div class='table-img'>
+                <el-image src={row.img} fit='fit'/>
+              </div>
+            )
+          }
+        },
+        { label: '是否展示', prop: 'display', align: 'center',
+          render: (h, { props: { row }}) => {
+            return (
+              <div class='is-default-icon'>
+                <i class={'el-icon-' + (row.display ? 'success' : 'error')}/>
+              </div>
             )
           }
         },
         {
-          label: '负责区域',
-          prop: 'region',
+          label: '添加时间',
+          prop: 'addTime',
+          align: 'center'
+        },
+        {
+          label: '更新时间',
+          prop: 'updateTime',
           align: 'center'
         },
         {
@@ -107,28 +118,16 @@ export default {
       editVisible: false,
       form: {
         name: '',
-        roles: '',
-        phone: '',
-        password: '',
-        region: ''
+        img: '',
+        display: ''
       },
       rules: {
         name: [
-          { required: true, message: '请输入姓名', trigger: 'blur' },
-          { min: 2, max: 15, message: '长度在 2 到 15 个字符', trigger: 'blur' }
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
         ],
-        roles: [
-          { required: true, message: '请选择一个角色', trigger: 'change' }
-        ],
-        phone: [
-          { required: true, message: '请填写手机号', trigger: 'blur' },
-          { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
-            message: '请填写符合要求的11位手机号', trigger: 'blur' }
-        ],
-        password: [
-          { required: true, message: '请填写密码', trigger: 'change' },
-          { pattern: /^[^\\\\\\/:*?\s\\"<>|]+$/, message: '请不要输入特殊字符', trigger: 'blur' },
-          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+        img: [
+          { required: true, message: '请上传一张图片', trigger: 'change' }
         ]
       }
     }
@@ -137,26 +136,16 @@ export default {
     this.fetchData()
   },
   methods: {
-    statusFilter(status) {
-      const statusMap = {
-        'super': 'danger',
-        'admin': 'warning',
-        'staff': 'success'
-      }
-      const statusTextMap = {
-        'super': '超级管理员',
-        'admin': '管理员',
-        'staff': '员工'
-      }
-      return {
-        text: statusTextMap[status],
-        type: statusMap[status]
-      }
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      this.form.img = file.url;
     },
     fetchData() {
       this.loading = true
-      staffApi.getStaff().then(res => {
-        this.staffData = res.list
+      partnerApi.getPartner().then(res => {
+        this.partnerData = res.list
       }).finally(_ => {
         this.loading = false
       })
@@ -172,12 +161,12 @@ export default {
       this.editVisible = true
     },
     delete(id) {
-      this.$confirm('此操作将删除该人员, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该合作伙伴, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        staffApi.deleteStaff(id).then(_ => {
+        partnerApi.deletePartner(id).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
         })
@@ -187,7 +176,7 @@ export default {
       this.editVisible = false
       this.form = {
         name: '',
-        roles: '',
+        img: '',
         phone: '',
         password: '',
         region: ''
@@ -196,8 +185,8 @@ export default {
     submitForm() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          const result = await this.isAdd ? staffApi.addStaff(this.form) : staffApi.updateStaff(this.form)
-          result.then(res => {
+          const result = await this.isAdd ? partnerApi.addPartner(this.form) : partnerApi.updatePartner(this.form)
+          result.then(_ => {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()
