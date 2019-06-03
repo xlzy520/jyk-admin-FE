@@ -231,10 +231,6 @@ export default {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
           this.$refs.upload.submit()
-          const result = await this.isAdd ? partnerApi.addPartner(this.form) : partnerApi.updatePartner(this.form)
-          result.then(_ => {
-
-          })
         } else {
           console.log('error submit!!')
           return false
