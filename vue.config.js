@@ -53,8 +53,8 @@ module.exports = {
     }
   },
   chainWebpack(config) {
-    // config.plugins.delete('preload') // TODO: need test
-    // config.plugins.delete('prefetch') // TODO: need test
+    config.plugins.delete('preload') // TODO: need test
+    config.plugins.delete('prefetch') // TODO: need test
 
     // set svg-sprite-loader
     config.module
@@ -94,14 +94,21 @@ module.exports = {
     config
       .when(process.env.NODE_ENV !== 'development',
         config => {
-          config
-            .plugin('ScriptExtHtmlWebpackPlugin')
-            .after('html')
-            .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
-              inline: /runtime\..*\.js$/
-            }])
-            .end()
+          /** 其实我们发现打包生成的 runtime.js非常的小，gzip 之后一般只有几 kb，但这个文件又经常会改变，
+          我们每次都需要重新请求它，它的 http 耗时远大于它的执行时间了，所以建议不要将它单独拆包，
+           而是将它内联到我们的 index.html 之中(index.html 本来每次打包都会变)。
+          这里我选用了 script-ext-html-webpack-plugin，主要是因为它还支持preload和 prefetch，
+         正好需要就不想再多引用一个插件了，你完全可以使用 inline-manifest-webpack-plugin或者
+          assets-webpack-plugin等来实现相同的效果。
+          **/
+          // config
+          //   .plugin('ScriptExtHtmlWebpackPlugin')
+          //   .after('html')
+          //   .use('script-ext-html-webpack-plugin', [{
+          //   // `runtime` must same as runtimeChunk name. default is `runtime`
+          //     inline: /runtime\..*\.js$/
+          //   }])
+          //   .end()
           config
             .optimization.splitChunks({
               chunks: 'all',
