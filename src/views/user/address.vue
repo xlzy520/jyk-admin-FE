@@ -12,7 +12,7 @@
           <el-input v-model="searchForm.phone" maxLength="11" />
         </el-form-item>
         <el-form-item label="用户类型:" prop="type">
-          <el-select v-model="addressForm.type" placeholder="请选择用户类型">
+          <el-select v-model="searchForm.type" placeholder="请选择用户类型">
             <el-option label="全部" value="" />
             <el-option label="餐厅" value="restaurant" />
             <el-option label="学校" value="school" />
