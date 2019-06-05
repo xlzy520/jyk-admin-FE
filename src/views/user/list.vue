@@ -33,7 +33,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <base-table
+    <xl-table
       ref="userListTable"
       :index="true"
       :loading="loading"
@@ -44,12 +44,10 @@
 </template>
 
 <script>
-import BaseTable from '../../components/baseTable'
 import userApi from '../../api/user'
 
 export default {
   name: 'UserList',
-  components: { BaseTable },
   data() {
     return {
       searchForm: {

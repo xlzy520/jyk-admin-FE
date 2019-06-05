@@ -49,7 +49,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <base-table
+    <xl-table
       ref="addressTable"
       :index="true"
       :loading="loading"
@@ -89,13 +89,11 @@
 </template>
 
 <script>
-import BaseTable from '../../components/baseTable'
 import addressApi from '../../api/address'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'Address',
-  components: { BaseTable },
   data() {
     return {
       addressData: [],

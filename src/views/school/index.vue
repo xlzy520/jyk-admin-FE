@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <base-table
+    <xl-table
       ref="schoolTable"
       :index="true"
       :loading="loading"
@@ -29,14 +29,13 @@
 </template>
 
 <script>
-import BaseTable from '../../components/baseTable'
 import AddButton from '../../components/AddButton'
 import schoolApi from '../../api/school'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'School',
-  components: { BaseTable, AddButton },
+  components: { AddButton },
   data() {
     return {
       schoolData: [],

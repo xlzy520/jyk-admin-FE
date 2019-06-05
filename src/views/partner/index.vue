@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <add-button @add="add" />
-    <base-table
+    <xl-table
       ref="partnerTable"
       :index="true"
       :loading="loading"
@@ -59,14 +59,13 @@
 </template>
 
 <script>
-import BaseTable from '../../components/baseTable'
 import AddButton from '../../components/AddButton'
 import partnerApi from '../../api/partner'
 import { deepClone } from '../../utils/index'
 
 export default {
   name: 'Partner',
-  components: { BaseTable, AddButton },
+  components: { AddButton },
   data() {
     return {
       partnerData: [],
