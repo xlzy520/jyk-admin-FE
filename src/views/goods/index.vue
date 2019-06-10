@@ -1,6 +1,27 @@
 <template>
   <div class="app-container">
     <add-button @add="add" />
+    <div class="header">
+      <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
+        <el-form-item label="名称:" prop="name">
+          <el-input v-model="searchForm.name" maxLength="11" />
+        </el-form-item>
+        <el-form-item label="状态:" prop="status">
+          <el-select v-model="searchForm.status">
+            <el-option label="全部" value="" />
+            <el-option label="上架" value="true" />
+            <el-option label="下架" value="false" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            @click="fetchData(searchForm)"
+          >查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
     <xl-table
       ref="goodsTable"
       :index="true"
@@ -17,37 +38,37 @@
     >
       <el-form ref="form" :model="form" label-width="100px" :rules="rules">
         <el-form-item label="名称：" prop="name">
-          <el-input v-model="form.name" />
+          <el-input v-model.trim="form.name" maxLength="20" />
         </el-form-item>
         <el-form-item label="宣传图" prop="img">
           <el-upload
             ref="upload"
-            :action="'/goods/'+url"
-            :on-preview="handlePreview"
-            :on-remove="controlHideUpload"
+            action="/file/add"
+            :on-remove="removeImg"
             :on-success="uploadOk"
             :on-error="onError"
-            :data="form"
-            :on-change="controlHideUpload"
             :file-list="fileList"
-            :auto-upload="false"
+            :auto-upload="true"
             list-type="picture-card"
             accept="['.png','.jpg']"
           >
             <i class="el-icon-plus" />
           </el-upload>
-          <el-dialog :visible.sync="imgVisible" append-to-body>
-            <el-image :src="dialogImageUrl" alt="" fit="fill" />
-          </el-dialog>
         </el-form-item>
-        <el-form-item label="是否展示：" prop="display">
+        <el-form-item label="库存：" prop="stores">
+          <el-input v-model.number="form.stores" maxLength="10" />
+        </el-form-item>
+        <el-form-item label="状态：" prop="status">
           <el-switch
-            v-model="form.display"
+            v-model="form.status"
             active-color="#13ce66"
             inactive-color="#ff4949"
-            active-text="展示"
-            inactive-text="隐藏"
+            active-text="上架"
+            inactive-text="下架"
           />
+        </el-form-item>
+        <el-form-item label="价格：" prop="price">
+          <el-input v-model="form.price" maxLength="10" />
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -67,18 +88,16 @@ export default {
   name: 'GoodsList',
   components: { AddButton },
   data() {
+    const validateImg = (rule, value, callback) => {
+      if (this.fileList.length === 0) {
+        callback(new Error('请上传一张图片'))
+      }
+    }
     return {
       goodsData: [],
       columns: [
-        {
-          label: '名称',
-          prop: 'name',
-          align: 'center'
-        },
-        {
-          label: '图片',
-          prop: 'pic',
-          align: 'center',
+        { label: '名称', prop: 'name', align: 'left' },
+        { label: '图片', prop: 'pic', align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
@@ -90,37 +109,25 @@ export default {
         { label: '库存/状态', align: 'center',
           render: (h, { props: { row }}) => {
             return (
-              <div class='is-default-icon'>
-                {row.stores}
-                <i class={'el-icon-' + (row.status ? 'success' : 'error')}/>
+              <div>
+                <div class={'stores'}>{row.stores}</div>
+                <el-tag size={'medium'} type={row.status ? 'success' : 'danger'}>{row.status ? '上架' : '下架'}</el-tag>
               </div>
             )
           }
         },
-        {
-          label: '价格',
-          prop: 'price',
-          align: 'center'
-        },
-        {
-          label: '销量',
-          prop: 'numberSells',
-          align: 'center'
-        },
-        {
-          label: '添加时间',
-          prop: 'addTime',
-          align: 'center'
-        },
-        {
-          label: '更新时间',
-          prop: 'updateTime',
-          align: 'center'
-        },
-        {
-          label: '操作',
-          prop: 'region',
-          align: 'center',
+        { label: '价格', prop: 'price', align: 'center' },
+        { label: '销量', prop: 'numberSells', align: 'center' },
+        { label: '添加/更新时间', align: 'center', width: '240',
+          render: (h, { props: { row }}) => {
+            return (
+              <div>
+                <p>{row.addTime}</p>
+                <p>{row.updateTime}</p>
+              </div>
+            )
+          } },
+        { label: '操作', prop: 'region', align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -135,16 +142,33 @@ export default {
       loading: false,
       isAdd: false,
       editVisible: false,
-      imgVisible: false,
-      dialogImageUrl: '',
+      imgUrl: '',
       form: {
         name: '',
-        display: ''
+        stores: '',
+        status: '',
+        price: '',
+        img: ''
+      },
+      searchForm: {
+        name: '',
+        status: ''
       },
       rules: {
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
+          { required: true, message: '名称不能为空', trigger: 'blur' },
+          { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
+        ],
+        stores: [
+          { required: true, message: '库存不能为空', trigger: 'blur' },
+          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
+        ],
+        price: [
+          { required: true, message: '价格不能为空', trigger: 'blur' },
+          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
+        ],
+        img: [
+          { validator: validateImg, trigger: 'blur' }
         ]
       },
       fileList: []
@@ -155,38 +179,30 @@ export default {
       return this.add ? 'add' : 'update'
     }
   },
+  watch: {
+    fileList(val) {
+      this.hideUpload(val.length === 0)
+    }
+  },
   created() {
     this.fetchData()
   },
   methods: {
-    controlHideUpload(file, fileList) {
-      if (fileList.length > 0) {
-        this.hideUpload()
-      } else {
-        this.hideUpload('')
-      }
-    },
     onError() {
       this.$message1000('文件上传出错：网络错误', 'error')
-      this.editVisible = false
+    },
+    removeImg() {
+      this.fileList = []
     },
     uploadOk(res) {
-      if (res.success) {
-        this.$message1000('文件上传成功', 'success')
-        this.close()
-        this.fetchData()
-        this.editVisible = false
+      const { success, msg, data } = res
+      if (success) {
+        this.$message1000('图片上传成功', 'success')
+        this.form.img = data.imgUrl
       } else {
-        let msg = res.msg
-        msg = '文件上传出错：' + msg
         this.$message1000(msg, 'error')
         this.fileList = []
-        this.editVisible = false
       }
-    },
-    handlePreview(file) {
-      this.imgVisible = true
-      this.dialogImageUrl = file.url
     },
     fetchData(data) {
       this.loading = true
@@ -197,25 +213,22 @@ export default {
       })
     },
     add() {
-      this.hideUpload('')
       this.isAdd = true
       this.editVisible = true
     },
-    hideUpload(display = 'none') {
-      this.$nextTick(() => {
-        this.$refs.upload.$refs['upload-inner'].$el.style.display = display
-      })
+    hideUpload(display) {
+      setTimeout(() => {
+        this.$refs.upload.$refs['upload-inner'].$el.style.display = display ? '' : 'none'
+      }, 0)
     },
     update(row) {
-      this.hideUpload()
       this.isAdd = false
       this.form = deepClone(row)
-      this.fileList = [{ name: 'food.jpg', url: 'https://img-bcy-qn.pstatp.com/user/213091/item/c0r3z/45a1ac2a95a54db08c6a5f1e5c31aa6b.jpg?imageMogr2/auto-orient/strip|watermark/2/text/wqnms73mnIgK5Y2K5qyh5YWDIC0gQUNH54ix5aW96ICF56S-5Yy6/fontsize/1824/fill/I2NjY2NjYw==/dx/59/dy/44/font/5b6u6L2v6ZuF6buR' }]
-
+      this.fileList = [{ name: row.name, url: row.pic }]
       this.editVisible = true
     },
     delete(id) {
-      this.$confirm('此操作将删除该合作伙伴, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该商品, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -230,19 +243,21 @@ export default {
       this.fileList = []
       this.form = {
         name: '',
-        display: ''
+        stores: '',
+        status: '',
+        price: ''
       }
     },
     submitForm() {
-      if (this.fileList.length < 1) {
-        this.$message1000('请上传图片', 'warning')
-        return
-      }
+      console.log(2);
       this.$refs.form.validate(async(valid) => {
+        console.log(22222);
         if (valid) {
-          this.$refs.upload.submit()
+          goodsApi.updateGoods(this.form).then(_ => {
+            this.editVisible = false
+            this.$message1000('提交成功', 'success')
+          })
         } else {
-          console.log('error submit!!')
           return false
         }
       })
@@ -255,5 +270,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+  /deep/.stores{
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  /deep/.table-img{
+    img{
+      width: 75%;
+    }
+  }
 </style>
