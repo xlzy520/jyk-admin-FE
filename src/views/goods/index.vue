@@ -91,6 +91,8 @@ export default {
     const validateImg = (rule, value, callback) => {
       if (this.fileList.length === 0) {
         callback(new Error('请上传一张图片'))
+      } else {
+        callback()
       }
     }
     return {
@@ -249,9 +251,7 @@ export default {
       }
     },
     submitForm() {
-      console.log(2);
-      this.$refs.form.validate(async(valid) => {
-        console.log(22222);
+      this.$refs.form.validate((valid) => {
         if (valid) {
           goodsApi.updateGoods(this.form).then(_ => {
             this.editVisible = false
