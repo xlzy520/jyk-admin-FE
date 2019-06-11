@@ -25,10 +25,16 @@
     <xl-table
       ref="goodsTable"
       :index="true"
+      :selection="true"
       :loading="loading"
       :table-data="goodsData"
       :table-columns="columns"
+      @selection-change="handleSelectionChange"
     />
+    <div class="footer">
+      <el-button type="success" @click="changeStatus(true)">上架</el-button>
+      <el-button type="danger" @click="changeStatus(false)">下架</el-button>
+    </div>
     <el-dialog
       width="40%"
       :title="isAdd?'新增商品' : '编辑商品'"
@@ -173,12 +179,8 @@ export default {
           { validator: validateImg, trigger: 'blur' }
         ]
       },
-      fileList: []
-    }
-  },
-  computed: {
-    url() {
-      return this.add ? 'add' : 'update'
+      fileList: [],
+      selected: []
     }
   },
   watch: {
@@ -190,6 +192,15 @@ export default {
     this.fetchData()
   },
   methods: {
+    changeStatus(status) {
+      goodsApi.changeStatusGoods({ ids: this.selected, status: status }).then(res => {
+        this.$message1000('成功', 'success')
+        this.fetchData()
+      })
+    },
+    handleSelectionChange(rows) {
+      this.selected = rows.map(v => v.id)
+    },
     onError() {
       this.$message1000('文件上传出错：网络错误', 'error')
     },
@@ -278,5 +289,8 @@ export default {
     img{
       width: 75%;
     }
+  }
+  .footer{
+    margin: 20px auto;
   }
 </style>

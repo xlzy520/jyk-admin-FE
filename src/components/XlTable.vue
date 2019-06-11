@@ -138,10 +138,7 @@ export default {
       return { row, col, column, $index }
     },
     clickRow(row) {
-      this.toggleRowSelection(row)
-    },
-    toggleRowSelection(row, boolean) {
-      this.$refs.baseTable.toggleRowSelection(row, boolean)
+      this.$emit('row-click', row)
     },
     showMenu(row, column, event) {
       this.$emit('row-contextmenu', row, column, event)
