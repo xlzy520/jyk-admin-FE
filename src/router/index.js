@@ -36,6 +36,16 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
+  {
+    path: '/a',
+    component: () => import('@/views/evidence'),
+    hidden: true
+  },
+  {
+    path: '/b',
+    component: () => import('@/views/list'),
+    hidden: true
+  },
 
   {
     path: '/404',
@@ -156,7 +166,31 @@ export const constantRoutes = [
         meta: { title: '线下支付', icon: 'offline' }
       }
     ]
-  }
+  },
+  {
+    path: '/company',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '公司信息',
+        component: () => import('@/views/company/index'),
+        meta: { title: '公司信息', icon: 'company' }
+      }
+    ]
+  },
+  {
+    path: '/file',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '图片管理',
+        component: () => import('@/views/company/index'),
+        meta: { title: '图片管理', icon: 'img' }
+      }
+    ]
+  },
 ]
 
 /**

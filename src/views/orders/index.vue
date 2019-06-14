@@ -6,12 +6,21 @@
         <el-form-item label="名称:" prop="name">
           <el-input v-model="searchForm.name" maxLength="11" />
         </el-form-item>
+        <el-form-item label="手机号:" prop="phone">
+          <el-input v-model="searchForm.phone" maxLength="11" />
+        </el-form-item>
         <el-form-item label="状态:" prop="status">
           <el-select v-model="searchForm.status">
             <el-option label="全部" value="" />
-            <el-option label="上架" value="true" />
-            <el-option label="下架" value="false" />
+            <el-option label="订单关闭" value="1" />
+            <el-option label="待支付" value="2" />
+            <el-option label="待发货" value="3" />
+            <el-option label="已发货" value="4" />
+            <el-option label="交易完成" value="5" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="订单号:" prop="orderNumber">
+          <el-input v-model="searchForm.orderNumber" maxLength="11" />
         </el-form-item>
         <el-form-item>
           <el-button
@@ -93,39 +102,15 @@ export default {
   name: 'OrderList',
   components: { AddButton },
   data() {
-    const validateImg = (rule, value, callback) => {
-      if (this.fileList.length === 0) {
-        callback(new Error('请上传一张图片'))
-      } else {
-        callback()
-      }
-    }
     return {
       orderData: [],
       columns: [
-        { label: '名称', prop: 'name', align: 'left' },
-        { label: '图片', prop: 'pic', align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-img'>
-                <el-image src={row.pic} fit='fit'/>
-              </div>
-            )
-          }
-        },
-        { label: '库存/状态', align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div>
-                <div class={'stores'}>{row.stores}</div>
-                <el-tag size={'medium'} type={row.status ? 'success' : 'danger'}>{row.status ? '上架' : '下架'}</el-tag>
-              </div>
-            )
-          }
-        },
-        { label: '价格', prop: 'price', align: 'center' },
-        { label: '销量', prop: 'numberSells', align: 'center' },
-        { label: '添加/更新时间', align: 'center', width: '240',
+        { label: '用户', prop: 'name', align: 'left', width: '80' },
+        { label: '数量', prop: 'goodsAmount', align: 'center',width: '60' },
+        { label: '订单号', prop: 'orderNumber', align: 'center',},
+        { label: '状态', prop: 'statusStr',align: 'center',},
+        { label: '金额', prop: 'money', align: 'center' },
+        { label: '交易/更新时间', align: 'center', width: '240',
           render: (h, { props: { row }}) => {
             return (
               <div>
@@ -138,7 +123,7 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
-                <span onClick={() => this.update(row)}>编 辑</span>
+                <span onClick={() => this.detail(row)}>详 情</span>
                 <el-divider direction={'vertical'}/>
                 <span onClick={() => this.delete(row.id)}>删 除</span>
               </div>
@@ -159,7 +144,10 @@ export default {
       },
       searchForm: {
         name: '',
-        status: ''
+        phone: '',
+        status: '',
+        orderNumber: '',
+        status: '',
       },
       rules: {
         name: [
@@ -173,18 +161,9 @@ export default {
         price: [
           { required: true, message: '价格不能为空', trigger: 'blur' },
           { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
-        ],
-        img: [
-          { validator: validateImg, trigger: 'blur' }
         ]
       },
-      fileList: [],
       selected: []
-    }
-  },
-  watch: {
-    fileList(val) {
-      this.hideUpload(val.length === 0)
     }
   },
   created() {
@@ -194,68 +173,33 @@ export default {
     orderDelete() {
 
     },
-    changeStatus(status) {
-      orderApi.changeStatusGoods({ ids: this.selected, status: status }).then(res => {
-        this.$message1000('成功', 'success')
-        this.fetchData()
-      })
-    },
     handleSelectionChange(rows) {
       this.selected = rows.map(v => v.id)
     },
-    onError() {
-      this.$message1000('文件上传出错：网络错误', 'error')
-    },
-    removeImg() {
-      this.fileList = []
-    },
-    uploadOk(res) {
-      const { success, msg, data } = res
-      if (success) {
-        this.$message1000('图片上传成功', 'success')
-        this.form.img = data.imgUrl
-      } else {
-        this.$message1000(msg, 'error')
-        this.fileList = []
-      }
-    },
     fetchData(data) {
       this.loading = true
-      orderApi.getGoods(data).then(res => {
+      orderApi.getOrder(data).then(res => {
         this.orderData = res.list
       }).finally(_ => {
         this.loading = false
       })
     },
-    add() {
-      this.isAdd = true
-      this.editVisible = true
-    },
-    hideUpload(display) {
-      setTimeout(() => {
-        this.$refs.upload.$refs['upload-inner'].$el.style.display = display ? '' : 'none'
-      }, 0)
-    },
-    update(row) {
-      this.isAdd = false
-      this.form = deepClone(row)
-      this.fileList = [{ name: row.name, url: row.pic }]
-      this.editVisible = true
+    detail(row){
+
     },
     delete(id) {
-      this.$confirm('此操作将删除该商品, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该订单, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        orderApi.deleteGoods(id).then(_ => {
+        orderApi.deleteOrder(id).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
         })
       })
     },
     close() {
-      this.fileList = []
       this.form = {
         name: '',
         stores: '',
@@ -266,7 +210,7 @@ export default {
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          orderApi.updateGoods(this.form).then(_ => {
+          orderApi.updateOrder(this.form).then(_ => {
             this.editVisible = false
             this.$message1000('提交成功', 'success')
           })
