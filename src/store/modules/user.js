@@ -18,7 +18,7 @@ const actions = {
     const username = userInfo.username.trim()
     const password = md5(userInfo.password)
     return new Promise((resolve, reject) => {
-      loginApi.login(username, password).then(response => {
+      loginApi.login({ username: username, password: password }).then(response => {
         commit('SET_USER_DATA', response)
         resolve()
       }).catch(error => {
