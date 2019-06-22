@@ -6,7 +6,7 @@
 
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click" @command="handleDropDownCommand">
-        <div>{{ userData.name }}<i class="el-icon-arrow-down el-icon--right" /></div>
+        <div>{{ userData.username }}<i class="el-icon-arrow-down el-icon--right" /></div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item>主页</el-dropdown-item>

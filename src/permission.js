@@ -12,12 +12,12 @@ const whiteList = ['/login'] // no redirect whitelist
 router.beforeEach(async(to, from, next) => {
   NProgress.start()
   document.title = getPageTitle(to.meta.title)
-  const hasRoles = store.getters.userData.roles && store.getters.userData.roles.length > 0
-  if (hasRoles === undefined) {
+  const hasRoles = store.getters.userData.roleCode
+  if (!hasRoles) {
     if (!whiteList.includes(to.path)) {
       try {
-        const { roles } = await store.dispatch('user/getInfo')
-        const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
+        const { roleCode } = await store.dispatch('user/getInfo')
+        const accessRoutes = await store.dispatch('permission/generateRoutes', roleCode)
         router.addRoutes(accessRoutes)
         next({ ...to, replace: true })
       } catch (error) {
