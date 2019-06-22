@@ -16,26 +16,25 @@
       @close="close"
     >
       <el-form ref="form" :model="form" label-width="80px" :rules="rules">
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="form.name" />
+        <el-form-item label="姓名" prop="username">
+          <el-input v-model="form.username" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" maxLength="11" />
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="form.mobile" maxLength="11" />
         </el-form-item>
-        <el-form-item label="角色类型" prop="roles">
-          <el-radio-group v-model="form.roles">
-            <el-radio label="super" border>超级管理员</el-radio>
+        <el-form-item label="角色类型" prop="roleCode">
+          <el-radio-group v-model="form.roleCode">
             <el-radio label="admin" border>管理员</el-radio>
             <el-radio label="staff" border>普通员工</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="负责区域" prop="region">
-          <el-select v-model="form.region" placeholder="请选择负责区域">
+        <el-form-item label="负责区域" prop="area">
+          <el-select v-model="form.area" placeholder="请选择负责区域">
             <el-option label="上海" value="shanghai" />
             <el-option label="深圳" value="shenzhen" />
           </el-select>
         </el-form-item>
-        <el-form-item label="登录密码" prop="password">
+        <el-form-item label="登录密码" prop="password" v-if="isAdd">
           <el-input v-model="form.password" type="password" max-length="20" />
         </el-form-item>
       </el-form>
@@ -61,64 +60,70 @@ export default {
       columns: [
         {
           label: '姓名',
-          prop: 'name',
+          prop: 'username',
           align: 'center'
         },
         {
           label: '手机号',
-          prop: 'phone',
+          prop: 'mobile',
           align: 'center'
         },
         {
           label: '角色',
-          prop: 'roles',
+          prop: 'roleCode',
           align: 'center',
           render: (h, { props: { row }}) => {
-            const roles = this.statusFilter(row.roles)
+            const roleCode = this.statusFilter(row.roleCode)
             return (
-              <el-tag type={roles.type}>{ roles.text }</el-tag>
+              <el-tag type={roleCode.type}>{ roleCode.text }</el-tag>
             )
           }
         },
         {
           label: '负责区域',
-          prop: 'region',
+          prop: 'area',
           align: 'center'
         },
         {
           label: '操作',
-          prop: 'region',
           align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
                 <span onClick={() => this.update(row)}>编 辑</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删 除</span>
+                <span onClick={() => this.delete(row.userId)}>删 除</span>
               </div>
             )
           }
         }
       ],
+      pageOption: {
+        pageIndex: 1,
+        pageSize: 100
+      },
       loading: false,
       isAdd: false,
       editVisible: false,
       form: {
-        name: '',
-        roles: '',
-        phone: '',
+        username: '',
+        roleCode: '',
+        mobile: '',
         password: '',
-        region: ''
+        area: ''
       },
       rules: {
-        name: [
+        username: [
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { min: 2, max: 15, message: '长度在 2 到 15 个字符', trigger: 'blur' }
         ],
-        roles: [
+        roleCode: [
           { required: true, message: '请选择一个角色', trigger: 'change' }
         ],
-        phone: [
+        area: [
+          { required: true, message: '请选择一个区域', trigger: 'change' }
+        ],
+        mobile: [
           { required: true, message: '请填写手机号', trigger: 'blur' },
           { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
             message: '请填写符合要求的11位手机号', trigger: 'blur' }
@@ -133,6 +138,7 @@ export default {
   },
   created() {
     this.fetchData()
+    Object.freeze(this.rules)
   },
   methods: {
     statusFilter(status) {
@@ -153,7 +159,7 @@ export default {
     },
     fetchData() {
       this.loading = true
-      staffApi.getStaff().then(res => {
+      staffApi.getStaff(this.pageOption).then(res => {
         this.staffData = res.list
       }).finally(_ => {
         this.loading = false
@@ -169,13 +175,13 @@ export default {
       // resetFields()会将form中的数据更改
       this.editVisible = true
     },
-    delete(id) {
+    delete(userId) {
       this.$confirm('此操作将删除该人员, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning'
+        type: 'danger'
       }).then(() => {
-        staffApi.deleteStaff(id).then(_ => {
+        staffApi.deleteStaff({ userId }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
         })
@@ -183,13 +189,7 @@ export default {
     },
     close() {
       this.editVisible = false
-      this.form = {
-        name: '',
-        roles: '',
-        phone: '',
-        password: '',
-        region: ''
-      }
+      this.$refs.form.resetFields()
     },
     submitForm() {
       this.$refs.form.validate(async(valid) => {
