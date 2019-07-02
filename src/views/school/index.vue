@@ -19,6 +19,14 @@
         <el-form-item label="学校名称" prop="name">
           <el-input v-model="schoolForm.name" suffix-icon="el-icon-school" maxLength="30" />
         </el-form-item>
+        <el-form-item label="学校类型" prop="type">
+          <el-select v-model="schoolForm.type" placeholder="请选择学校类型">
+            <el-option label="幼儿园" value="0" />
+            <el-option label="小学" value="1" />
+            <el-option label="中学" value="2" />
+          </el-select>
+          <el-input v-model="schoolForm.name" />
+        </el-form-item>
       </el-form>
       <div class="dialog-footer">
         <el-button type="primary" @click="submitForm">提交</el-button>
@@ -44,6 +52,18 @@ export default {
           label: '学校名称',
           prop: 'name',
           align: 'center'
+        },
+        {
+          label: '学校类型',
+          prop: 'type',
+          align: 'center',
+          render: (h, { props: { row }}) => {
+            const map = ['幼儿园', '小学', '中学']
+            const typeName = map[row.type]
+            return (
+              <el-tag type='success' style='background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);'><i class='el-icon-school' />{typeName }</el-tag>
+            )
+          }
         },
         {
           label: '添加时间',
@@ -74,12 +94,20 @@ export default {
       isAdd: false,
       editVisible: false,
       schoolForm: {
-        name: ''
+        name: '',
+        type: '2'
+      },
+      pageOption: {
+        pageIndex: 1,
+        pageSize: 100
       },
       rules: {
         name: [
           { required: true, message: '请输入学校名称', trigger: 'blur' },
           { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+        ],
+        type: [
+          { required: true, message: '请选择一个学校类型', trigger: 'change' }
         ]
       }
     }
@@ -90,7 +118,7 @@ export default {
   methods: {
     fetchData() {
       this.loading = true
-      schoolApi.getSchool().then(res => {
+      schoolApi.getSchool(this.pageOption).then(res => {
         this.schoolData = res.list
       }).finally(_ => {
         this.loading = false
