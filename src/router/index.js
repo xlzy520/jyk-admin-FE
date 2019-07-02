@@ -176,8 +176,20 @@ export const constantRoutes = [
       {
         path: 'index',
         name: '图片管理',
-        component: () => import('@/views/company/index'),
+        component: () => import('@/views/file/index'),
         meta: { title: '图片管理', icon: 'img' }
+      }
+    ]
+  },
+  {
+    path: '/stores',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '进销存管理',
+        component: () => import('@/views/stores/index'),
+        meta: { title: '进销存管理', icon: 'stores' }
       }
     ]
   },
