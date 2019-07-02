@@ -11,10 +11,25 @@
           <router-link to="/">
             <el-dropdown-item>主页</el-dropdown-item>
           </router-link>
+          <el-dropdown-item divided command="changePassword">修改密码</el-dropdown-item>
           <el-dropdown-item divided command="logout">注销</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+    <el-dialog :visible.sync="visible" title="修改密码" @close="close" append-to-body>
+      <el-form ref="ruleForm" :model="ruleForm" status-icon :rules="rules" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="密码" prop="pass">
+          <el-input v-model="ruleForm.pass" type="password" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="checkPass">
+          <el-input v-model="ruleForm.checkPass" type="password" autocomplete="off" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
+          <el-button @click="resetForm('ruleForm')">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -28,6 +43,42 @@ export default {
     Breadcrumb,
     Hamburger
   },
+  data() {
+    const validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        if (this.ruleForm.checkPass !== '') {
+          this.$refs.ruleForm.validateField('checkPass')
+        }
+        callback()
+      }
+    }
+    const validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.ruleForm.pass) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      visible: false,
+      ruleForm: {
+        pass: '',
+        checkPass: ''
+      },
+      rules: {
+        pass: [
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        checkPass: [
+          { validator: validatePass2, trigger: 'blur' }
+        ]
+      }
+    }
+  },
   computed: {
     ...mapGetters([
       'sidebar',
@@ -35,6 +86,19 @@ export default {
     ])
   },
   methods: {
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          alert('submit!')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -46,8 +110,12 @@ export default {
         location.reload() // 为了重新实例化vue-router对象 避免bug
       })
     },
+    close() {
+      this.visible = false
+    },
     handleDropDownCommand(cmd) {
       if (cmd === 'logout') this.logout()
+      if (cmd === 'changePassword') this.visible = true
     }
   }
 }

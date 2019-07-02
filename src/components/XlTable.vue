@@ -69,8 +69,8 @@ export default {
   props: {
     // 是否有选择框
     selection: {
-      type: String,
-      default: ''
+      type: Boolean,
+      default: false
     },
     // 表格数据
     tableData: {
