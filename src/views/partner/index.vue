@@ -3,10 +3,15 @@
     <add-button @add="add" />
     <xl-table
       ref="partnerTable"
+      v-loading="loading"
       :index="true"
-      :loading="loading"
       :table-data="partnerData"
       :table-columns="columns"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
+      @change-page="pageChange"
+      @size-change="sizeChange"
     />
     <el-dialog
       width="40%"
@@ -21,20 +26,13 @@
         </el-form-item>
         <el-form-item label="宣传图" prop="img">
           <el-upload
-            ref="upload"
-            :action="'/partner/'+url"
-            :on-preview="handlePreview"
-            :on-remove="controlHideUpload"
+            class="avatar-uploader"
+            action="https://jsonplaceholder.typicode.com/posts/"
+            :show-file-list="false"
             :on-success="uploadOk"
-            :on-error="onError"
-            :data="form"
-            :on-change="controlHideUpload"
-            :file-list="fileList"
-            :auto-upload="false"
-            list-type="picture-card"
-            accept="['.png','.jpg']"
-          >
-            <i class="el-icon-plus" />
+            :before-upload="beforeAvatarUpload">
+            <img v-if="dialogImageUrl" :src="dialogImageUrl" class="avatar">
+            <i v-else class="el-icon-plus img-uploader-icon" />
           </el-upload>
           <el-dialog :visible.sync="imgVisible" append-to-body>
             <el-image :src="dialogImageUrl" alt="" fit="fill" />
@@ -62,53 +60,55 @@
 import AddButton from '../../components/AddButton'
 import partnerApi from '../../api/partner'
 import { deepClone } from '../../utils/index'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'Partner',
   components: { AddButton },
+  mixins: [pagination],
   data() {
     return {
       partnerData: [],
       columns: [
         {
           label: '名称',
-          prop: 'name',
+          prop: 'partnersName',
           align: 'center'
         },
         {
           label: '宣传图',
-          prop: 'img',
+          prop: 'fileUrl',
           align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
-                <el-image src={row.img} fit='fit'/>
+                <el-image src={row.fileUrl} fit='fit'/>
               </div>
             )
           }
         },
-        { label: '是否展示', prop: 'display', align: 'center',
+        { label: '是否展示', prop: 'show', align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
-                <i class={'el-icon-' + (row.display ? 'success' : 'error')}/>
+                <i class={'el-icon-' + (row.show ? 'success' : 'error')}/>
               </div>
             )
           }
         },
         {
           label: '添加时间',
-          prop: 'addTime',
+          prop: 'saveDate',
           align: 'center'
         },
         {
           label: '更新时间',
-          prop: 'updateTime',
+          prop: 'modifyDate',
           align: 'center'
         },
         {
           label: '操作',
-          prop: 'region',
+          prop: 'operation',
           align: 'center',
           render: (h, { props: { row }}) => {
             return (
@@ -127,8 +127,8 @@ export default {
       imgVisible: false,
       dialogImageUrl: '',
       form: {
-        name: '',
-        display: ''
+        partnersName: '',
+        show: ''
       },
       rules: {
         name: [
@@ -148,6 +148,18 @@ export default {
     this.fetchData()
   },
   methods: {
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === 'image/jpeg';
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!');
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!');
+      }
+      return isJPG && isLt2M;
+    },
     controlHideUpload(file, fileList) {
       if (fileList.length > 0) {
         this.hideUpload()
@@ -159,19 +171,19 @@ export default {
       this.$message1000('文件上传出错：网络错误', 'error')
       this.editVisible = false
     },
-    uploadOk(res) {
-      if (res.success) {
-        this.$message1000('文件上传成功', 'success')
-        this.close()
-        this.fetchData()
-        this.editVisible = false
-      } else {
-        let msg = res.msg
-        msg = '文件上传出错：' + msg
-        this.$message1000(msg, 'error')
-        this.fileList = []
-        this.editVisible = false
-      }
+    uploadOk(res, file) {
+      console.log(res)
+      this.dialogImageUrl = URL.createObjectURL(file.raw)
+      console.log(this.dialogImageUrl);
+      // if (res.success) {
+      //   this.$message1000('文件上传成功', 'success')
+      // } else {
+      //   let msg = res.msg
+      //   msg = '文件上传出错：' + msg
+      //   this.$message1000(msg, 'error')
+      //   this.fileList = []
+      // }
+      // this.editVisible = false
     },
     handlePreview(file) {
       this.imgVisible = true
@@ -181,26 +193,23 @@ export default {
       this.loading = true
       partnerApi.getPartner().then(res => {
         this.partnerData = res.list
+        this.total = res.total
       }).finally(_ => {
         this.loading = false
       })
     },
     add() {
-      this.hideUpload('')
       this.isAdd = true
       this.editVisible = true
     },
-    hideUpload(display = 'none') {
-      this.$nextTick(() => {
-        this.$refs.upload.$refs['upload-inner'].$el.style.display = display
-      })
-    },
     update(row) {
-      this.hideUpload()
       this.isAdd = false
-      this.form = deepClone(row)
-      this.fileList = [{ name: 'food.jpg', url: 'https://img-bcy-qn.pstatp.com/user/213091/item/c0r3z/45a1ac2a95a54db08c6a5f1e5c31aa6b.jpg?imageMogr2/auto-orient/strip|watermark/2/text/wqnms73mnIgK5Y2K5qyh5YWDIC0gQUNH54ix5aW96ICF56S-5Yy6/fontsize/1824/fill/I2NjY2NjYw==/dx/59/dy/44/font/5b6u6L2v6ZuF6buR' }]
-
+      this.form.partnersName = row.partnersName
+      this.form.show = row.show
+      this.fileList.push({
+        name: row.partnersName,
+        url: row.fileUrl
+      })
       this.editVisible = true
     },
     delete(id) {
@@ -217,10 +226,7 @@ export default {
     },
     close() {
       this.fileList = []
-      this.form = {
-        name: '',
-        display: ''
-      }
+      this.resetForm()
     },
     submitForm() {
       if (this.fileList.length < 1) {
@@ -244,5 +250,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+  /deep/ .img-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .img-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .img-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>
