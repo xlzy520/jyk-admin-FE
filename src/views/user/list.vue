@@ -2,32 +2,36 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item label="注册时间:" prop="registerTime">
+        <el-form-item prop="nickname">
+          <el-input v-model="searchForm.nickname" max-length="11" placeholder="昵称" />
+        </el-form-item>
+        <el-form-item prop="registerTime">
           <el-date-picker
             v-model="searchForm.registerTime"
             type="daterange"
             align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            start-placeholder="注册时间起"
+            end-placeholder="注册时间止"
+            value-format="yyyy-MM-dd"
+            :clearable="false"
           />
         </el-form-item>
-        <el-form-item label="登录时间:" prop="lastLoginTime">
+        <el-form-item prop="lastLoginTime">
           <el-date-picker
             v-model="searchForm.lastLoginTime"
             type="daterange"
             align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            start-placeholder="登录时间起"
+            end-placeholder="登录时间止"
+            value-format="yyyy-MM-dd"
+            :clearable="false"
           />
-        </el-form-item>
-        <el-form-item label="昵称:" prop="nickname">
-          <el-input v-model="searchForm.nickname" max-length="11" />
         </el-form-item>
         <el-form-item>
           <el-button
             type="primary"
             icon="el-icon-search"
-            @click="fetchData(searchForm)"
+            @click="fetchData"
           >查询</el-button>
           <el-button type="info" @click="resetForm">清空</el-button>
         </el-form-item>
@@ -35,25 +39,31 @@
     </div>
     <xl-table
       ref="userListTable"
+      v-loading="loading"
       :index="true"
-      :loading="loading"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
       :table-data="userListData"
       :table-columns="columns"
+      @change-page="pageChange"
+      @size-change="sizeChange"
     />
   </div>
 </template>
 
 <script>
 import userApi from '../../api/user'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'UserList',
+  mixins: [pagination],
   data() {
     return {
       searchForm: {
         nickname: '',
         registerTime: '',
-        // TODO 格式化时间
         lastLoginTime: ''
       },
       userListData: [],
@@ -62,7 +72,8 @@ export default {
           label: '昵称',
           prop: 'nickname',
           align: 'center',
-          width: '120'
+          width: '180',
+          showOverflowTooltip: true
         },
         {
           label: '城市',
@@ -86,31 +97,17 @@ export default {
         {
           label: '注册时间',
           prop: 'registerTime',
-          align: 'center',
-          sortable: true
+          align: 'center'
         },
         {
           label: '登录时间',
           prop: 'lastLoginTime',
-          align: 'center',
-          sortable: true
+          align: 'center'
         },
         {
           label: '微信唯一ID',
           prop: 'openId',
           align: 'center'
-        },
-        {
-          label: '操作',
-          prop: 'region',
-          align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
-                <el-button type='danger' size='small' onClick={() => this.delete(row.id)}>删 除</el-button>
-              </div>
-            )
-          }
         }
       ],
       loading: false
@@ -120,24 +117,16 @@ export default {
     this.fetchData()
   },
   methods: {
-    fetchData(data) {
+    fetchData() {
       this.loading = true
-      userApi.getUserList(data).then(res => {
+      userApi.getUserList({
+        ...this.searchForm,
+        ...this.pageOption
+      }).then(res => {
         this.userListData = res.list
+        this.total = res.total
       }).finally(_ => {
         this.loading = false
-      })
-    },
-    delete(id) {
-      this.$confirm('此操作将删除该用户, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        userApi.deleteUser(id).then(_ => {
-          this.$message1000('删除成功', 'success')
-          this.fetchData()
-        })
       })
     },
     resetForm() {
@@ -153,4 +142,7 @@ export default {
     font-size: 14px;
   }
 }
+  /deep/ .el-range-editor.el-input__inner{
+    width: 300px;
+  }
 </style>

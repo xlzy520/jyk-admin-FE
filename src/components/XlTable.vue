@@ -2,18 +2,11 @@
   <div class="base-table">
     <el-table
       ref="baseTable"
-      v-loading="loading"
+      v-bind="$attrs"
       highlight-current-row
       :data="tableData"
-      :stripe="stripe"
       header-row-class-name="header-row"
-      @row-click="clickRow"
-      @select="handleSelection"
-      @select-all="selectAll"
-      @selection-change="handleSelectionChange"
-      @cell-dblclick="dblclickRow"
-      @cell-click="clickCell"
-      @row-contextmenu="showMenu"
+      v-on="$listeners"
     >
       <el-table-column
         v-if="selection"
@@ -43,9 +36,10 @@
       :page-size="pageSize"
       prev-text="上一页"
       next-text="下一页"
-      layout="prev, pager, next, jumper"
+      layout="sizes,prev, pager, next, jumper"
       :total="total"
       @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
     />
   </div>
 </template>
@@ -81,10 +75,6 @@ export default {
     tableColumns: {
       type: Array,
       default: () => { [] }
-    },
-    stripe: {
-      type: Boolean,
-      default: false
     },
     loading: {
       type: Boolean,
@@ -133,30 +123,12 @@ export default {
     handleCurrentChange(val) {
       this.$emit('change-page', val)
     },
+    handleSizeChange(val) {
+      this.$emit('change-page-size', val)
+    },
     // 使用v-bind展开props到组件上
     getComponentBind({ row, column, $index }, col) {
       return { row, col, column, $index }
-    },
-    clickRow(row) {
-      this.$emit('row-click', row)
-    },
-    showMenu(row, column, event) {
-      this.$emit('row-contextmenu', row, column, event)
-    },
-    dblclickRow(row) {
-      this.$emit('cell-dblclick', row)
-    },
-    clickCell(row, column, cell, event) {
-      this.$emit('cellclick', row, column, cell, event)
-    },
-    handleSelectionChange(select) {
-      this.$emit('selection-change', select)
-    },
-    handleSelection(select) {
-      this.$emit('selectchange', select)
-    },
-    selectAll(select) {
-      this.$emit('selectAll', select)
     }
   }
 }

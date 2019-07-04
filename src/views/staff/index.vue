@@ -138,7 +138,6 @@ export default {
   },
   created() {
     this.fetchData()
-    Object.freeze(this.rules)
   },
   methods: {
     statusFilter(status) {
