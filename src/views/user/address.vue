@@ -21,8 +21,8 @@
         <el-form-item prop="isDefault">
           <el-select v-model="searchForm.isDefault" placeholder="是否默认">
             <el-option label="全部" value="all" />
-            <el-option label="是" value="1" />
-            <el-option label="否" value="0" />
+            <el-option label="默认" value="1" />
+            <el-option label="非默认" value="0" />
           </el-select>
         </el-form-item>
         <el-form-item prop="addTime">
@@ -66,7 +66,7 @@
       :total="total"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
-      @current-change="pageChange"
+      @change-page="pageChange"
       @size-change="sizeChange"
     />
     <el-dialog
@@ -84,7 +84,13 @@
           <el-input v-model="addressForm.phone" suffix-icon="el-icon-phone" maxLength="11" />
         </el-form-item>
         <el-form-item label="详细地址" prop="address">
-          <el-input v-model="addressForm.address" suffix-icon="el-icon-location" maxLength="40" type="textarea" :rows="2" />
+          <el-input
+            v-model="addressForm.address"
+            suffix-icon="el-icon-location"
+            maxLength="40"
+            type="textarea"
+            :rows="2"
+          />
         </el-form-item>
         <el-form-item label="用户类型" prop="type">
           <el-radio-group v-model="addressForm.type">
@@ -137,7 +143,7 @@ export default {
             )
           }
         },
-        { label: '详细地址', prop: 'address', align: 'center', minWidth: 180 },
+        { label: '详细地址', prop: 'address', align: 'center', width: 160 },
         { label: '是否默认', prop: 'isDefault', align: 'center', width: 80,
           render: (h, { props: { row }}) => {
             return (

@@ -2,10 +2,15 @@
   <div class="app-container">
     <xl-table
       ref="schoolTable"
+      v-loading="loading"
       :index="true"
-      :loading="loading"
       :table-data="schoolData"
       :table-columns="columns"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
+      @change-page="pageChange"
+      @size-change="sizeChange"
     />
     <add-button @add="add" />
     <el-dialog
@@ -25,7 +30,6 @@
             <el-option label="小学" value="1" />
             <el-option label="中学" value="2" />
           </el-select>
-          <el-input v-model="schoolForm.name" />
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -40,10 +44,12 @@
 import AddButton from '../../components/AddButton'
 import schoolApi from '../../api/school'
 import { deepClone } from '../../utils/index'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'School',
   components: { AddButton },
+  mixins: [pagination],
   data() {
     return {
       schoolData: [],
@@ -61,7 +67,7 @@ export default {
             const map = ['幼儿园', '小学', '中学']
             const typeName = map[row.type]
             return (
-              <el-tag type='success' style='background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);'><i class='el-icon-school' />{typeName }</el-tag>
+              <el-tag type='success'><i class='el-icon-school' />{typeName }</el-tag>
             )
           }
         },
@@ -97,10 +103,6 @@ export default {
         name: '',
         type: '2'
       },
-      pageOption: {
-        pageIndex: 1,
-        pageSize: 100
-      },
       rules: {
         name: [
           { required: true, message: '请输入学校名称', trigger: 'blur' },
@@ -120,6 +122,7 @@ export default {
       this.loading = true
       schoolApi.getSchool(this.pageOption).then(res => {
         this.schoolData = res.list
+        this.total = res.total
       }).finally(_ => {
         this.loading = false
       })
@@ -131,7 +134,6 @@ export default {
     update(row) {
       this.isAdd = false
       this.schoolForm = deepClone(row)
-      // resetFields()会将form中的数据更改
       this.editVisible = true
     },
     delete(id) {
@@ -148,9 +150,7 @@ export default {
     },
     close() {
       this.editVisible = false
-      this.schoolForm = {
-        name: ''
-      }
+      this.resetForm()
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
@@ -176,5 +176,6 @@ export default {
 <style lang="scss" scoped>
   /deep/ .el-tag{
     font-size: 16px;
+    background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
   }
 </style>
