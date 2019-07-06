@@ -6,5 +6,11 @@ export default {
   },
   deletePartner(id) {
     return baseRequest('/partner/delete', id)
-  }
+  },
+  addPartner(data) {
+    return baseRequest('/partner/add', id)
+  },
+  updatePartner(data) {
+    return baseRequest('/partner/update', id)
+  },
 }
