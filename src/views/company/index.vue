@@ -1,11 +1,11 @@
 <template>
   <div class="company">
     <el-form label-width="80px" :model="comForm">
-      <el-form-item label="电话">
-        <el-input v-model="comForm.phone" />
+      <el-form-item label="电话" prop="mobile">
+        <el-input v-model="comForm.phone" maxLength="12" />
       </el-form-item>
-      <el-form-item label="公司地址">
-        <el-input v-model="comForm.address" />
+      <el-form-item label="公司地址" prop="partnersName">
+        <el-input v-model="comForm.partnersName" maxLength="30" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="update">更新</el-button>
@@ -21,7 +21,10 @@ export default {
   name: 'Company',
   data() {
     return {
-      comForm: {}
+      comForm: {
+        phone: '',
+        partnersName: ''
+      }
     }
   },
   created() {
@@ -34,7 +37,7 @@ export default {
       })
     },
     update() {
-      request.post('/company/update').then(res => {
+      request.post('/partner/update', this.comForm).then(res => {
         this.fetchData()
         this.$message1000('更新成功', 'success')
       })
