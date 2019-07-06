@@ -2,28 +2,18 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="nickname">
-          <el-input v-model="searchForm.nickname" max-length="11" placeholder="昵称" />
+        <el-form-item prop="keyword">
+          <el-input v-model="searchForm.keyword" max-length="11" placeholder="昵称" />
         </el-form-item>
-        <el-form-item prop="registerTime">
+        <el-form-item prop="saveDate">
           <el-date-picker
-            v-model="searchForm.registerTime"
+            v-model="searchForm.saveDate"
             type="daterange"
             align="center"
             start-placeholder="注册时间起"
             end-placeholder="注册时间止"
-            value-format="yyyy-MM-dd"
-            :clearable="false"
-          />
-        </el-form-item>
-        <el-form-item prop="lastLoginTime">
-          <el-date-picker
-            v-model="searchForm.lastLoginTime"
-            type="daterange"
-            align="center"
-            start-placeholder="登录时间起"
-            end-placeholder="登录时间止"
-            value-format="yyyy-MM-dd"
+            :default-time="['00:00:00', '23:59:59']"
+            value-format="yyyy-MM-dd HH:mm:ss"
             :clearable="false"
           />
         </el-form-item>
@@ -55,22 +45,22 @@
 <script>
 import userApi from '../../api/user'
 import pagination from '../../mixins/pagination'
+import time from '../../mixins/time'
 
 export default {
   name: 'UserList',
-  mixins: [pagination],
+  mixins: [pagination, time],
   data() {
     return {
       searchForm: {
-        nickname: '',
-        registerTime: '',
-        lastLoginTime: ''
+        keyword: '',
+        saveDate: ''
       },
       userListData: [],
       columns: [
         {
           label: '昵称',
-          prop: 'nickname',
+          prop: 'username',
           align: 'center',
           width: '180',
           showOverflowTooltip: true
@@ -84,24 +74,19 @@ export default {
         },
         {
           label: '头像',
-          prop: 'avatar',
+          prop: 'fileUrl',
           align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
-                <el-image style='width: 50px; height: 50px' src={row.avatar} fit='fit'/>
+                <el-image style='width: 50px; height: 50px' src={row.fileUrl} fit='fit'/>
               </div>
             )
           }
         },
         {
           label: '注册时间',
-          prop: 'registerTime',
-          align: 'center'
-        },
-        {
-          label: '登录时间',
-          prop: 'lastLoginTime',
+          prop: 'saveDate',
           align: 'center'
         },
         {
@@ -120,6 +105,7 @@ export default {
     fetchData() {
       this.loading = true
       userApi.getUserList({
+        ...this.getStartEndTime(this.searchForm.saveDate),
         ...this.searchForm,
         ...this.pageOption
       }).then(res => {

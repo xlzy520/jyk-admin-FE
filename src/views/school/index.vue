@@ -21,14 +21,14 @@
       @close="close"
     >
       <el-form ref="form" :model="schoolForm" label-width="80px" :rules="rules">
-        <el-form-item label="学校名称" prop="name">
-          <el-input v-model="schoolForm.name" suffix-icon="el-icon-school" maxLength="30" />
+        <el-form-item label="学校名称" prop="schoolName">
+          <el-input v-model="schoolForm.schoolName" suffix-icon="el-icon-school" maxLength="30" />
         </el-form-item>
-        <el-form-item label="学校类型" prop="type">
-          <el-select v-model="schoolForm.type" placeholder="请选择学校类型">
-            <el-option label="幼儿园" value="0" />
-            <el-option label="小学" value="1" />
-            <el-option label="中学" value="2" />
+        <el-form-item label="学校类型" prop="schoolType">
+          <el-select v-model="schoolForm.schoolType" placeholder="请选择学校类型">
+            <el-option label="幼儿园" value="幼儿园" />
+            <el-option label="小学" value="小学" />
+            <el-option label="中学" value="中学" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -56,29 +56,27 @@ export default {
       columns: [
         {
           label: '学校名称',
-          prop: 'name',
+          prop: 'schoolName',
           align: 'center'
         },
         {
           label: '学校类型',
-          prop: 'type',
+          prop: 'schoolType',
           align: 'center',
           render: (h, { props: { row }}) => {
-            const map = ['幼儿园', '小学', '中学']
-            const typeName = map[row.type]
             return (
-              <el-tag type='success'><i class='el-icon-school' />{typeName }</el-tag>
+              <el-tag type='success'><i class='el-icon-school' />{row.schoolType }</el-tag>
             )
           }
         },
         {
           label: '添加时间',
-          prop: 'addTime',
+          prop: 'saveDate',
           align: 'center'
         },
         {
           label: '更新时间',
-          prop: 'updateTime',
+          prop: 'modifyDate',
           align: 'center'
         },
         {
@@ -100,15 +98,15 @@ export default {
       isAdd: false,
       editVisible: false,
       schoolForm: {
-        name: '',
-        type: '2'
+        schoolName: '',
+        schoolType: ''
       },
       rules: {
-        name: [
+        schoolName: [
           { required: true, message: '请输入学校名称', trigger: 'blur' },
           { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
         ],
-        type: [
+        schoolType: [
           { required: true, message: '请选择一个学校类型', trigger: 'change' }
         ]
       }
@@ -153,9 +151,14 @@ export default {
       this.resetForm()
     },
     submitForm() {
-      this.$refs.form.validate((valid) => {
+      this.$refs.form.validate(async(valid) => {
         if (valid) {
-          schoolApi.updateSchool(this.schoolForm).then(res => {
+          const param = {
+            ...this.schoolForm,
+            ...this.pageOption
+          }
+          const getFn = this.isAdd ? schoolApi.addSchool(param) : schoolApi.updateSchool(param)
+          getFn.then(res => {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()

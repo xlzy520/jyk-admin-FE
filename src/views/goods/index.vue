@@ -61,9 +61,6 @@
             <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
-        <el-form-item label="库存：" prop="stores">
-          <el-input v-model.number="form.stores" maxLength="10" />
-        </el-form-item>
         <el-form-item label="状态：" prop="status">
           <el-switch
             v-model="form.status"
@@ -114,11 +111,10 @@ export default {
             )
           }
         },
-        { label: '库存/状态', align: 'center',
+        { label: '状态', align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div>
-                <div class={'stores'}>{row.stores}</div>
                 <el-tag size={'medium'} type={row.status ? 'success' : 'danger'}>{row.status ? '上架' : '下架'}</el-tag>
               </div>
             )
@@ -153,7 +149,6 @@ export default {
       imgUrl: '',
       form: {
         name: '',
-        stores: '',
         status: '',
         price: '',
         img: ''
@@ -166,10 +161,6 @@ export default {
         name: [
           { required: true, message: '名称不能为空', trigger: 'blur' },
           { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
-        ],
-        stores: [
-          { required: true, message: '库存不能为空', trigger: 'blur' },
-          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
         ],
         price: [
           { required: true, message: '价格不能为空', trigger: 'blur' },

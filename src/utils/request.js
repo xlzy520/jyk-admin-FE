@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
-import store from '@/store'
 import router from '@/router'
 import { resetRouter } from '@/router'
 
@@ -8,7 +7,7 @@ const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   // baseURL: 'https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin',
   withCredentials: true,
-  timeout: 10 * 1000
+  timeout: 50 * 1000
 })
 
 // response interceptor

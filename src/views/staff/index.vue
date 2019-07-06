@@ -29,12 +29,9 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="负责区域" prop="area">
-          <el-select v-model="form.area" placeholder="请选择负责区域">
-            <el-option label="上海" value="shanghai" />
-            <el-option label="深圳" value="shenzhen" />
-          </el-select>
+          <el-input v-model="form.area" placeholder="请选择负责区域" />
         </el-form-item>
-        <el-form-item label="登录密码" prop="password" v-if="isAdd">
+        <el-form-item v-if="isAdd" label="登录密码" prop="password">
           <el-input v-model="form.password" type="password" max-length="20" />
         </el-form-item>
       </el-form>
