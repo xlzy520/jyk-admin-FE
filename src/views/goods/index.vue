@@ -1,27 +1,6 @@
 <template>
   <div class="app-container">
     <add-button @add="add" />
-    <div class="header">
-      <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item label="名称:" prop="name">
-          <el-input v-model="searchForm.name" maxLength="11" />
-        </el-form-item>
-        <el-form-item label="状态:" prop="status">
-          <el-select v-model="searchForm.status">
-            <el-option label="全部" value="" />
-            <el-option label="上架" value="true" />
-            <el-option label="下架" value="false" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            @click="fetchData(searchForm)"
-          >查询</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
     <xl-table
       ref="goodsTable"
       :index="true"
@@ -43,23 +22,25 @@
       @close="close"
     >
       <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-        <el-form-item label="名称：" prop="name">
-          <el-input v-model.trim="form.name" maxLength="20" />
+        <el-form-item label="名称：" prop="goodsName">
+          <el-input v-model.trim="form.goodsName" maxLength="20" />
         </el-form-item>
         <el-form-item label="宣传图" prop="img">
           <el-upload
             ref="upload"
-            action="/file/add"
-            :on-remove="removeImg"
-            :on-success="uploadOk"
-            :on-error="onError"
-            :file-list="fileList"
-            :auto-upload="true"
+            action="/market/file/add"
             list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="removeImg"
+            :on-success="handleSuccess"
+            :auto-upload="true"
             accept="['.png','.jpg']"
           >
             <i class="el-icon-plus" />
           </el-upload>
+          <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="imgUrl" alt="">
+          </el-dialog>
         </el-form-item>
         <el-form-item label="状态：" prop="status">
           <el-switch
@@ -70,9 +51,35 @@
             inactive-text="下架"
           />
         </el-form-item>
-        <el-form-item label="价格：" prop="price">
-          <el-input v-model="form.price" maxLength="10" />
+        <el-form-item label="商品类型：" prop="">
+          <el-select v-model="form.type" @change="typeChange">
+            <el-option
+              v-for="option in useType"
+              :key="option.useType"
+              :value="option.useTypeId"
+              :label="option.useType"
+            />
+          </el-select>
         </el-form-item>
+        <el-form-item label="规格详情" v-if="specsList.length>0">
+          <el-checkbox-group v-model="form.specsList">
+            <el-checkbox
+              v-for="item in specsList"
+              :key="item.specsName"
+              border
+              :label="item.specsName"
+            >{{ item.specsName }}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="价格：" prop="price" v-if="form.type!==3">
+          <el-input v-model.number="form.price" maxLength="10" />
+        </el-form-item>
+        <el-form-item label="规格A价格：" prop="price" v-if="form.type===3">
+          <el-input v-model.number="form.price" maxLength="10" />
+          <label>规格B价格：</label>
+          <el-input v-model.number="form.price" maxLength="10" />
+        </el-form-item>
+
       </el-form>
       <div class="dialog-footer">
         <el-button type="primary" @click="submitForm">提交</el-button>
@@ -85,14 +92,17 @@
 <script>
 import AddButton from '../../components/AddButton'
 import goodsApi from '../../api/goods'
+import guigeApi from '../../api/guige'
 import { deepClone } from '../../utils/index'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'GoodsList',
   components: { AddButton },
+  mixins: [pagination],
   data() {
     const validateImg = (rule, value, callback) => {
-      if (this.fileList.length === 0) {
+      if (this.form.fileUrls.length === 0) {
         callback(new Error('请上传一张图片'))
       } else {
         callback()
@@ -101,7 +111,7 @@ export default {
     return {
       goodsData: [],
       columns: [
-        { label: '名称', prop: 'name', align: 'left' },
+        { label: '名称', prop: 'goodsName', align: 'left' },
         { label: '图片', prop: 'pic', align: 'center',
           render: (h, { props: { row }}) => {
             return (
@@ -137,7 +147,7 @@ export default {
               <div class='table-action'>
                 <span onClick={() => this.update(row)}>编 辑</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删 除</span>
+                <span onClick={() => this.delete(row.goodsId)}>删 除</span>
               </div>
             )
           }
@@ -148,19 +158,17 @@ export default {
       editVisible: false,
       imgUrl: '',
       form: {
-        name: '',
+        goodsName: '',
         status: '',
         price: '',
-        img: ''
-      },
-      searchForm: {
-        name: '',
-        status: ''
+        fileUrls: [],
+        specsList: [],
+        type: ''
       },
       rules: {
-        name: [
+        goodsName: [
           { required: true, message: '名称不能为空', trigger: 'blur' },
-          { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
+          { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
         ],
         price: [
           { required: true, message: '价格不能为空', trigger: 'blur' },
@@ -171,18 +179,30 @@ export default {
         ]
       },
       fileList: [],
-      selected: []
-    }
-  },
-  watch: {
-    fileList(val) {
-      this.hideUpload(val.length === 0)
+      selected: [],
+      dialogVisible: false,
+      useType: [],
+      specsList: []
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    typeChange(val) {
+      const index = this.useType.findIndex(v => v.useTypeId === val)
+      if (index > 0) {
+        this.specsList = this.useType[index].specsList
+      }
+    },
+    handleSuccess(res, file, fileList) {
+      console.log(res)
+      this.form.fileUrls.push(res.data)
+    },
+    handlePictureCardPreview(file) {
+      this.imgUrl = file.url
+      this.dialogVisible = true
+    },
     changeStatus(status) {
       goodsApi.changeStatusGoods({ ids: this.selected, status: status }).then(res => {
         this.$message1000('成功', 'success')
@@ -196,7 +216,7 @@ export default {
       this.$message1000('文件上传出错：网络错误', 'error')
     },
     removeImg() {
-      this.fileList = []
+      this.form.img = []
     },
     uploadOk(res) {
       const { success, msg, data } = res
@@ -210,15 +230,34 @@ export default {
     },
     fetchData(data) {
       this.loading = true
-      goodsApi.getGoods(data).then(res => {
+      goodsApi.getGoods({ ...this.pageOption, ...this.form }).then(res => {
         this.goodsData = res.list
       }).finally(_ => {
         this.loading = false
       })
     },
+    getUseTypeList() {
+      guigeApi.getUseTypeList().then(res => {
+        // this.useType = res.map(v => {
+        //   return {
+        //     value: v.useTypeId,
+        //     label: v.useType,
+        //     children: v.specsList.map(zv => {
+        //       return {
+        //         value: zv.specsId,
+        //         label: zv.specsName + ':' + zv.specsStr
+        //       }
+        //     })
+        //   }
+        // })
+        this.useType = res
+        console.log(this.useType)
+      })
+    },
     add() {
       this.isAdd = true
       this.editVisible = true
+      this.getUseTypeList()
     },
     hideUpload(display) {
       setTimeout(() => {
@@ -228,7 +267,7 @@ export default {
     update(row) {
       this.isAdd = false
       this.form = deepClone(row)
-      this.fileList = [{ name: row.name, url: row.pic }]
+      this.fileList = [{ goodsName: row.goodsName, url: row.pic }]
       this.editVisible = true
     },
     delete(id) {
@@ -237,7 +276,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        goodsApi.deleteGoods(id).then(_ => {
+        this.loading = true
+        goodsApi.deleteGoods({
+          goodsId: id
+        }).then(_ => {
+          this.loading = false
           this.$message1000('删除成功', 'success')
           this.fetchData()
         })
@@ -246,7 +289,7 @@ export default {
     close() {
       this.fileList = []
       this.form = {
-        name: '',
+        goodsName: '',
         stores: '',
         status: '',
         price: ''
