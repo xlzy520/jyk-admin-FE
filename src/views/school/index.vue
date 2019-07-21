@@ -24,6 +24,9 @@
         <el-form-item label="学校名称" prop="schoolName">
           <el-input v-model="schoolForm.schoolName" suffix-icon="el-icon-school" maxLength="30" />
         </el-form-item>
+        <el-form-item label="学校地址" prop="schoolAddress">
+          <el-input v-model="schoolForm.schoolAddress" suffix-icon="el-icon-address" maxLength="60" />
+        </el-form-item>
         <el-form-item label="学校类型" prop="schoolType">
           <el-select v-model="schoolForm.schoolType" placeholder="请选择学校类型">
             <el-option label="幼儿园" value="幼儿园" />
@@ -60,12 +63,17 @@ export default {
           align: 'center'
         },
         {
+          label: '学校地址',
+          prop: 'schoolAddress',
+          align: 'center'
+        },
+        {
           label: '学校类型',
           prop: 'schoolType',
           align: 'center',
           render: (h, { props: { row }}) => {
             return (
-              <el-tag type='success'><i class='el-icon-school' />{row.schoolType }</el-tag>
+              <el-tag><i class='el-icon-school' />{row.schoolType }</el-tag>
             )
           }
         },
@@ -88,7 +96,7 @@ export default {
               <div class='table-action'>
                 <span onClick={() => this.update(row)}>编辑</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删除</span>
+                <span onClick={() => this.delete(row.schoolId)}>删除</span>
               </div>
             )
           }
@@ -99,12 +107,17 @@ export default {
       editVisible: false,
       schoolForm: {
         schoolName: '',
+        schoolAddress: '',
         schoolType: ''
       },
       rules: {
         schoolName: [
           { required: true, message: '请输入学校名称', trigger: 'blur' },
           { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+        ],
+        schoolAddress: [
+          { required: true, message: '请输入学校地址', trigger: 'blur' },
+          { min: 2, max: 100, message: '长度在 2 到 100 个字符', trigger: 'blur' }
         ],
         schoolType: [
           { required: true, message: '请选择一个学校类型', trigger: 'change' }
@@ -140,7 +153,9 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        schoolApi.deleteSchool(id).then(_ => {
+        schoolApi.deleteSchool({
+          schoolId: id
+        }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
         })
@@ -164,7 +179,6 @@ export default {
             this.fetchData()
           })
         } else {
-          console.log('error submit!!')
           return false
         }
       })
@@ -179,6 +193,5 @@ export default {
 <style lang="scss" scoped>
   /deep/ .el-tag{
     font-size: 16px;
-    background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
   }
 </style>
