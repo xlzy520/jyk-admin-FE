@@ -12,15 +12,15 @@
           <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
         </el-form-item>
         <el-form-item prop="type">
-          <el-select v-model="searchForm.type" placeholder="请选择用户类型">
-            <el-option label="全部" value="all" />
-            <el-option label="餐厅" value="restaurant" />
-            <el-option label="学校" value="school" />
+          <el-select v-model="searchForm.addressType" placeholder="用户类型">
+            <el-option label="全部" value="" />
+            <el-option label="餐厅" value="1" />
+            <el-option label="学校" value="0" />
           </el-select>
         </el-form-item>
         <el-form-item prop="isDefault">
           <el-select v-model="searchForm.isDefault" placeholder="是否默认地址">
-            <el-option label="全部" value="all" />
+            <el-option label="全部" value="" />
             <el-option label="默认" value="1" />
             <el-option label="非默认" value="0" />
           </el-select>
@@ -30,20 +30,10 @@
             v-model="searchForm.saveDate"
             type="daterange"
             align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="yyyy-MM-dd"
-            :clearable="false"
-          />
-        </el-form-item>
-        <el-form-item prop="modifyDate">
-          <el-date-picker
-            v-model="searchForm.modifyDate"
-            type="daterange"
-            align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="yyyy-MM-dd"
+            start-placeholder="添加日期起"
+            end-placeholder="添加日期止"
+            :default-time="['00:00:00', '23:59:59']"
+            value-format="yyyy-MM-dd HH:mm:ss"
             :clearable="false"
           />
         </el-form-item>
@@ -70,38 +60,41 @@
       @size-change="sizeChange"
     />
     <el-dialog
-      width="40%"
+      width="600px"
       title="地址信息编辑"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
       @close="close"
     >
-      <el-form ref="dialogForm" :model="addressForm" label-width="80px" :rules="rules">
-        <el-form-item label="联系人" prop="consignee">
+      <el-form ref="addressForm" :model="addressForm" label-width="120px" :rules="rules">
+        <el-form-item :label="addressForm.addressType?'联系人':'班级'" prop="consignee">
           <el-input v-model="addressForm.consignee" suffix-icon="el-icon-user" maxLength="15" />
         </el-form-item>
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="addressForm.mobile" suffix-icon="el-icon-mobile" maxLength="11" />
         </el-form-item>
-        <el-form-item label="详细地址" prop="address">
+        <el-form-item :label="addressForm.addressType?'详细地址':'学校'" prop="address">
           <el-input
+            v-if="addressForm.addressType === 1"
             v-model="addressForm.address"
             suffix-icon="el-icon-location"
             maxLength="40"
             type="textarea"
             :rows="2"
           />
-        </el-form-item>
-        <el-form-item label="地址类型" prop="addressType">
-          <el-radio-group v-model.number="addressForm.addressType">
-            <el-radio label="1" border>餐厅</el-radio>
-            <el-radio label="0" border>学校</el-radio>
-          </el-radio-group>
+          <el-select v-else v-model="addressForm.schoolId" suffix-icon="el-icon-location">
+            <el-option
+              v-for="option in schoolOptions"
+              :key="option.schoolId"
+              :value="option.schoolId"
+              :label="option.address"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm('dialogForm')">重置</el-button>
+        <el-button type="primary" @click="submitForm" :loading="submitLoading">提交</el-button>
+        <el-button @click="resetForm('addressForm')">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -109,6 +102,7 @@
 
 <script>
 import addressApi from '../../api/address'
+import schoolApi from '../../api/school'
 import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
 
@@ -126,9 +120,9 @@ export default {
           width: 180,
           showOverflowTooltip: true
         },
-        { label: '联系人', prop: 'consignee', align: 'center', width: 100 },
-        { label: '手机号', prop: 'mobile', align: 'center', width: 110 },
-        { label: '类型', prop: 'addressType', align: 'center', width: 80,
+        { label: '联系人/班级', prop: 'consignee', align: 'center', width: 120 },
+        { label: '手机号', prop: 'mobile', align: 'center', width: 150 },
+        { label: '类型', prop: 'addressType', align: 'center', width: 100,
           render: (h, { props: { row }}) => {
             if (row.addressType === 0) {
               return (
@@ -140,9 +134,9 @@ export default {
             )
           }
         },
-        { label: '详细地址 / 学校', prop: 'address', align: 'center', width: 160,
-          formatter: row => row.address || row.schoolName },
-        { label: '是否默认', prop: 'isDefault', align: 'center', width: 80,
+        { label: '详细地址 / 学校', prop: 'address', align: 'left',
+          formatter: row => row.schoolName || row.address },
+        { label: '是否默认', prop: 'isDefault', align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
@@ -151,8 +145,7 @@ export default {
             )
           }
         },
-        { label: '添加时间', prop: 'saveDate', align: 'center' },
-        { label: '更新时间', prop: 'modifyDate', align: 'center' },
+        { label: '添加时间', prop: 'saveDate', align: 'center', sortable: true, width: 180 },
         { label: '操作', prop: 'region', align: 'center', minWidth: 100,
           render: (h, { props: { row }}) => {
             return (
@@ -166,16 +159,15 @@ export default {
         }
       ],
       loading: false,
-
+      submitLoading: false,
       editVisible: false,
       searchForm: {
         username: '',
         consignee: '',
         mobile: '',
-        addressType: '',
+        addressType:'',
         isDefault: '',
-        saveDate: '',
-        modifyDate: ''
+        saveDate: ''
       },
       addressForm: {
         consignee: '',
@@ -185,30 +177,41 @@ export default {
       },
       rules: {
         consignee: [
-          { required: true, message: '请输入姓名', trigger: 'blur' },
-          { min: 2, max: 15, message: '长度在 2 到 15 个字符', trigger: 'blur' }
-        ],
-        addressType: [
-          { required: true, message: '请选择一个类型', trigger: 'change' }
+          { required: true, message: '请输入姓名' },
+          { min: 2, max: 15, message: '长度在 2 到 15 个字符' }
         ],
         mobile: [
-          { required: true, message: '请填写手机号', trigger: 'blur' },
-          { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
-            message: '请填写符合要求的11位手机号', trigger: 'blur' }
+          { required: true, message: '请填写手机号'},
+          { pattern: /^(1[0-9])\d{9}$/,
+            message: '请填写符合要求的11位手机号' }
         ],
         address: [
-          { required: true, message: '请填写地址', trigger: 'blur' }
+          { required: true, message: '请填写地址'}
         ]
-      }
+      },
+      schoolOptions: []
     }
   },
   created() {
     this.fetchData()
   },
+  mounted() {
+    this.getSchool()
+  },
   methods: {
     fetchData() {
+      let seachParams = {}
+      const { saveDate } = this.searchForm
+      if (saveDate.length === 2) {
+        const [startDate, endDate] = this.searchForm.saveDate
+        seachParams = {
+          startDate: startDate,
+          endDate: endDate
+        }
+      }
       this.loading = true
       addressApi.getAddress({
+        ...seachParams,
         ...this.searchForm,
         ...this.pageOption
       }).then(res => {
@@ -221,6 +224,14 @@ export default {
     edit(row) {
       this.addressForm = deepClone(row)
       this.editVisible = true
+    },
+    getSchool() {
+      schoolApi.getSchool({
+        pageIndex: 1,
+        pageSize: 100
+      }).then(res => {
+        this.schoolOptions = res.list
+      })
     },
     delete(id) {
       this.$confirm('此操作将删除该地址信息, 是否继续?', '提示', {
@@ -236,19 +247,19 @@ export default {
     },
     close() {
       this.editVisible = false
-      this.resetForm('dialogForm')
+      this.resetForm('addressForm')
     },
     submitForm() {
-      this.$refs.form.validate((valid) => {
+      this.$refs.addressForm.validate((valid) => {
         if (valid) {
+          this.submitLoading = true
           addressApi.updateAddress(this.addressForm).then(res => {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()
+          }).finally(()=>{
+            this.submitLoading = false
           })
-        } else {
-          console.log('error submit!!')
-          return false
         }
       })
     },
@@ -262,5 +273,8 @@ export default {
 <style lang="scss" scoped>
   /deep/ .el-tag{
     font-size: 16px;
+  }
+  /deep/ .el-select{
+    width: 100%;
   }
 </style>
