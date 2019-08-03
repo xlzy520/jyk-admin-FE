@@ -24,8 +24,8 @@
         <el-form-item label="学校名称" prop="schoolName">
           <el-input v-model="schoolForm.schoolName" suffix-icon="el-icon-school" maxLength="30" />
         </el-form-item>
-        <el-form-item label="学校地址" prop="schoolAddress">
-          <el-input v-model="schoolForm.schoolAddress" suffix-icon="el-icon-address" maxLength="60" />
+        <el-form-item label="学校地址" prop="address">
+          <el-input v-model="schoolForm.address" suffix-icon="el-icon-address" maxLength="60" />
         </el-form-item>
         <el-form-item label="学校类型" prop="schoolType">
           <el-select v-model="schoolForm.schoolType" placeholder="请选择学校类型">
@@ -64,28 +64,34 @@ export default {
         },
         {
           label: '学校地址',
-          prop: 'schoolAddress',
-          align: 'center'
+          prop: 'address',
+          align: 'left'
         },
         {
           label: '学校类型',
           prop: 'schoolType',
           align: 'center',
           render: (h, { props: { row }}) => {
+            const schoolMap = {
+              '幼儿园': 'danger',
+              '小学': 'warning'
+            }
             return (
-              <el-tag><i class='el-icon-school' />{row.schoolType }</el-tag>
+              <el-tag type={schoolMap[row.schoolType]}><i class='el-icon-school' />{row.schoolType }</el-tag>
             )
           }
         },
         {
           label: '添加时间',
           prop: 'saveDate',
-          align: 'center'
+          align: 'center',
+          sortable: true
         },
         {
           label: '更新时间',
           prop: 'modifyDate',
-          align: 'center'
+          align: 'center',
+          sortable: true
         },
         {
           label: '操作',
@@ -107,20 +113,20 @@ export default {
       editVisible: false,
       schoolForm: {
         schoolName: '',
-        schoolAddress: '',
+        address: '',
         schoolType: ''
       },
       rules: {
         schoolName: [
-          { required: true, message: '请输入学校名称', trigger: 'blur' },
-          { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+          { required: true, message: '请输入学校名称' },
+          { min: 2, max: 30, message: '长度在 2 到 30 个字符' }
         ],
-        schoolAddress: [
-          { required: true, message: '请输入学校地址', trigger: 'blur' },
-          { min: 2, max: 100, message: '长度在 2 到 100 个字符', trigger: 'blur' }
+        address: [
+          { required: true, message: '请输入学校地址' },
+          { min: 2, max: 100, message: '长度在 2 到 100 个字符' }
         ],
         schoolType: [
-          { required: true, message: '请选择一个学校类型', trigger: 'change' }
+          { required: true, message: '请选择一个学校类型' }
         ]
       }
     }
