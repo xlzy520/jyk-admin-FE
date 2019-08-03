@@ -45,16 +45,15 @@
 <script>
 import userApi from '../../api/user'
 import pagination from '../../mixins/pagination'
-import time from '../../mixins/time'
 
 export default {
   name: 'UserList',
-  mixins: [pagination, time],
+  mixins: [pagination],
   data() {
     return {
       searchForm: {
         keyword: '',
-        saveDate: ''
+        saveDate: []
       },
       userListData: [],
       columns: [
@@ -69,7 +68,6 @@ export default {
           label: '城市',
           prop: 'city',
           align: 'center',
-          width: '80',
           formatter: (row) => row.city === 'Changde' ? '常德' : row.city
         },
         {
@@ -103,10 +101,19 @@ export default {
   },
   methods: {
     fetchData() {
+      let seachParams = {}
+      const { saveDate, keyword } = this.searchForm
+      if (saveDate.length === 2) {
+        const [startDate, endDate] = this.searchForm.saveDate
+        seachParams = {
+          startDate: startDate,
+          endDate: endDate
+        }
+      }
       this.loading = true
       userApi.getUserList({
-        ...this.getStartEndTime(this.searchForm.saveDate),
-        ...this.searchForm,
+        ...seachParams,
+        keyword: keyword,
         ...this.pageOption
       }).then(res => {
         this.userListData = res.list
