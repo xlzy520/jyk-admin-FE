@@ -2,14 +2,14 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="nickname">
-          <el-input v-model="searchForm.nickname" maxLength="11" placeholder="昵称" />
+        <el-form-item prop="username">
+          <el-input v-model="searchForm.username" maxLength="11" placeholder="昵称" />
         </el-form-item>
-        <el-form-item prop="name">
-          <el-input v-model="searchForm.name" maxLength="11" placeholder="联系人" />
+        <el-form-item prop="consignee">
+          <el-input v-model="searchForm.consignee" maxLength="11" placeholder="联系人" />
         </el-form-item>
-        <el-form-item prop="phone">
-          <el-input v-model="searchForm.phone" maxLength="11" placeholder="手机号" />
+        <el-form-item prop="mobile">
+          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
         </el-form-item>
         <el-form-item prop="type">
           <el-select v-model="searchForm.type" placeholder="请选择用户类型">
@@ -25,9 +25,9 @@
             <el-option label="非默认" value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item prop="addTime">
+        <el-form-item prop="saveDate">
           <el-date-picker
-            v-model="searchForm.addTime"
+            v-model="searchForm.saveDate"
             type="daterange"
             align="center"
             start-placeholder="开始日期"
@@ -36,9 +36,9 @@
             :clearable="false"
           />
         </el-form-item>
-        <el-form-item prop="updateTime">
+        <el-form-item prop="modifyDate">
           <el-date-picker
-            v-model="searchForm.updateTime"
+            v-model="searchForm.modifyDate"
             type="daterange"
             align="center"
             start-placeholder="开始日期"
@@ -77,11 +77,11 @@
       @close="close"
     >
       <el-form ref="dialogForm" :model="addressForm" label-width="80px" :rules="rules">
-        <el-form-item label="联系人" prop="name">
-          <el-input v-model="addressForm.name" suffix-icon="el-icon-user" maxLength="15" />
+        <el-form-item label="联系人" prop="consignee">
+          <el-input v-model="addressForm.consignee" suffix-icon="el-icon-user" maxLength="15" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="addressForm.phone" suffix-icon="el-icon-phone" maxLength="11" />
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addressForm.mobile" suffix-icon="el-icon-mobile" maxLength="11" />
         </el-form-item>
         <el-form-item label="详细地址" prop="address">
           <el-input
@@ -92,10 +92,10 @@
             :rows="2"
           />
         </el-form-item>
-        <el-form-item label="用户类型" prop="type">
-          <el-radio-group v-model="addressForm.type">
-            <el-radio label="restaurant" border>餐厅</el-radio>
-            <el-radio label="school" border>学校</el-radio>
+        <el-form-item label="地址类型" prop="addressType">
+          <el-radio-group v-model.number="addressForm.addressType">
+            <el-radio label="1" border>餐厅</el-radio>
+            <el-radio label="0" border>学校</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -113,7 +113,7 @@ import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
 
 export default {
-  name: 'Address',
+  consignee: 'Address',
   mixins: [pagination],
   data() {
     return {
@@ -121,19 +121,16 @@ export default {
       columns: [
         {
           label: '昵称',
-          prop: 'nickname',
+          prop: 'username',
           align: 'center',
           width: 180,
           showOverflowTooltip: true
         },
-        { label: '联系人', prop: 'name', align: 'center', width: 100 },
-        { label: '手机号', prop: 'phone', align: 'center', width: 110, formatter: (row) => row.phone.toString() },
-        { label: '类型', prop: 'type', align: 'center', width: 80,
-          filters: [{ text: '学校', value: 'school' }, { text: '餐厅', value: 'restaurant' }],
-          filterMethod: (value, row) => row.type === value,
-          filterPlacement: 'bottom-end',
+        { label: '联系人', prop: 'consignee', align: 'center', width: 100 },
+        { label: '手机号', prop: 'mobile', align: 'center', width: 110 },
+        { label: '类型', prop: 'addressType', align: 'center', width: 80,
           render: (h, { props: { row }}) => {
-            if (row.type === 'school') {
+            if (row.addressType === 0) {
               return (
                 <el-tag type={'danger'}>学校</el-tag>
               )
@@ -143,7 +140,8 @@ export default {
             )
           }
         },
-        { label: '详细地址', prop: 'address', align: 'center', width: 160 },
+        { label: '详细地址 / 学校', prop: 'address', align: 'center', width: 160,
+          formatter: row => row.address || row.schoolName },
         { label: '是否默认', prop: 'isDefault', align: 'center', width: 80,
           render: (h, { props: { row }}) => {
             return (
@@ -153,9 +151,9 @@ export default {
             )
           }
         },
-        { label: '添加时间', prop: 'addTime', align: 'center', minWidth: 80 },
-        { label: '更新时间', prop: 'updateTime', align: 'center', minWidth: 80 },
-        { label: '操作', prop: 'region', align: 'center', minWidth: 120,
+        { label: '添加时间', prop: 'saveDate', align: 'center' },
+        { label: '更新时间', prop: 'modifyDate', align: 'center' },
+        { label: '操作', prop: 'region', align: 'center', minWidth: 100,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -171,29 +169,29 @@ export default {
 
       editVisible: false,
       searchForm: {
-        nickname: '',
-        name: '',
-        phone: '',
-        type: '',
+        username: '',
+        consignee: '',
+        mobile: '',
+        addressType: '',
         isDefault: '',
-        addTime: '',
-        updateTime: ''
+        saveDate: '',
+        modifyDate: ''
       },
       addressForm: {
-        name: '',
-        type: '',
-        phone: '',
+        consignee: '',
+        addressType: '',
+        mobile: '',
         address: ''
       },
       rules: {
-        name: [
+        consignee: [
           { required: true, message: '请输入姓名', trigger: 'blur' },
           { min: 2, max: 15, message: '长度在 2 到 15 个字符', trigger: 'blur' }
         ],
-        type: [
+        addressType: [
           { required: true, message: '请选择一个类型', trigger: 'change' }
         ],
-        phone: [
+        mobile: [
           { required: true, message: '请填写手机号', trigger: 'blur' },
           { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
             message: '请填写符合要求的11位手机号', trigger: 'blur' }
