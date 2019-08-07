@@ -2,6 +2,7 @@
   <div class="base-table">
     <el-table
       ref="baseTable"
+      v-loading="loading"
       v-bind="$attrs"
       highlight-current-row
       :data="tableData"
