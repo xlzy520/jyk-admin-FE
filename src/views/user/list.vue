@@ -85,12 +85,14 @@ export default {
         {
           label: '注册时间',
           prop: 'saveDate',
-          align: 'center'
+          align: 'center',
+          sortable: true
         },
         {
           label: '微信唯一ID',
           prop: 'openId',
-          align: 'center'
+          align: 'center',
+          width: 270
         }
       ],
       loading: false
