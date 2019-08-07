@@ -134,7 +134,7 @@ export default {
             )
           }
         },
-        { label: '详细地址 / 学校', prop: 'address', align: 'left',
+        { label: '详细地址 / 学校', prop: 'address', align: 'left',width: 160,
           formatter: row => row.schoolName || row.address },
         { label: '是否默认', prop: 'isDefault', align: 'center',
           render: (h, { props: { row }}) => {
