@@ -7,7 +7,7 @@ export default {
   updateAddress(data) {
     return baseRequest('/address/update', data)
   },
-  deleteAddress(id) {
-    return baseRequest('/address/delete', id)
+  deleteAddress(data) {
+    return baseRequest('/address/delete', data)
   }
 }
