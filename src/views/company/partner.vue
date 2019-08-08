@@ -26,15 +26,21 @@
         </el-form-item>
         <el-form-item label="宣传图" prop="fileUrl">
           <el-upload
+            v-loading="uploadLoading"
             class="img-uploader"
             action="market/file/add"
             :on-error="onError"
             accept="['.png','.jpg']"
             :show-file-list="false"
+            :before-upload="beforeUpload"
             :on-success="uploadOk"
           >
-            <img v-if="form.fileUrl" :src="'/market/file/preview?fileUrl='+form.fileUrl"
-                 class="img" @click.prevent.self="handlePreview">
+            <img
+              v-if="form.fileUrl"
+              :src="'/market/file/preview?fileUrl='+form.fileUrl"
+              class="img"
+              @click.prevent.self="handlePreview"
+            >
             <i v-else class="el-icon-plus img-uploader-icon" />
           </el-upload>
           <el-dialog :visible.sync="imgVisible" append-to-body>
@@ -64,7 +70,7 @@
 <script>
 import AddButton from '../../components/AddButton'
 import partnerApi from '../../api/partner'
-import { deepClone } from '../../utils/index'
+import { deepClone } from '../../utils'
 import pagination from '../../mixins/pagination'
 
 export default {
@@ -82,14 +88,14 @@ export default {
               <el-image src={'/market/file/preview?fileUrl=111' + row.fileUrl} fit='fit'/>
             </div>
           )
-        }},
+        } },
         { label: '是否展示', prop: 'show', render: (h, { props: { row }}) => {
           return (
             <div class='is-default-icon'>
               <i class={'el-icon-' + (row.show ? 'success' : 'error')}/>
             </div>
           )
-        }},
+        } },
         { label: '添加时间', prop: 'saveDate' },
         { label: '更新时间', prop: 'modifyDate' },
         { label: '操作', prop: 'operation', render: (h, { props: { row }}) => {
@@ -100,9 +106,11 @@ export default {
               <span onClick={() => this.delete(row.partnersId)}>删 除</span>
             </div>
           )
-        }}
+        } }
       ],
       loading: false,
+      uploadLoading: false,
+
       isAdd: false,
       editVisible: false,
       imgVisible: false,
@@ -113,13 +121,13 @@ export default {
       },
       rules: {
         partnersName: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+          { required: true, message: '请输入名称' },
+          { min: 2, max: 30, message: '长度在 2 到 30 个字符' }
         ],
         fileUrl: [
-          { required: true, message: '请上传图片', trigger: 'change' },
+          { required: true, message: '请上传图片', trigger: 'change' }
         ]
-      },
+      }
     }
   },
   computed: {
@@ -131,7 +139,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    beforeUpload(file) {
+      this.uploadLoading = true
+      console.log(file)
+    },
     onError(err, file, fileList) {
+      this.uploadLoading = false
       this.$message1000('文件上传出错：网络错误', 'error')
     },
     uploadOk(res) {
@@ -142,6 +155,7 @@ export default {
       } else {
         this.$message1000(msg, 'error')
       }
+      this.uploadLoading = false
     },
     handlePreview(file) {
       this.imgVisible = true
@@ -183,10 +197,10 @@ export default {
       this.resetForm()
     },
     submitForm() {
-      this.$refs.form.validate(async (valid) => {
+      this.$refs.form.validate(async(valid) => {
         if (valid) {
-          const res = this.isAdd?await partnerApi.addPartner(this.form): await partnerApi.updatePartner(this.form)
-          console.log(res);
+          const res = this.isAdd ? await partnerApi.addPartner(this.form) : await partnerApi.updatePartner(this.form)
+          console.log(res)
         } else {
           console.log('error submit!!')
           return false

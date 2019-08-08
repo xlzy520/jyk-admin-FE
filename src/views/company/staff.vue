@@ -46,7 +46,7 @@
 <script>
 import AddButton from '../../components/AddButton'
 import staffApi from '../../api/staff'
-import { deepClone } from '../../utils/index'
+import { deepClone } from '../../utils'
 import md5 from 'md5'
 
 export default {

@@ -46,7 +46,7 @@
 <script>
 import AddButton from '../../components/AddButton'
 import schoolApi from '../../api/school'
-import { deepClone } from '../../utils/index'
+import { deepClone } from '../../utils'
 import pagination from '../../mixins/pagination'
 
 export default {
