@@ -56,14 +56,34 @@ export const constantRoutes = [
   },
 
   {
-    path: '/staff',
+    name: '公司管理',
+    path: '/company',
     component: Layout,
+    meta: { title: '公司管理', icon: 'company' },
     children: [
       {
-        path: 'index',
+        path: 'staff',
         name: '员工管理',
         component: () => import('@/views/staff/index'),
         meta: { title: '员工管理', icon: 'staff' }
+      },
+      {
+        path: 'info',
+        name: '公司信息',
+        component: () => import('@/views/company/index'),
+        meta: { title: '公司信息', icon: 'company' }
+      },
+      {
+        path: 'partner',
+        name: '合作伙伴',
+        component: () => import('@/views/partner/index'),
+        meta: { title: '合作伙伴', icon: 'partner' }
+      },
+      {
+        path: 'school',
+        name: '学校管理',
+        component: () => import('@/views/school/index'),
+        meta: { title: '学校管理', icon: 'school' }
       }
     ]
   },
@@ -85,30 +105,6 @@ export const constantRoutes = [
         name: '地址列表',
         component: () => import('@/views/user/address'),
         meta: { title: '地址列表', icon: 'address' }
-      }
-    ]
-  },
-  {
-    path: '/school',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: '学校管理',
-        component: () => import('@/views/school/index'),
-        meta: { title: '学校管理', icon: 'school' }
-      }
-    ]
-  },
-  {
-    path: '/partner',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: '合作伙伴',
-        component: () => import('@/views/partner/index'),
-        meta: { title: '合作伙伴', icon: 'partner' }
       }
     ]
   },
@@ -158,25 +154,13 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/company',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: '公司信息',
-        component: () => import('@/views/company/index'),
-        meta: { title: '公司信息', icon: 'company' }
-      }
-    ]
-  },
-  {
-    path: '/stores',
+    path: '/inventory',
     component: Layout,
     children: [
       {
         path: 'index',
         name: '进销存管理',
-        component: () => import('@/views/stores/index'),
+        component: () => import('@/views/inventory/index'),
         meta: { title: '进销存管理', icon: 'stores' }
       }
     ]
