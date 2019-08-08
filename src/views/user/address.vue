@@ -152,7 +152,7 @@ export default {
               <div class='table-action'>
                 <span onClick={() => this.edit(row)}>编辑</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删除</span>
+                <span onClick={() => this.delete(row)}>删除</span>
               </div>
             )
           }
@@ -228,20 +228,25 @@ export default {
     getSchool() {
       schoolApi.getSchool({
         pageIndex: 1,
-        pageSize: 100
+        pageSize: 300
       }).then(res => {
         this.schoolOptions = res.list
       })
     },
-    delete(id) {
+    delete(row) {
       this.$confirm('此操作将删除该地址信息, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        addressApi.deleteAddress(id).then(_ => {
+        this.loading = true
+        addressApi.deleteAddress({
+          addressId: row.addressId
+        }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
+        }).catch(() => {
+          this.loading = false
         })
       })
     },
