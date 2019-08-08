@@ -16,7 +16,7 @@ service.interceptors.response.use(
     const res = response.data
     if (!res.success) {
       Message({
-        message: res.message || 'error',
+        message: res.msg || 'error',
         type: 'error',
         duration: 1.5 * 1000
       })
@@ -29,7 +29,7 @@ service.interceptors.response.use(
         }).then(() => {
           resetRouter()
           router.push('/login')
-          location.reload()
+          // location.reload()
         })
       }
       return Promise.reject(res)
