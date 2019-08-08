@@ -22,8 +22,8 @@
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="form.mobile" maxLength="11" />
         </el-form-item>
-        <el-form-item label="角色类型" prop="roleCode">
-          <el-radio-group v-model="form.roleCode">
+        <el-form-item label="员工类型" prop="addRoleCode">
+          <el-radio-group v-model="form.addRoleCode">
             <el-radio label="admin" border>管理员</el-radio>
             <el-radio label="staff" border>普通员工</el-radio>
           </el-radio-group>
@@ -36,7 +36,7 @@
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
+        <el-button v-loading="submitLoading" type="primary" @click="submitForm">提交</el-button>
         <el-button @click="resetForm">重置</el-button>
       </div>
     </el-dialog>
@@ -47,6 +47,7 @@
 import AddButton from '../../components/AddButton'
 import staffApi from '../../api/staff'
 import { deepClone } from '../../utils/index'
+import md5 from 'md5'
 
 export default {
   name: 'Staff',
@@ -104,7 +105,7 @@ export default {
       editVisible: false,
       form: {
         username: '',
-        roleCode: '',
+        addRoleCode: 'staff',
         mobile: '',
         password: '',
         area: ''
@@ -130,7 +131,8 @@ export default {
           { pattern: /^[^\\\\\\/:*?\s\\"<>|]+$/, message: '请不要输入特殊字符', trigger: 'blur' },
           { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
         ]
-      }
+      },
+      submitLoading: false
     }
   },
   created() {
@@ -168,7 +170,7 @@ export default {
     update(row) {
       this.isAdd = false
       this.form = deepClone(row)
-      // resetFields()会将form中的数据更改
+      this.form.addRoleCode = this.form.roleCode
       this.editVisible = true
     },
     delete(userId) {
@@ -177,6 +179,7 @@ export default {
         cancelButtonText: '取消',
         type: 'danger'
       }).then(() => {
+        this.loading = true
         staffApi.deleteStaff({ userId }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
@@ -190,14 +193,18 @@ export default {
     submitForm() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
+          this.submitLoading = true
+          const cache = this.form
+          cache.password = md5(cache.password)
           const result = await this.isAdd ? staffApi.addStaff(this.form) : staffApi.updateStaff(this.form)
           result.then(res => {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()
+          }).finally(() => {
+            this.submitLoading = false
           })
         } else {
-          console.log('error submit!!')
           return false
         }
       })
