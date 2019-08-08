@@ -112,7 +112,7 @@ export default {
       goodsData: [],
       columns: [
         { label: '名称', prop: 'goodsName', align: 'left' },
-        { label: '图片', prop: 'pic', align: 'center',
+        { label: '图片', prop: 'pic',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
@@ -121,7 +121,7 @@ export default {
             )
           }
         },
-        { label: '状态', align: 'center',
+        { label: '状态',
           render: (h, { props: { row }}) => {
             return (
               <div>
@@ -130,9 +130,9 @@ export default {
             )
           }
         },
-        { label: '价格', prop: 'price', align: 'center' },
-        { label: '销量', prop: 'numberSells', align: 'center' },
-        { label: '添加/更新时间', align: 'center', width: '240',
+        { label: '价格', prop: 'price' },
+        { label: '销量', prop: 'numberSells' },
+        { label: '添加/更新时间', width: '240',
           render: (h, { props: { row }}) => {
             return (
               <div>
@@ -141,7 +141,7 @@ export default {
               </div>
             )
           } },
-        { label: '操作', prop: 'region', align: 'center',
+        { label: '操作', prop: 'region',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>

@@ -116,13 +116,12 @@ export default {
         {
           label: '昵称',
           prop: 'username',
-          align: 'center',
           width: 180,
           showOverflowTooltip: true
         },
-        { label: '联系人/班级', prop: 'consignee', align: 'center', width: 120 },
-        { label: '手机号', prop: 'mobile', align: 'center', width: 150 },
-        { label: '类型', prop: 'addressType', align: 'center', width: 100,
+        { label: '联系人/班级', prop: 'consignee', width: 120 },
+        { label: '手机号', prop: 'mobile', width: 150 },
+        { label: '类型', prop: 'addressType', width: 100,
           render: (h, { props: { row }}) => {
             if (row.addressType === 0) {
               return (
@@ -136,7 +135,7 @@ export default {
         },
         { label: '详细地址 / 学校', prop: 'address', align: 'left',width: 160,
           formatter: row => row.schoolName || row.address },
-        { label: '是否默认', prop: 'isDefault', align: 'center',
+        { label: '是否默认', prop: 'isDefault',
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
@@ -145,8 +144,8 @@ export default {
             )
           }
         },
-        { label: '添加时间', prop: 'saveDate', align: 'center', sortable: true, width: 180 },
-        { label: '操作', prop: 'region', align: 'center', minWidth: 100,
+        { label: '添加时间', prop: 'saveDate', sortable: true, width: 180 },
+        { label: '操作', prop: 'region', minWidth: 100,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>

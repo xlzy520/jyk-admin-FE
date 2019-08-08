@@ -73,12 +73,10 @@ export default {
         {
           label: '名称',
           prop: 'name',
-          align: 'center'
         },
         {
           label: '宣传图',
           prop: 'img',
-          align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
@@ -87,7 +85,7 @@ export default {
             )
           }
         },
-        { label: '是否展示', prop: 'display', align: 'center',
+        { label: '是否展示', prop: 'display'
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
@@ -99,17 +97,14 @@ export default {
         {
           label: '添加时间',
           prop: 'addTime',
-          align: 'center'
         },
         {
           label: '更新时间',
           prop: 'updateTime',
-          align: 'center'
         },
         {
           label: '操作',
           prop: 'region',
-          align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>

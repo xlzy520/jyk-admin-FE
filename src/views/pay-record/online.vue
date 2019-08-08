@@ -59,14 +59,16 @@ export default {
     return {
       payData: [],
       columns: [
-        { label: '微信昵称', prop: 'nickname', align: 'center' },
-        { label: '支付单号', prop: 'orderNumber', align: 'center' },
-        { label: '支付通道订单号', prop: 'payChannel', align: 'center' },
-        { label: '金额', prop: 'count', align: 'center' },
-        { label: '支付时间', prop: 'addTime', align: 'center' },
-        { label: '支付状态', prop: 'status', align: 'center' },
-        { label: '操作', align: 'center',
-          render: (h, { props: { row }}) => {
+        { label: '微信昵称', prop: 'payer'},
+        { label: '账单号', prop: 'billNumber'},
+        { label: '支付单号', prop: 'orderNumber'},
+        { label: '支付通道订单号', prop: 'openNumber'},
+        { label: '金额', prop: 'amount'},
+        { label: '支付时间', prop: 'saveDate'},
+        { label: '支付状态', prop: 'billStatus'},
+        { label: '手机号', prop: 'mobile'},
+        { label: '线上线下', prop: 'type'},
+        { label: '操作', render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
                 <span onClick={() => this.delete(row.id)}>删 除</span>

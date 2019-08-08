@@ -56,20 +56,9 @@ export default {
     return {
       staffData: [],
       columns: [
-        {
-          label: '姓名',
-          prop: 'username',
-          align: 'center'
-        },
-        {
-          label: '手机号',
-          prop: 'mobile',
-          align: 'center'
-        },
-        {
-          label: '角色',
-          prop: 'roleCode',
-          align: 'center',
+        { label: '姓名', prop: 'username' },
+        { label: '手机号', prop: 'mobile' },
+        { label: '角色', prop: 'roleCode',
           render: (h, { props: { row }}) => {
             const roleCode = this.statusFilter(row.roleCode)
             return (
@@ -77,23 +66,16 @@ export default {
             )
           }
         },
-        {
-          label: '负责区域',
-          prop: 'area',
-          align: 'center'
-        },
-        {
-          label: '操作',
-          align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
-                <span onClick={() => this.update(row)}>编 辑</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.userId)}>删 除</span>
-              </div>
-            )
-          }
+        { label: '负责区域', prop: 'area' },
+        { label: '操作', render: (h, { props: { row }}) => {
+          return (
+            <div class='table-action'>
+              <span onClick={() => this.update(row)}>编 辑</span>
+              <el-divider direction={'vertical'}/>
+              <span onClick={() => this.delete(row.userId)}>删 除</span>
+            </div>
+          )
+        }
         }
       ],
       pageOption: {

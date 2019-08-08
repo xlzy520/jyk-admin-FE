@@ -88,13 +88,13 @@ export default {
     return {
       payData: [],
       columns: [
-        { label: '商家名称', prop: 'name', align: 'center' },
-        { label: '商家地址', prop: 'address', align: 'center' },
-        { label: '金额', prop: 'count', align: 'center', sortable: true },
-        { label: '收款人', prop: 'staff', align: 'center' },
-        { label: '支付时间', prop: 'addTime', align: 'center', sortable: true },
-        { label: '更新时间', prop: 'updateTime', align: 'center', sortable: true },
-        { label: '操作', align: 'center',
+        { label: '商家名称', prop: 'name' },
+        { label: '商家地址', prop: 'address' },
+        { label: '金额', prop: 'count', sortable: true },
+        { label: '收款人', prop: 'staff' },
+        { label: '支付时间', prop: 'addTime', sortable: true },
+        { label: '更新时间', prop: 'updateTime', sortable: true },
+        { label: '操作',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>

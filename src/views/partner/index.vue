@@ -75,56 +75,32 @@ export default {
     return {
       partnerData: [],
       columns: [
-        {
-          label: '名称',
-          prop: 'partnersName',
-          align: 'center'
-        },
-        {
-          label: '宣传图',
-          prop: 'fileUrl',
-          align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-img'>
-                <el-image src={'/market/file/preview?fileUrl=111' + row.fileUrl} fit='fit'/>
-              </div>
-            )
-          }
-        },
-        { label: '是否展示', prop: 'show', align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='is-default-icon'>
-                <i class={'el-icon-' + (row.show ? 'success' : 'error')}/>
-              </div>
-            )
-          }
-        },
-        {
-          label: '添加时间',
-          prop: 'saveDate',
-          align: 'center'
-        },
-        {
-          label: '更新时间',
-          prop: 'modifyDate',
-          align: 'center'
-        },
-        {
-          label: '操作',
-          prop: 'operation',
-          align: 'center',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
-                <span onClick={() => this.update(row)}>编 辑</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.partnersId)}>删 除</span>
-              </div>
-            )
-          }
-        }
+        { label: '名称', prop: 'partnersName' },
+        { label: '宣传图', prop: 'fileUrl', render: (h, { props: { row }}) => {
+          return (
+            <div class='table-img'>
+              <el-image src={'/market/file/preview?fileUrl=111' + row.fileUrl} fit='fit'/>
+            </div>
+          )
+        }},
+        { label: '是否展示', prop: 'show', render: (h, { props: { row }}) => {
+          return (
+            <div class='is-default-icon'>
+              <i class={'el-icon-' + (row.show ? 'success' : 'error')}/>
+            </div>
+          )
+        }},
+        { label: '添加时间', prop: 'saveDate' },
+        { label: '更新时间', prop: 'modifyDate' },
+        { label: '操作', prop: 'operation', render: (h, { props: { row }}) => {
+          return (
+            <div class='table-action'>
+              <span onClick={() => this.update(row)}>编 辑</span>
+              <el-divider direction={'vertical'}/>
+              <span onClick={() => this.delete(row.partnersId)}>删 除</span>
+            </div>
+          )
+        }}
       ],
       loading: false,
       isAdd: false,

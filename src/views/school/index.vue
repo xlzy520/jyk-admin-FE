@@ -70,7 +70,6 @@ export default {
         {
           label: '学校类型',
           prop: 'schoolType',
-          align: 'center',
           render: (h, { props: { row }}) => {
             const schoolMap = {
               '幼儿园': 'danger',
@@ -84,19 +83,16 @@ export default {
         {
           label: '添加时间',
           prop: 'saveDate',
-          align: 'center',
           sortable: true
         },
         {
           label: '更新时间',
           prop: 'modifyDate',
-          align: 'center',
           sortable: true
         },
         {
           label: '操作',
           prop: 'region',
-          align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -159,11 +155,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+        this.loading = true
         schoolApi.deleteSchool({
           schoolId: id
         }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
+        }).catch(() => {
+          this.loading = false
         })
       })
     },

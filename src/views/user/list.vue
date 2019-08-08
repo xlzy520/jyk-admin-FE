@@ -60,20 +60,17 @@ export default {
         {
           label: '昵称',
           prop: 'username',
-          align: 'center',
           width: '180',
           showOverflowTooltip: true
         },
         {
           label: '城市',
           prop: 'city',
-          align: 'center',
           formatter: (row) => row.city === 'Changde' ? '常德' : row.city
         },
         {
           label: '头像',
           prop: 'fileUrl',
-          align: 'center',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
@@ -85,13 +82,11 @@ export default {
         {
           label: '注册时间',
           prop: 'saveDate',
-          align: 'center',
           sortable: true
         },
         {
           label: '微信唯一ID',
           prop: 'openId',
-          align: 'center',
           width: 270
         }
       ],
