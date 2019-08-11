@@ -2,32 +2,31 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item label="昵称:" prop="nickname">
-          <el-input v-model="searchForm.nickname" maxLength="11" />
+        <el-form-item prop="nickname">
+          <el-input v-model="searchForm.nickname" maxLength="11" placeholder="昵称" />
         </el-form-item>
-        <el-form-item label="支付单号:" prop="orderNumber">
-          <el-input v-model="searchForm.orderNumber" maxLength="11" />
+        <el-form-item prop="orderNumber">
+          <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="支付单号" />
         </el-form-item>
-        <el-form-item label="支付通道订单号:" prop="payChannel">
-          <el-input v-model="searchForm.payChannel" maxLength="11" />
+        <el-form-item prop="payChannel">
+          <el-input v-model="searchForm.payChannel" maxLength="11" placeholder="支付通道订单号" />
         </el-form-item>
-        <el-form-item label="金额:" prop="count">
-          <el-input v-model="searchForm.count" maxLength="11" />
+        <el-form-item prop="count">
+          <el-input v-model.number="searchForm.count" maxLength="11" placeholder="金额" />
         </el-form-item>
-        <el-form-item label="支付状态:" prop="status">
-          <el-select v-model="searchForm.status" placeholder="类型">
-            <el-option label="未支付" value="no-pay" />
-            <el-option label="成功" value="success" />
-            <el-option label="失败" value="failed" />
+        <el-form-item prop="status">
+          <el-select v-model="searchForm.billStatus" placeholder="支付状态">
+            <el-option label="已支付" value="1" />
+            <el-option label="未支付" value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item label="支付时间:" prop="addTime">
+        <el-form-item prop="addTime">
           <el-date-picker
             v-model="searchForm.addTime"
             type="daterange"
             align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            start-placeholder="支付开始日期"
+            end-placeholder="支付结束日期"
           />
         </el-form-item>
         <el-form-item>
@@ -46,44 +45,60 @@
       :loading="loading"
       :table-data="payData"
       :table-columns="columns"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
+      @change-page="pageChange"
+      @size-change="sizeChange"
     />
   </div>
 </template>
 
 <script>
 import payApi from '../../api/pay'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'Online',
+  mixins: [pagination],
   data() {
     return {
       payData: [],
       columns: [
-        { label: '微信昵称', prop: 'payer'},
-        { label: '账单号', prop: 'billNumber'},
-        { label: '支付单号', prop: 'orderNumber'},
-        { label: '支付通道订单号', prop: 'openNumber'},
-        { label: '金额', prop: 'amount'},
-        { label: '支付时间', prop: 'saveDate'},
-        { label: '支付状态', prop: 'billStatus'},
-        { label: '手机号', prop: 'mobile'},
-        { label: '线上线下', prop: 'type'},
-        { label: '操作', render: (h, { props: { row }}) => {
+        { label: '微信昵称', prop: 'payer' },
+        { label: '账单号', prop: 'billNumber' },
+        { label: '支付单号', prop: 'orderNumber' },
+        { label: '支付通道号', prop: 'openNumber' },
+        { label: '金额', prop: 'amount' },
+        { label: '支付时间', prop: 'saveDate', sortable: true, width: 100},
+        { label: '支付状态', prop: 'billStatus', render: (h, { props: { row }}) => {
+          if (row.billStatus) {
             return (
-              <div class='table-action'>
-                <span onClick={() => this.delete(row.id)}>删 除</span>
-              </div>
+              <el-tag effect={'dark'} type={'success'}>已支付</el-tag>
             )
-          } }
+          }
+          return (
+            <el-tag effect={'dark'} type={'info'}>未支付</el-tag>
+          )
+        } },
+        { label: '手机号', prop: 'mobile' },
+        { label: '操作', render: (h, { props: { row }}) => {
+          return (
+            <div class='table-action'>
+              <span onClick={() => this.delete(row)}>删 除</span>
+            </div>
+          )
+        } }
       ],
       loading: false,
       searchForm: {
-        nickname: '',
+        payer: '',
+        billNumber: '',
         orderNumber: '',
-        payChannel: '',
-        count: '',
-        addTime: '',
-        status: ''
+        openNumber: '',
+        amount: '',
+        saveDate: '',
+        billStatus: ''
       },
       rules: {
         name: [
@@ -99,21 +114,30 @@ export default {
   methods: {
     fetchData(data) {
       this.loading = true
-      payApi.getPayOnline(data).then(res => {
+      payApi.getPayOnline({
+        ...data,
+        ...this.pageOption
+      }).then(res => {
         this.payData = res.list
+        this.total = res.count
       }).finally(_ => {
         this.loading = false
       })
     },
-    delete(id) {
+    delete(row) {
       this.$confirm('此操作将删除该支付记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        payApi.deletePartner(id).then(_ => {
+        this.loading = true
+        payApi.deletePartner({
+          billId: row.billId
+        }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
+        }).catch(() => {
+          this.loading = false
         })
       })
     },
