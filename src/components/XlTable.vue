@@ -7,6 +7,9 @@
       highlight-current-row
       :data="tableData"
       header-row-class-name="header-row"
+      element-loading-text="拼命加载中"
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
       v-on="$listeners"
     >
       <el-table-column
@@ -22,6 +25,7 @@
       <el-table-column
         v-for="col in columns"
         :key="col.label"
+        :align="col.align||'center'"
         v-bind="col"
       >
         <template v-if="col.component" slot-scope="scope">
@@ -111,7 +115,7 @@ export default {
         temp.render = col.render
       }
       // 显示索引号，只能允许有type=index一个属性
-      if (col.type === 'index') {
+      if (col.type === 'company.vue') {
         return { ...col }
       }
       return {
@@ -125,7 +129,7 @@ export default {
       this.$emit('change-page', val)
     },
     handleSizeChange(val) {
-      this.$emit('change-page-size', val)
+      this.$emit('size-change', val)
     },
     // 使用v-bind展开props到组件上
     getComponentBind({ row, column, $index }, col) {
