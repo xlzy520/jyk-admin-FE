@@ -1,5 +1,5 @@
 <template>
-  <div class="company">
+  <div v-loading="loading" class="company">
     <el-form label-width="80px" :model="comForm">
       <el-form-item label="电话" prop="mobile">
         <el-input v-model="comForm.phone" maxLength="12" />
@@ -21,6 +21,7 @@ export default {
   name: 'Company',
   data() {
     return {
+      loading: false,
       comForm: {
         phone: '',
         partnersName: ''
@@ -32,14 +33,20 @@ export default {
   },
   methods: {
     fetchData() {
+      this.loading = true
       request.post('/company/getInfo').then(res => {
         this.comForm = res
+      }).finally(() => {
+        this.loading = false
       })
     },
     update() {
+      this.loading = true
       request.post('/partner/update', this.comForm).then(res => {
         this.fetchData()
         this.$message1000('更新成功', 'success')
+      }).finally(() => {
+        this.loading = false
       })
     }
   }
