@@ -1,7 +1,7 @@
 <template>
   <div class="company">
-    <el-form label-width="80px" :model="comForm">
-      <el-form-item label="电话" prop="mobile">
+    <el-form label-width="120px" :model="comForm" :rules="rule">
+      <el-form-item label="手机或电话" prop="phone">
         <el-input v-model="comForm.phone" maxLength="12" />
       </el-form-item>
       <el-form-item label="公司地址" prop="partnersName">
@@ -24,6 +24,15 @@ export default {
       comForm: {
         phone: '',
         partnersName: ''
+      },
+      rule: {
+        phone: [
+          { required: true, message: '请输入手机或电话' },
+          { pattern: /^(\d+(-\d*)?)?$/g, message: '请输入合法的手机或电话', trigger: 'change' }
+        ],
+        partnersName: [
+          { required: true, message: '请输入公司地址' }
+        ]
       }
     }
   },
