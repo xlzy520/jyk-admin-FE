@@ -1,7 +1,7 @@
-import baseRequest from './base'
+import fetch from './base/fetch'
 
 export default {
   getUseTypeList(data) {
-    return baseRequest('/use/type/list', data)
+    return fetch('/use/type/list', data)
   }
 }

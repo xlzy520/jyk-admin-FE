@@ -1,12 +1,12 @@
-import request from '@/utils/request'
+import baseRequest from './baseRequest'
 
-export default function baseService(url, value, method = 'post', options = {}) {
+export default function fetch(url, value, method = 'post', options = {}) {
   if (method === 'post') {
-    return request.post(url, value, options)
+    return baseRequest.post(url, value, options)
   } else if (method === 'get') {
-    return request.get(url, { params: value }, options)
+    return baseRequest.get(url, { params: value }, options)
   } else if (method === 'formdata') {
-    return request({
+    return baseRequest({
       method: 'post',
       url: url,
       data: value,

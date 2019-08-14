@@ -1,13 +1,13 @@
-import baseRequest from './base'
-
+import baseFetch from './base/fetch'
+const fetch = (url, ...arg) => baseFetch('/address/' + url, ...arg)
 export default {
   getAddress(data) {
-    return baseRequest('/address/list', data)
+    return fetch('list', data)
   },
   updateAddress(data) {
-    return baseRequest('/address/update', data)
+    return fetch('update', data)
   },
   deleteAddress(data) {
-    return baseRequest('/address/delete', data)
+    return fetch('delete', data)
   }
 }

@@ -3,15 +3,14 @@ import { MessageBox, Message } from 'element-ui'
 import router from '@/router'
 import { resetRouter } from '@/router'
 
-const service = axios.create({
+const baseRequest = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
-  // baseURL: 'https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin',
   withCredentials: true,
-  timeout: 50 * 1000
+  timeout: 20 * 1000
 })
 
 // response interceptor
-service.interceptors.response.use(
+baseRequest.interceptors.response.use(
   response => {
     const res = response.data
     if (!res.success) {
@@ -48,4 +47,4 @@ service.interceptors.response.use(
   }
 )
 
-export default service
+export default baseRequest

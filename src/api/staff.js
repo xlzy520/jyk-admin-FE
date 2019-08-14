@@ -1,16 +1,16 @@
-import baseRequest from './base'
-
+import baseFetch from './base/fetch'
+const fetch = (url, ...arg) => baseFetch('school' + url, ...arg)
 export default {
   getStaff(data) {
-    return baseRequest('/staff/list', data)
+    return fetch('list', data)
   },
   addStaff(data) {
-    return baseRequest('/staff/add', data)
+    return fetch('add', data)
   },
   updateStaff(data) {
-    return baseRequest('/staff/update', data)
+    return fetch('update', data)
   },
   deleteStaff(id) {
-    return baseRequest('/staff/delete', id)
+    return fetch('delete', id)
   }
 }
