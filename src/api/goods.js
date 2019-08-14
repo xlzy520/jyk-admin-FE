@@ -4,6 +4,9 @@ export default {
   getGoods(data) {
     return baseRequest('/goods/list', data)
   },
+  addGoods(data) {
+    return baseRequest('/goods/add', data)
+  },
   updateGoods(data) {
     return baseRequest('/goods/update', data)
   },
