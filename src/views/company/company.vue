@@ -1,6 +1,6 @@
 <template>
   <div class="company">
-    <el-form label-width="120px" :model="comForm" :rules="rule">
+    <el-form ref="form" label-width="120px" :model="comForm" :rules="rule">
       <el-form-item label="手机或电话" prop="phone">
         <el-input v-model="comForm.phone" maxLength="12" />
       </el-form-item>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import request from '@/utils/request'
+import companyApi from '../../api/company'
 
 export default {
   name: 'Company',
@@ -41,14 +41,15 @@ export default {
   },
   methods: {
     fetchData() {
-      request.post('/company/getInfo').then(res => {
+      companyApi.getCompanyInfo().then(res => {
         this.comForm = res
       })
     },
     update() {
-      request.post('/partner/update', this.comForm).then(res => {
-        this.fetchData()
+      companyApi.updateCompanyInfo(this.comForm).then(res => {
         this.$message1000('更新成功', 'success')
+      }).catch(() => {
+        this.$ref.form.resetFields()
       })
     }
   }
