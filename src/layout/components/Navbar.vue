@@ -107,7 +107,7 @@ export default {
         this.$message1000('注销成功。', 'success')
       }).finally(() => {
         this.$router.push(`/login?redirect=${this.$route.fullPath}`)
-        location.reload() // 为了重新实例化vue-router对象 避免bug
+        // location.reload() // 为了重新实例化vue-router对象 避免bug
       })
     },
     close() {
