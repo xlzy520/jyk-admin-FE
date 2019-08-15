@@ -113,7 +113,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'company.vue',
+        path: 'index',
         name: '商品管理',
         component: () => import('@/views/goods/index'),
         meta: { title: '商品管理', icon: 'goods' }
@@ -125,7 +125,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'company.vue',
+        path: 'index',
         name: '订单管理',
         component: () => import('@/views/orders/index'),
         meta: { title: '订单管理', icon: 'orders' }
@@ -158,7 +158,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'company.vue',
+        path: 'index',
         name: '进销存管理',
         component: () => import('@/views/inventory/index'),
         meta: { title: '进销存管理', icon: 'stores' }
