@@ -1,4 +1,7 @@
 export default {
+  required: (text) => {
+    return { required: true, message: text }
+  },
   chinese: { pattern: /[\u4e00-\u9fa5]/g, message: '请输入汉字', trigger: 'change' },
   word_number: { pattern: /^\w+$/g, message: '请输入字母、数字' },
   float: { pattern: /^(\d+(\.\d*)?)?$/g, message: '请输入数字', trigger: 'change' },
