@@ -3,7 +3,7 @@ export default {
     return {
       pageOption: {
         pageIndex: 1,
-        pageSize: 20
+        pageSize: 10
       },
       total: 0
     }
@@ -15,6 +15,7 @@ export default {
     },
     sizeChange(val) {
       this.pageOption.pageSize = val
+      this.pageOption.pageIndex = 1
       this.fetchData()
     }
   }
