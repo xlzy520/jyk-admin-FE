@@ -34,8 +34,9 @@ module.exports = {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
-        target: `https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin`,
+        // target: `https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin`,
         // target: `http://ceba3640.ngrok.io/market`,
+        target: `http://49.234.212.216:8080/market`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''

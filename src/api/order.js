@@ -1,22 +1,22 @@
-import baseRequest from './base'
-
+import baseFetch from './base/fetch'
+const fetch = (url, ...arg) => baseFetch('/order/' + url, ...arg)
 export default {
   getOrder(data) {
-    return baseRequest('/order/list', data)
+    return fetch('list', data)
   },
   updateOrder(data) {
-    return baseRequest('/order/update', data)
+    return fetch('update', data)
   },
   deleteOrder(id) {
-    return baseRequest('/order/delete', id)
+    return fetch('delete', id)
   },
   orderDetail(id) {
-    return baseRequest('/order/detail', id)
+    return fetch('detail', id)
   },
   fahuo(id) {
-    return baseRequest('/order/setFaHuo', id)
+    return fetch('setFaHuo', id)
   },
   orderClose(id) {
-    return baseRequest('/order/close', id)
+    return fetch('close', id)
   }
 }

@@ -1,7 +1,7 @@
-import baseRequest from './base'
+import fetch from './base/fetch'
 
 export default {
   transactionList() {
-    return baseRequest('/transaction/list')
+    return fetch('/transaction/list')
   }
 }

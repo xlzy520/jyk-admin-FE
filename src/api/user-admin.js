@@ -1,13 +1,13 @@
-import baseRequest from './base'
+import fetch from './base/fetch'
 
 export default {
   login(data) {
-    return baseRequest('/login', data, 'formdata')
+    return fetch('/login', data, 'formdata')
   },
   getInfo() {
-    return baseRequest('/info')
+    return fetch('/info')
   },
   logout() {
-    return baseRequest('/logout')
+    return fetch('/logout')
   }
 }

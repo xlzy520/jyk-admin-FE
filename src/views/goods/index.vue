@@ -10,9 +10,9 @@
       :table-columns="columns"
       @selection-change="handleSelectionChange"
     />
-    <div class="footer">
-      <el-button type="success" @click="changeStatus(true)">上架</el-button>
-      <el-button type="danger" @click="changeStatus(false)">下架</el-button>
+    <div v-if="goodsData.length>0" class="footer">
+      <el-button type="success" @click="changeStatus(1)">上架</el-button>
+      <el-button type="danger" @click="changeStatus(0)">下架</el-button>
     </div>
     <el-dialog
       width="40%"
@@ -38,7 +38,7 @@
           >
             <i class="el-icon-plus" />
           </el-upload>
-          <el-dialog :visible.sync="dialogVisible">
+          <el-dialog :visible.sync="dialogVisible" append-to-body>
             <img width="100%" :src="imgUrl" alt="">
           </el-dialog>
         </el-form-item>
@@ -51,8 +51,8 @@
             inactive-text="下架"
           />
         </el-form-item>
-        <el-form-item label="商品类型：" prop="">
-          <el-select v-model="form.type" @change="typeChange">
+        <el-form-item label="商品类型：" prop="useTypeId">
+          <el-select v-model="form.useTypeId" @change="typeChange">
             <el-option
               v-for="option in useType"
               :key="option.useType"
@@ -61,7 +61,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="规格详情" v-if="specsList.length>0">
+        <el-form-item v-if="specsList.length>0" label="规格详情">
           <el-checkbox-group v-model="form.specsList">
             <el-checkbox
               v-for="item in specsList"
@@ -71,10 +71,10 @@
             >{{ item.specsName }}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="价格：" prop="price" v-if="form.type!==3">
+        <el-form-item v-if="form.type!==3" label="价格：" prop="price">
           <el-input v-model.number="form.price" maxLength="10" />
         </el-form-item>
-        <el-form-item label="规格A价格：" prop="price" v-if="form.type===3">
+        <el-form-item v-if="form.type===3" label="规格A价格：" prop="price">
           <el-input v-model.number="form.price" maxLength="10" />
           <label>规格B价格：</label>
           <el-input v-model.number="form.price" maxLength="10" />
@@ -82,7 +82,7 @@
 
       </el-form>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
         <el-button @click="resetForm">重置</el-button>
       </div>
     </el-dialog>
@@ -95,6 +95,15 @@ import goodsApi from '../../api/goods'
 import guigeApi from '../../api/guige'
 import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
+
+const initFormData = {
+  goodsName: '',
+  status: '',
+  price: '',
+  fileUrls: [],
+  specsList: [],
+  useTypeId: ''
+}
 
 export default {
   name: 'GoodsList',
@@ -116,7 +125,7 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
-                <el-image src={row.pic} fit='fit'/>
+                <img src={'http://49.234.212.216:8080/market/file/preview?fileUrl=' + row.fileUrls[0]} fit='fit'/>
               </div>
             )
           }
@@ -125,22 +134,14 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div>
-                <el-tag size={'medium'} type={row.status ? 'success' : 'danger'}>{row.status ? '上架' : '下架'}</el-tag>
+                <el-tag size={'medium'} type={row.sale ? 'success' : 'danger'}>{row.sale ? '上架' : '下架'}</el-tag>
               </div>
             )
           }
         },
-        { label: '价格', prop: 'price' },
+        { label: '价格', prop: 'priceStr' },
         { label: '销量', prop: 'numberSells' },
-        { label: '添加/更新时间', width: '240',
-          render: (h, { props: { row }}) => {
-            return (
-              <div>
-                <p>{row.addTime}</p>
-                <p>{row.updateTime}</p>
-              </div>
-            )
-          } },
+        { label: '添加时间', width: '240', prop: 'saveDate' },
         { label: '操作', prop: 'region',
           render: (h, { props: { row }}) => {
             return (
@@ -153,26 +154,26 @@ export default {
           }
         }
       ],
+
       loading: false,
+      submitLoading: false,
+
       isAdd: false,
       editVisible: false,
       imgUrl: '',
-      form: {
-        goodsName: '',
-        status: '',
-        price: '',
-        fileUrls: [],
-        specsList: [],
-        type: ''
-      },
+      form: initFormData,
       rules: {
         goodsName: [
-          { required: true, message: '名称不能为空', trigger: 'blur' },
-          { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+          { required: true, message: '请输入商品名称' },
+          { min: 2, max: 20, message: '长度在 2 到 20 个字符' }
         ],
         price: [
-          { required: true, message: '价格不能为空', trigger: 'blur' },
-          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
+          { required: true, message: '请输入商品价格' },
+          { type: 'number', min: 0, message: '不能小于0' }
+        ],
+        useTypeId: [
+          { required: true, message: '请输入商品类型' },
+          { type: 'number', min: 0, message: '不能小于0' }
         ],
         img: [
           { validator: validateImg, trigger: 'blur' }
@@ -204,13 +205,13 @@ export default {
       this.dialogVisible = true
     },
     changeStatus(status) {
-      goodsApi.changeStatusGoods({ ids: this.selected, status: status }).then(res => {
+      goodsApi.changeStatusGoods({ goodsId: this.selected, sale: status }).then(res => {
         this.$message1000('成功', 'success')
         this.fetchData()
       })
     },
     handleSelectionChange(rows) {
-      this.selected = rows.map(v => v.id)
+      this.selected = rows.map(v => v.goodsId)
     },
     onError() {
       this.$message1000('文件上传出错：网络错误', 'error')
@@ -219,6 +220,7 @@ export default {
       this.form.img = []
     },
     uploadOk(res) {
+      console.log(res);
       const { success, msg, data } = res
       if (success) {
         this.$message1000('图片上传成功', 'success')
@@ -238,20 +240,7 @@ export default {
     },
     getUseTypeList() {
       guigeApi.getUseTypeList().then(res => {
-        // this.useType = res.map(v => {
-        //   return {
-        //     value: v.useTypeId,
-        //     label: v.useType,
-        //     children: v.specsList.map(zv => {
-        //       return {
-        //         value: zv.specsId,
-        //         label: zv.specsName + ':' + zv.specsStr
-        //       }
-        //     })
-        //   }
-        // })
         this.useType = res
-        console.log(this.useType)
       })
     },
     add() {
@@ -288,19 +277,19 @@ export default {
     },
     close() {
       this.fileList = []
-      this.form = {
-        goodsName: '',
-        stores: '',
-        status: '',
-        price: ''
-      }
+      this.form = initFormData
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          goodsApi.updateGoods(this.form).then(_ => {
+          this.submitLoading = true
+          const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
+          baseRequest(this.form).then(_ => {
             this.editVisible = false
-            this.$message1000('提交成功', 'success')
+            this.$message1000(this.isAdd ? '新增成功' : '更新成功', 'success')
+            this.fetchData()
+          }).catch(() => {
+            this.submitLoading = false
           })
         } else {
           return false

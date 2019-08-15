@@ -1,16 +1,16 @@
-import baseRequest from './base'
+import fetch from './base/fetch'
 
 export default {
   getPayOnline(data) {
-    return baseRequest('/pay-online/list', data)
+    return fetch('/pay-online/list', data)
   },
   getPayOffline(data) {
-    return baseRequest('/pay-offline/list', data)
+    return fetch('/pay-offline/list', data)
   },
   updatePayOffline(data) {
-    return baseRequest('/pay-offline/update', data)
+    return fetch('/pay-offline/update', data)
   },
   addPayOffline(id) {
-    return baseRequest('/pay-offline/add', id)
+    return fetch('/pay-offline/add', id)
   }
 }

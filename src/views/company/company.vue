@@ -1,7 +1,7 @@
 <template>
-  <div v-loading="loading" class="company">
-    <el-form label-width="80px" :model="comForm">
-      <el-form-item label="电话" prop="mobile">
+  <div class="company">
+    <el-form ref="form" label-width="120px" :model="comForm" :rules="rule">
+      <el-form-item label="手机或电话" prop="phone">
         <el-input v-model="comForm.phone" maxLength="12" />
       </el-form-item>
       <el-form-item label="公司地址" prop="partnersName">
@@ -15,16 +15,24 @@
 </template>
 
 <script>
-import request from '@/utils/request'
+import companyApi from '../../api/company'
 
 export default {
   name: 'Company',
   data() {
     return {
-      loading: false,
       comForm: {
         phone: '',
         partnersName: ''
+      },
+      rule: {
+        phone: [
+          { required: true, message: '请输入手机或电话' },
+          { pattern: /^(\d+(-\d*)?)?$/g, message: '请输入合法的手机或电话', trigger: 'change' }
+        ],
+        partnersName: [
+          { required: true, message: '请输入公司地址' }
+        ]
       }
     }
   },
@@ -33,20 +41,15 @@ export default {
   },
   methods: {
     fetchData() {
-      this.loading = true
-      request.post('/company/getInfo').then(res => {
+      companyApi.getCompanyInfo().then(res => {
         this.comForm = res
-      }).finally(() => {
-        this.loading = false
       })
     },
     update() {
-      this.loading = true
-      request.post('/partner/update', this.comForm).then(res => {
-        this.fetchData()
+      companyApi.updateCompanyInfo(this.comForm).then(res => {
         this.$message1000('更新成功', 'success')
-      }).finally(() => {
-        this.loading = false
+      }).catch(() => {
+        this.$ref.form.resetFields()
       })
     }
   }

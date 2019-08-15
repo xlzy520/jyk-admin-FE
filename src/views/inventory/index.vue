@@ -85,7 +85,7 @@ export default {
             )
           }
         },
-        { label: '是否展示', prop: 'display'
+        { label: '是否展示', prop: 'display',
           render: (h, { props: { row }}) => {
             return (
               <div class='is-default-icon'>
