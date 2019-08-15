@@ -1,5 +1,5 @@
 import baseFetch from './base/fetch'
-const fetch = (url, ...arg) => baseFetch('school' + url, ...arg)
+const fetch = (url, ...arg) => baseFetch('staff/' + url, ...arg)
 export default {
   getStaff(data) {
     return fetch('list', data)
