@@ -86,13 +86,7 @@ const initFormData = {
   specsList: [],
   useTypeId: ''
 }
-const validateImg = (rule, value, callback) => {
-  if (this.form.fileUrls.length === 0) {
-    callback(new Error('请上传一张图片'))
-  } else {
-    callback()
-  }
-}
+
 export default {
   name: 'GoodDialog',
   props: {
@@ -102,6 +96,13 @@ export default {
     }
   },
   data() {
+    const validateImg = (rule, value, callback) => {
+      if (this.form.fileUrls.length === 0) {
+        callback(new Error('请上传一张图片'))
+      } else {
+        callback()
+      }
+    }
     return {
       submitLoading: false,
       form: initFormData,
@@ -143,11 +144,11 @@ export default {
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
+        console.log(2);
         if (valid) {
           this.submitLoading = true
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
           baseRequest(this.form).then(_ => {
-            this.visible = false
             this.$message1000(this.isAdd ? '新增成功' : '更新成功', 'success')
             this.fetchData()
           }).catch(() => {
