@@ -93,7 +93,7 @@
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm" :loading="submitLoading">提交</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
         <el-button @click="resetForm('addressForm')">重置</el-button>
       </div>
     </el-dialog>
@@ -133,7 +133,7 @@ export default {
             )
           }
         },
-        { label: '详细地址 / 学校', prop: 'address', align: 'left',width: 160,
+        { label: '详细地址 / 学校', prop: 'address', align: 'left', width: 160,
           formatter: row => row.schoolName || row.address },
         { label: '是否默认', prop: 'isDefault',
           render: (h, { props: { row }}) => {
@@ -164,7 +164,7 @@ export default {
         username: '',
         consignee: '',
         mobile: '',
-        addressType:'',
+        addressType: '',
         isDefault: '',
         saveDate: ''
       },
@@ -180,12 +180,12 @@ export default {
           { min: 2, max: 15, message: '长度在 2 到 15 个字符' }
         ],
         mobile: [
-          { required: true, message: '请填写手机号'},
+          { required: true, message: '请填写手机号' },
           { pattern: /^(1[0-9])\d{9}$/,
             message: '请填写符合要求的11位手机号' }
         ],
         address: [
-          { required: true, message: '请填写地址'}
+          { required: true, message: '请填写地址' }
         ]
       },
       schoolOptions: []
@@ -261,7 +261,7 @@ export default {
             this.$message1000('提交成功', 'success')
             this.close()
             this.fetchData()
-          }).finally(()=>{
+          }).finally(() => {
             this.submitLoading = false
           })
         }

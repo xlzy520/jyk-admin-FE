@@ -1,5 +1,5 @@
 <template>
-  <div class="company">
+  <div class="company" v-loading="loading">
     <el-form ref="form" label-width="120px" :model="comForm" :rules="rule">
       <el-form-item label="手机或电话" prop="phone">
         <el-input v-model="comForm.phone" maxLength="12" />
@@ -21,6 +21,7 @@ export default {
   name: 'Company',
   data() {
     return {
+      loading: false,
       comForm: {
         phone: '',
         partnersName: ''
@@ -41,15 +42,21 @@ export default {
   },
   methods: {
     fetchData() {
+      this.loading = true
       companyApi.getCompanyInfo().then(res => {
         this.comForm = res
+      }).finally(() => {
+        this.loading = false
       })
     },
     update() {
+      this.loading = true
       companyApi.updateCompanyInfo(this.comForm).then(res => {
         this.$message1000('更新成功', 'success')
       }).catch(() => {
         this.$ref.form.resetFields()
+      }).finally(() => {
+        this.loading = false
       })
     }
   }

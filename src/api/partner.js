@@ -12,5 +12,5 @@ export default {
   },
   updatePartner(data) {
     return fetch('update', data)
-  },
+  }
 }

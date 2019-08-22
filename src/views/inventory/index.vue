@@ -72,7 +72,7 @@ export default {
       columns: [
         {
           label: '名称',
-          prop: 'name',
+          prop: 'name'
         },
         {
           label: '宣传图',
@@ -96,11 +96,11 @@ export default {
         },
         {
           label: '添加时间',
-          prop: 'addTime',
+          prop: 'addTime'
         },
         {
           label: '更新时间',
-          prop: 'updateTime',
+          prop: 'updateTime'
         },
         {
           label: '操作',

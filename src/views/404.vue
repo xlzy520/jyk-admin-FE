@@ -9,7 +9,7 @@
       </div>
       <div class="bullshit">
         <div class="bullshit__oops">页面未找到!</div>
-       <a href="" class="bullshit__return-home">返回首页</a>
+        <a href="" class="bullshit__return-home">返回首页</a>
       </div>
     </div>
   </div>
@@ -18,7 +18,7 @@
 <script>
 
 export default {
-  name: 'Page404',
+  name: 'Page404'
 }
 </script>
 

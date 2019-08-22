@@ -1,11 +1,10 @@
 <template>
-  <div class="app-container">
+  <div v-loading="loading" class="app-container">
     <add-button @add="add"/>
     <xl-table
       ref="goodsTable"
       :index="true"
       :selection="true"
-      :loading="loading"
       :table-data="goodsData"
       :table-columns="columns"
       @selection-change="handleSelectionChange"
@@ -55,7 +54,7 @@ export default {
           }
         },
         { label: '价格', prop: 'priceStr' },
-        { label: '销量', prop: 'numberSells' },
+        { label: '销量', prop: 'sales' },
         { label: '添加时间', width: '240', prop: 'saveDate' },
         {
           label: '操作', prop: 'region',
@@ -85,17 +84,25 @@ export default {
         this.$message1000('请选择商品', 'info')
         return false
       }
-      this.loading = true
       const text = status ? '上架' : '下架'
       this.$confirm(`此操作将确定${text}选择的商品, 是否继续?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'danger'
       }).then(() => {
-        goodsApi.changeStatusGoods({ goodsId: this.selected, sale: status }).then(res => {
+        this.loading = true
+        const params = this.selected.map((v) => {
+          return {
+            goodsId: v,
+            sale: status
+          }
+        })
+        goodsApi.changeStatusGoods({ goods: params }).then(res => {
           this.$message1000(text + '成功', 'success')
-          this.fetchData()
-        }).catch(() => {
+          this.goodsData.filter(v => this.selected.includes(v.goodsId)).map(v => {
+            v.sale = !v.sale
+          })
+        }).finally(() => {
           this.loading = false
         })
       })

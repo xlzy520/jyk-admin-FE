@@ -31,12 +31,10 @@ module.exports = {
       errors: true
     },
     proxy: {
-      // change xxx-api/login => mock/login
-      // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
         // target: `https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin`,
-        // target: `http://ceba3640.ngrok.io/market`,
-        target: `http://49.234.212.216:8080/market`,
+        target: `http://1fa240e7.ngrok.io/market`,
+        // target: `http://49.234.212.216:8080/market`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
@@ -55,9 +53,6 @@ module.exports = {
     }
   },
   chainWebpack(config) {
-    config.plugins.delete('preload') // TODO: need test
-    config.plugins.delete('prefetch') // TODO: need test
-
     // set svg-sprite-loader
     config.module
       .rule('svg')
@@ -87,11 +82,11 @@ module.exports = {
       .end()
 
     // 打断点时，可以查看未压缩的源码
-    // config
-    //   // https://webpack.js.org/configuration/devtool/#development
-    //   .when(process.env.NODE_ENV === 'development',
-    //     config => config.devtool('cheap-source-map')
-    //   )
+    config
+      // https://webpack.js.org/configuration/devtool/#development
+      .when(process.env.NODE_ENV === 'development',
+        config => config.devtool('cheap-source-map')
+      )
 
     config
       .when(process.env.NODE_ENV !== 'development',
@@ -111,30 +106,29 @@ module.exports = {
           //     inline: /runtime\..*\.js$/
           //   }])
           //   .end()
-          config
-            .optimization.splitChunks({
-              chunks: 'all',
-              cacheGroups: {
-                libs: {
-                  name: 'chunk-libs',
-                  test: /[\\/]node_modules[\\/]/,
-                  priority: 10,
-                  chunks: 'initial' // only package third parties that are initially dependent
-                },
-                elementUI: {
-                  name: 'chunk-elementUI', // split elementUI into a single package
-                  priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
-                  test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
-                },
-                commons: {
-                  name: 'chunk-commons',
-                  test: resolve('src/components'), // can customize your rules
-                  minChunks: 3, //  minimum common number
-                  priority: 5,
-                  reuseExistingChunk: true
-                }
-              }
-            })
+          // config.optimization.splitChunks({
+          //     chunks: 'all',
+          //     cacheGroups: {
+          //       libs: {
+          //         name: 'chunk-libs',
+          //         test: /[\\/]node_modules[\\/]/,
+          //         priority: 10,
+          //         chunks: 'initial' // only package third parties that are initially dependent
+          //       },
+          //       elementUI: {
+          //         name: 'chunk-elementUI', // split elementUI into a single package
+          //         priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
+          //         test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
+          //       },
+          //       commons: {
+          //         name: 'chunk-commons',
+          //         test: resolve('src/components'), // can customize your rules
+          //         minChunks: 3, //  minimum common number
+          //         priority: 5,
+          //         reuseExistingChunk: true
+          //       }
+          //     }
+          //   })
           config.optimization.runtimeChunk('single')
         }
       )

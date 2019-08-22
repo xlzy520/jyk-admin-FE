@@ -3,34 +3,25 @@
     <add-button @add="add" />
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item label="收款人:" prop="staff">
-          <el-input v-model="searchForm.staff" maxLength="11" />
+        <el-form-item prop="staff">
+          <el-input v-model="searchForm.staff" maxLength="11" placeholder="收款人"/>
         </el-form-item>
-        <el-form-item label="商家名称:" prop="name">
-          <el-input v-model="searchForm.name" maxLength="11" />
+        <el-form-item prop="mobile">
+          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号"/>
         </el-form-item>
-        <el-form-item label="商家地址:" prop="address">
-          <el-input v-model="searchForm.address" maxLength="11" />
+        <el-form-item prop="name">
+          <el-input v-model="searchForm.name" maxLength="20" placeholder="商家名称"/>
         </el-form-item>
-        <el-form-item label="金额:" prop="count">
-          <el-input v-model="searchForm.count" maxLength="11" />
+        <el-form-item prop="amount">
+          <el-input v-model="searchForm.amount" maxLength="11" placeholder="金额"/>
         </el-form-item>
-        <el-form-item label="支付时间:" prop="addTime">
+        <el-form-item prop="payTime">
           <el-date-picker
-            v-model="searchForm.addTime"
+            v-model="searchForm.payTime"
             type="daterange"
             align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-          />
-        </el-form-item>
-        <el-form-item label="更新时间:" prop="updateTime">
-          <el-date-picker
-            v-model="searchForm.updateTime"
-            type="daterange"
-            align="center"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            start-placeholder="支付时间起"
+            end-placeholder="支付时间止"
           />
         </el-form-item>
         <el-form-item>
@@ -64,8 +55,8 @@
         <el-form-item label="商家地址:" prop="address">
           <el-input v-model="form.address" maxLength="11" />
         </el-form-item>
-        <el-form-item label="金额:" prop="count">
-          <el-input v-model="form.count" maxLength="11" />
+        <el-form-item label="金额:" prop="amount">
+          <el-input v-model="form.amount" maxLength="11" />
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -80,20 +71,22 @@
 import AddButton from '../../components/AddButton'
 import payApi from '../../api/pay'
 import { deepClone } from '../../utils/index'
+import pagination from '../../mixins/pagination'
 
 export default {
   name: 'Offline',
   components: { AddButton },
+  mixins: [pagination],
   data() {
     return {
       payData: [],
       columns: [
         { label: '商家名称', prop: 'name' },
         { label: '商家地址', prop: 'address' },
-        { label: '金额', prop: 'count', sortable: true },
-        { label: '收款人', prop: 'staff' },
-        { label: '支付时间', prop: 'addTime', sortable: true },
-        { label: '更新时间', prop: 'updateTime', sortable: true },
+        { label: '金额', prop: 'amount', sortable: true },
+        { label: '收款人', prop: 'staffName' },
+        { label: '支付时间', prop: 'payTime', sortable: true },
+        { label: '更新时间', prop: 'saveDate', sortable: true },
         { label: '操作',
           render: (h, { props: { row }}) => {
             return (
@@ -109,17 +102,17 @@ export default {
       editVisible: false,
       searchForm: {
         name: '',
-        address: '',
-        count: '',
-        addTime: '',
+        mobile: '',
+        amount: '',
+        payTime: '',
         staff: ''
       },
       form: {
         name: '',
         address: '',
-        count: '',
-        addTime: '',
-        updateTime: '',
+        amount: '',
+        payTime: '',
+        saveDate: '',
         staff: ''
       },
       rules: {
@@ -134,9 +127,12 @@ export default {
     this.fetchData()
   },
   methods: {
-    fetchData() {
+    fetchData(data) {
       this.loading = true
-      payApi.getPayOffline().then(res => {
+      payApi.getPayOffline({
+        ...data,
+        ...this.pageOption
+      }).then(res => {
         this.payData = res.list
       }).finally(_ => {
         this.loading = false
@@ -167,9 +163,9 @@ export default {
       this.form = {
         name: '',
         address: '',
-        count: '',
-        addTime: '',
-        updateTime: ''
+        amount: '',
+        payTime: '',
+        saveDate: ''
       }
     },
     submitForm() {

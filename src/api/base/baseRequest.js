@@ -37,7 +37,7 @@ baseRequest.interceptors.response.use(
     }
   },
   error => {
-    error.message = error.message === 'timeout of 10000ms exceeded' ? '连接服务器超时！' : error.message;
+    error.message = error.message === 'timeout of 10000ms exceeded' ? '连接服务器超时！' : error.message
     Message({
       message: error.message,
       type: 'error',

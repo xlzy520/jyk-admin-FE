@@ -164,7 +164,7 @@ export const constantRoutes = [
         meta: { title: '进销存管理', icon: 'stores' }
       }
     ]
-  },
+  }
 ]
 
 /**

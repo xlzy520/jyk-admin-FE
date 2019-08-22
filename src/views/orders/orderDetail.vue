@@ -3,72 +3,46 @@
     width="40%"
     :title="isAdd?'新增商品' : '编辑商品'"
     :close-on-click-modal="true"
-    :visible="true"
+    :visible.sync="editVisible"
     @close="close"
   >
     <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-      <el-form-item label="名称：" prop="goodsName">
-        <el-input v-model.trim="form.goodsName" maxLength="20"/>
+      <el-form-item label="名称：" prop="name">
+        <el-input v-model.trim="form.name" maxLength="20" />
       </el-form-item>
       <el-form-item label="宣传图" prop="img">
         <el-upload
           ref="upload"
-          action="/market/file/add"
-          list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
+          action="/file/add"
           :on-remove="removeImg"
-          :on-success="handleSuccess"
+          :on-success="uploadOk"
+          :on-error="onError"
+          :file-list="fileList"
           :auto-upload="true"
+          list-type="picture-card"
           accept="['.png','.jpg']"
         >
-          <i class="el-icon-plus"/>
+          <i class="el-icon-plus" />
         </el-upload>
-        <el-dialog :visible.sync="dialogVisible" append-to-body>
-          <img width="100%" :src="imgUrl" alt="">
-        </el-dialog>
       </el-form-item>
-      <el-form-item label="状态：" prop="status">
+      <el-form-item label="库存：" prop="stores">
+        <el-input v-model.number="form.stores" maxLength="10" />
+      </el-form-item>
+      <el-form-item label="状态：" prop="statusName">
         <el-switch
-          v-model="form.status"
+          v-model="form.statusName"
           active-color="#13ce66"
           inactive-color="#ff4949"
           active-text="上架"
           inactive-text="下架"
         />
       </el-form-item>
-      <el-form-item label="商品类型：" prop="useTypeId">
-        <el-select v-model="form.useTypeId" @change="typeChange">
-          <el-option
-            v-for="option in useType"
-            :key="option.useType"
-            :value="option.useTypeId"
-            :label="option.useType"
-          />
-        </el-select>
+      <el-form-item label="价格：" prop="price">
+        <el-input v-model="form.price" maxLength="10" />
       </el-form-item>
-      <el-form-item v-if="specsList.length>0" label="规格详情">
-        <el-checkbox-group v-model="form.specsList">
-          <el-checkbox
-            v-for="item in specsList"
-            :key="item.specsName"
-            border
-            :label="item.specsName"
-          >{{ item.specsName }}
-          </el-checkbox>
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item v-if="form.type!==3" label="价格：" prop="priceStr">
-        <el-input v-model="form.priceStr" maxLength="10"/>
-      </el-form-item>
-      <el-form-item v-if="form.type===3" label="规格A价格：" prop="priceStr">
-        <el-input v-model="form.priceStr" maxLength="10"/>
-        <label>规格B价格：</label>
-        <el-input v-model="form.priceStr" maxLength="10"/>
-      </el-form-item>
-
     </el-form>
     <div class="dialog-footer">
-      <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
+      <el-button type="primary" @click="submitForm">提交</el-button>
       <el-button @click="resetForm">重置</el-button>
     </div>
   </el-dialog>
@@ -78,17 +52,9 @@
 import guigeApi from '../../api/guige'
 import goodsApi from '../../api/goods'
 
-const initFormData = {
-  goodsName: '',
-  status: '',
-  priceStr: '',
-  fileUrls: [],
-  specsList: [],
-  useTypeId: ''
-}
 
 export default {
-  name: 'GoodDialog',
+  name: 'orderDetail',
   props: {
     isAdd: {
       type: Boolean,
@@ -96,13 +62,7 @@ export default {
     }
   },
   data() {
-    const validateImg = (rule, value, callback) => {
-      if (this.form.fileUrls.length === 0) {
-        callback(new Error('请上传一张图片'))
-      } else {
-        callback()
-      }
-    }
+
     return {
       submitLoading: false,
       form: initFormData,

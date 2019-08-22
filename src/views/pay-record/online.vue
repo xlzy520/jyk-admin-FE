@@ -70,7 +70,7 @@ export default {
         { label: '支付单号', prop: 'orderNumber' },
         { label: '支付通道号', prop: 'openNumber' },
         { label: '金额', prop: 'amount' },
-        { label: '支付时间', prop: 'saveDate', sortable: true, width: 100},
+        { label: '支付时间', prop: 'saveDate', sortable: true, width: 100 },
         { label: '支付状态', prop: 'billStatus', render: (h, { props: { row }}) => {
           if (row.billStatus) {
             return (

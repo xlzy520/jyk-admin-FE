@@ -1,26 +1,31 @@
 <template>
-  <div class="app-container">
-    <add-button @add="add" />
+  <div
+    v-loading="loading"
+    class="app-container"
+    element-loading-text="拼命加载中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+  >
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item label="名称:" prop="name">
-          <el-input v-model="searchForm.name" maxLength="11" />
+        <el-form-item prop="name">
+          <el-input v-model="searchForm.name" maxLength="11" placeholder="姓名" />
         </el-form-item>
-        <el-form-item label="手机号:" prop="phone">
-          <el-input v-model="searchForm.phone" maxLength="11" />
+        <el-form-item prop="mobile">
+          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
         </el-form-item>
-        <el-form-item label="状态:" prop="status">
-          <el-select v-model="searchForm.status">
+        <el-form-item prop="orderNumber">
+          <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="订单编号" />
+        </el-form-item>
+        <el-form-item prop="statusName">
+          <el-select v-model="searchForm.statusName" placeholder="订单状态">
             <el-option label="全部" value="" />
-            <el-option label="订单关闭" value="1" />
-            <el-option label="待支付" value="2" />
-            <el-option label="待发货" value="3" />
-            <el-option label="已发货" value="4" />
-            <el-option label="交易完成" value="5" />
+            <el-option label="订单关闭" value="订单关闭" />
+            <el-option label="待支付" value="待支付" />
+            <el-option label="待发货" value="待发货" />
+            <el-option label="已发货" value="已发货" />
+            <el-option label="交易完成" value="交易完成" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="订单号:" prop="orderNumber">
-          <el-input v-model="searchForm.orderNumber" maxLength="11" />
         </el-form-item>
         <el-form-item>
           <el-button
@@ -35,97 +40,50 @@
       ref="orderTable"
       :index="true"
       :selection="true"
-      :loading="loading"
       :table-data="orderData"
       :table-columns="columns"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
+      @change-page="pageChange"
+      @size-change="sizeChange"
       @selection-change="handleSelectionChange"
     />
     <div class="footer">
-      <el-button type="danger" @click="orderDelete(false)">批量删除</el-button>
+      <el-button v-if="orderData.length>0" :disabled="selected.length>0" type="danger" @click="orderDelete('all')">批量删除</el-button>
     </div>
-    <el-dialog
-      width="40%"
-      :title="isAdd?'新增商品' : '编辑商品'"
-      :close-on-click-modal="true"
-      :visible.sync="editVisible"
-      @close="close"
-    >
-      <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-        <el-form-item label="名称：" prop="name">
-          <el-input v-model.trim="form.name" maxLength="20" />
-        </el-form-item>
-        <el-form-item label="宣传图" prop="img">
-          <el-upload
-            ref="upload"
-            action="/file/add"
-            :on-remove="removeImg"
-            :on-success="uploadOk"
-            :on-error="onError"
-            :file-list="fileList"
-            :auto-upload="true"
-            list-type="picture-card"
-            accept="['.png','.jpg']"
-          >
-            <i class="el-icon-plus" />
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="库存：" prop="stores">
-          <el-input v-model.number="form.stores" maxLength="10" />
-        </el-form-item>
-        <el-form-item label="状态：" prop="status">
-          <el-switch
-            v-model="form.status"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="上架"
-            inactive-text="下架"
-          />
-        </el-form-item>
-        <el-form-item label="价格：" prop="price">
-          <el-input v-model="form.price" maxLength="10" />
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-      </div>
-    </el-dialog>
+    <order-detail v-if="visible" ref="dialog" @close="close"/>
   </div>
 </template>
 
 <script>
-import AddButton from '../../components/AddButton'
 import orderApi from '../../api/order'
 import { deepClone } from '../../utils/index'
+import pagination from '../../mixins/pagination'
+import OrderDetail from "./orderDetail";
 
 export default {
   name: 'OrderList',
-  components: { AddButton },
+  components: {OrderDetail },
+  mixins: [pagination],
   data() {
     return {
       orderData: [],
       columns: [
-        { label: '用户', prop: 'name', align: 'left', width: '80' },
-        { label: '数量', prop: 'goodsAmount', align: 'center',width: '60' },
-        { label: '订单号', prop: 'orderNumber', align: 'center',},
-        { label: '状态', prop: 'statusStr',align: 'center',},
-        { label: '金额', prop: 'money', align: 'center' },
-        { label: '交易/更新时间', align: 'center', width: '240',
-          render: (h, { props: { row }}) => {
-            return (
-              <div>
-                <p>{row.addTime}</p>
-                <p>{row.updateTime}</p>
-              </div>
-            )
-          } },
-        { label: '操作', prop: 'region', align: 'center',
+        { label: '用户', prop: 'consignee', align: 'left' },
+        { label: '手机号', prop: 'mobile', align: 'left' },
+        { label: '数量', prop: 'total' },
+        { label: '订单号', prop: 'orderNumber' },
+        { label: '状态', prop: 'statusName' },
+        { label: '金额/元', prop: 'amount', align: 'center' },
+        { label: '提交时间', prop: 'saveDate' },
+        { label: '操作', prop: 'operate',
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详 情</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删 除</span>
+                <span onClick={() => this.orderDelete('one', row.id)}>删 除</span>
               </div>
             )
           }
@@ -133,21 +91,20 @@ export default {
       ],
       loading: false,
       isAdd: false,
-      editVisible: false,
+      visible: false,
       imgUrl: '',
       form: {
         name: '',
         stores: '',
-        status: '',
+        statusName: '',
         price: '',
         img: ''
       },
       searchForm: {
         name: '',
-        phone: '',
-        status: '',
-        orderNumber: '',
-        status: '',
+        mobile: '',
+        statusName: '',
+        orderNumber: ''
       },
       rules: {
         name: [
@@ -163,47 +120,56 @@ export default {
           { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
         ]
       },
-      selected: []
+      selected: [],
+      total: 0
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
-    orderDelete() {
-
+    orderDelete(type, id) {
+      this.$confirm('此操作将删除订单, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        const params = type === 'all' ? this.selected : id
+        orderApi.deleteOrder({
+          id: params
+        }).then(res => {
+          this.$message1000('删除成功', 'success')
+          this.loading = false
+          this.fetchData()
+        }).catch(() => {
+          this.loading = false
+        })
+      })
     },
     handleSelectionChange(rows) {
       this.selected = rows.map(v => v.id)
     },
     fetchData(data) {
       this.loading = true
-      orderApi.getOrder(data).then(res => {
+      orderApi.getOrder({
+        ...data,
+        ...this.pageOption
+      }).then(res => {
         this.orderData = res.list
+        this.total = res.count
       }).finally(_ => {
         this.loading = false
       })
     },
-    detail(row){
+    detail(row) {
 
-    },
-    delete(id) {
-      this.$confirm('此操作将删除该订单, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        orderApi.deleteOrder(id).then(_ => {
-          this.$message1000('删除成功', 'success')
-          this.fetchData()
-        })
-      })
     },
     close() {
       this.form = {
         name: '',
         stores: '',
-        status: '',
+        statusName: '',
         price: ''
       }
     },
@@ -211,7 +177,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           orderApi.updateOrder(this.form).then(_ => {
-            this.editVisible = false
+            this.visible = false
             this.$message1000('提交成功', 'success')
           })
         } else {
