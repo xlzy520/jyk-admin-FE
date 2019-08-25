@@ -50,7 +50,7 @@
       @selection-change="handleSelectionChange"
     />
     <div class="footer">
-      <el-button v-if="orderData.length>0" :disabled="selected.length>0" type="danger" @click="orderDelete('all')">批量删除</el-button>
+      <el-button v-if="orderData.length>0" :disabled="selected.length<1" type="danger" @click="orderDelete('all')">批量删除</el-button>
     </div>
     <order-detail v-if="visible" ref="dialog" @close="close"/>
   </div>
@@ -60,28 +60,48 @@
 import orderApi from '../../api/order'
 import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
-import OrderDetail from "./orderDetail";
+import OrderDetail from './detail'
 
 export default {
   name: 'OrderList',
-  components: {OrderDetail },
+  components: { OrderDetail },
   mixins: [pagination],
   data() {
     return {
       orderData: [],
       columns: [
-        { label: '用户', prop: 'consignee', align: 'left' },
-        { label: '手机号', prop: 'mobile', align: 'left' },
-        { label: '数量', prop: 'total' },
-        { label: '订单号', prop: 'orderNumber' },
-        { label: '状态', prop: 'statusName' },
-        { label: '金额/元', prop: 'amount', align: 'center' },
-        { label: '提交时间', prop: 'saveDate' },
-        { label: '操作', prop: 'operate',
+        { label: '用户', prop: 'payer', width: 120, showOverflowTooltip: true, formatter: row => {
+
+        } },
+        { label: '手机号', prop: 'mobile', width: 120 },
+        { label: '数量', prop: 'total', width: 120 },
+        { label: '订单号', prop: 'orderNumber', width: 120 },
+        { label: '状态', prop: 'statusName',
           render: (h, { props: { row }}) => {
+            const schoolMap = {
+              'unpaid': 'info',
+              'unshipped': 'primary',
+              'unreceived': 'info',
+              'completed': 'success'
+            }
+            return (
+              <el-tag effect='dark' type={schoolMap[row.statusCode]}>{row.statusName }</el-tag>
+            )
+          } },
+        { label: '金额/元', prop: 'amount', align: 'center', width: 120 },
+        { label: '提交时间', prop: 'saveDate', sortable: true, width: 200 },
+        { label: '操作', prop: 'operate', fixed: 'right', width: 150,
+          render: (h, { props: { row }}) => {
+            const send = (
+              <span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.send(row)}>发 货</span>
+              </span>
+            )
             return (
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详 情</span>
+                {row.statusCode === 'unshipped' ? send : null}
                 <el-divider direction={'vertical'}/>
                 <span onClick={() => this.orderDelete('one', row.id)}>删 除</span>
               </div>
@@ -90,35 +110,12 @@ export default {
         }
       ],
       loading: false,
-      isAdd: false,
       visible: false,
-      imgUrl: '',
-      form: {
-        name: '',
-        stores: '',
-        statusName: '',
-        price: '',
-        img: ''
-      },
       searchForm: {
         name: '',
         mobile: '',
         statusName: '',
         orderNumber: ''
-      },
-      rules: {
-        name: [
-          { required: true, message: '名称不能为空', trigger: 'blur' },
-          { min: 4, max: 20, message: '长度在 4 到 20 个字符', trigger: 'blur' }
-        ],
-        stores: [
-          { required: true, message: '库存不能为空', trigger: 'blur' },
-          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
-        ],
-        price: [
-          { required: true, message: '价格不能为空', trigger: 'blur' },
-          { type: 'number', min: 0, message: '不能小于0', trigger: 'blur' }
-        ]
       },
       selected: [],
       total: 0
@@ -128,8 +125,26 @@ export default {
     this.fetchData()
   },
   methods: {
+    send(row) {
+      this.$confirm('确认发货?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        orderApi.fahuo({
+          orderId: row.orderId
+        }).then(res => {
+          this.loading = false
+          this.$message1000('发货成功', 'success')
+          this.fetchData()
+        }).catch(() => {
+          this.loading = false
+        })
+      })
+    },
     orderDelete(type, id) {
-      this.$confirm('此操作将删除订单, 是否继续?', '提示', {
+      this.$confirm('此操作将删除订单,并且无法恢复,是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -163,7 +178,11 @@ export default {
       })
     },
     detail(row) {
-
+      orderApi.orderDetail({
+        orderId: row.orderId
+      }).then(res => {
+        console.log(res);
+      })
     },
     close() {
       this.form = {

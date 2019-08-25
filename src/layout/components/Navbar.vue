@@ -16,7 +16,7 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <el-dialog :visible.sync="visible" title="修改密码" @close="close" append-to-body>
+    <el-dialog :visible.sync="visible" title="修改密码" append-to-body @close="close">
       <el-form ref="ruleForm" :model="ruleForm" status-icon :rules="rules" label-width="100px" class="demo-ruleForm">
         <el-form-item label="密码" prop="pass">
           <el-input v-model="ruleForm.pass" type="password" autocomplete="off" />

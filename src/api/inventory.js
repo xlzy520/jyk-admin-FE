@@ -1,16 +1,16 @@
-import baseRequest from './base'
+import baseFetch from './base/fetch'
 
 export default {
   list(data) {
-    return baseRequest('/inventory/list', data)
+    return baseFetch('/inventory/list', data)
   },
   update(data) {
-    return baseRequest('/inventory/update', data)
+    return baseFetch('/inventory/update', data)
   },
   delete(id) {
-    return baseRequest('/inventory/delete', id)
+    return baseFetch('/inventory/delete', id)
   },
   save(ids) {
-    return baseRequest('/inventory/save', ids)
+    return baseFetch('/inventory/save', ids)
   }
 }

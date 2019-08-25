@@ -1,53 +1,38 @@
 <template>
   <div class="app-container">
-    <add-button @add="add" />
     <xl-table
-      ref="partnerTable"
+      ref="inventoryTable"
+      v-loading="loading"
       :index="true"
-      :loading="loading"
-      :table-data="partnerData"
+      :table-data="inventoryData"
       :table-columns="columns"
+      :total="total"
+      :pageSize="pageOption.pageSize"
+      :pageNo="pageOption.pageIndex"
+      @change-page="pageChange"
+      @size-change="sizeChange"
     />
+    <add-button @add="add" />
     <el-dialog
       width="40%"
-      :title="isAdd?'新增合作伙伴' : '合作伙伴信息更新'"
+      :title="isAdd?'增加学校信息' : '更新学校信息'"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
       @close="close"
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-        <el-form-item label="名称：" prop="name">
-          <el-input v-model="form.name" />
+      <el-form ref="form" :model="inventoryForm" label-width="80px" :rules="rules">
+        <el-form-item label="学校名称" prop="inventoryName">
+          <el-input v-model="inventoryForm.inventoryName" suffix-icon="el-icon-inventory" maxLength="30" />
         </el-form-item>
-        <el-form-item label="宣传图" prop="img">
-          <el-upload
-            ref="upload"
-            :action="'/partner/'+url"
-            :on-preview="handlePreview"
-            :on-remove="controlHideUpload"
-            :on-success="uploadOk"
-            :on-error="onError"
-            :data="form"
-            :on-change="controlHideUpload"
-            :file-list="fileList"
-            :auto-upload="false"
-            list-type="picture-card"
-            accept="['.png','.jpg']"
-          >
-            <i class="el-icon-plus" />
-          </el-upload>
-          <el-dialog :visible.sync="imgVisible" append-to-body>
-            <el-image :src="dialogImageUrl" alt="" fit="fill" />
-          </el-dialog>
+        <el-form-item label="学校地址" prop="address">
+          <el-input v-model="inventoryForm.address" suffix-icon="el-icon-address" maxLength="60" />
         </el-form-item>
-        <el-form-item label="是否展示：" prop="display">
-          <el-switch
-            v-model="form.display"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="展示"
-            inactive-text="隐藏"
-          />
+        <el-form-item label="学校类型" prop="inventoryType">
+          <el-select v-model="inventoryForm.inventoryType" placeholder="请选择学校类型">
+            <el-option label="幼儿园" value="幼儿园" />
+            <el-option label="小学" value="小学" />
+            <el-option label="中学" value="中学" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -60,47 +45,50 @@
 
 <script>
 import AddButton from '../../components/AddButton'
-import partnerApi from '../../api/partner'
-import { deepClone } from '../../utils/index'
+import inventoryApi from '../../api/inventory'
+import { deepClone } from '../../utils'
+import pagination from '../../mixins/pagination'
 
 export default {
-  name: 'Partner',
+  name: 'School',
   components: { AddButton },
+  mixins: [pagination],
   data() {
     return {
-      partnerData: [],
+      inventoryData: [],
       columns: [
         {
-          label: '名称',
-          prop: 'name'
+          label: '地址',
+          prop: 'address',
+          align: 'left'
         },
         {
-          label: '宣传图',
-          prop: 'img',
-          render: (h, { props: { row }}) => {
-            return (
-              <div class='table-img'>
-                <el-image src={row.img} fit='fit'/>
-              </div>
-            )
-          }
+          label: '日期',
+          prop: 'saveDate',
+          align: 'left'
         },
-        { label: '是否展示', prop: 'display',
+        {
+          label: '餐具类型',
+          prop: 'inventoryType',
           render: (h, { props: { row }}) => {
+            const inventoryMap = {
+              '幼儿园': 'danger',
+              '小学': 'warning'
+            }
             return (
-              <div class='is-default-icon'>
-                <i class={'el-icon-' + (row.display ? 'success' : 'error')}/>
-              </div>
+              <el-tag type={inventoryMap[row.inventoryType]}><i class='el-icon-inventory' />{row.inventoryType }</el-tag>
             )
           }
         },
         {
           label: '添加时间',
-          prop: 'addTime'
+          prop: 'saveDate',
+          sortable: true
         },
         {
           label: '更新时间',
-          prop: 'updateTime'
+          prop: 'modifyDate',
+          sortable: true
         },
         {
           label: '操作',
@@ -108,9 +96,9 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
-                <span onClick={() => this.update(row)}>编 辑</span>
+                <span onClick={() => this.update(row)}>编辑</span>
                 <el-divider direction={'vertical'}/>
-                <el-button type='danger' onClick={() => this.delete(row.id)}>删 除</el-button>
+                <span onClick={() => this.delete(row.inventoryId)}>删除</span>
               </div>
             )
           }
@@ -119,114 +107,83 @@ export default {
       loading: false,
       isAdd: false,
       editVisible: false,
-      imgVisible: false,
-      dialogImageUrl: '',
-      form: {
-        name: '',
-        display: ''
+      inventoryForm: {
+        inventoryName: '',
+        address: '',
+        inventoryType: ''
       },
       rules: {
-        name: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
+        inventoryName: [
+          { required: true, message: '请输入学校名称' },
+          { min: 2, max: 30, message: '长度在 2 到 30 个字符' }
+        ],
+        address: [
+          { required: true, message: '请输入学校地址' },
+          { min: 2, max: 100, message: '长度在 2 到 100 个字符' }
+        ],
+        inventoryType: [
+          { required: true, message: '请选择一个学校类型' }
         ]
-      },
-      fileList: []
-    }
-  },
-  computed: {
-    url() {
-      return this.add ? 'add' : 'update'
+      }
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
-    controlHideUpload(file, fileList) {
-      if (fileList.length > 0) {
-        this.hideUpload()
-      } else {
-        this.hideUpload('')
-      }
-    },
-    onError() {
-      this.$message1000('文件上传出错：网络错误', 'error')
-      this.editVisible = false
-    },
-    uploadOk(res) {
-      if (res.success) {
-        this.$message1000('文件上传成功', 'success')
-        this.close()
-        this.fetchData()
-        this.editVisible = false
-      } else {
-        let msg = res.msg
-        msg = '文件上传出错：' + msg
-        this.$message1000(msg, 'error')
-        this.fileList = []
-        this.editVisible = false
-      }
-    },
-    handlePreview(file) {
-      this.imgVisible = true
-      this.dialogImageUrl = file.url
-    },
     fetchData() {
       this.loading = true
-      partnerApi.getPartner().then(res => {
-        this.partnerData = res.list
+      inventoryApi.list(this.pageOption).then(res => {
+        this.inventoryData = res.list
+        this.total = res.total
       }).finally(_ => {
         this.loading = false
       })
     },
     add() {
-      this.hideUpload('')
       this.isAdd = true
       this.editVisible = true
     },
-    hideUpload(display = 'none') {
-      this.$nextTick(() => {
-        this.$refs.upload.$refs['upload-inner'].$el.style.display = display
-      })
-    },
     update(row) {
-      this.hideUpload()
       this.isAdd = false
-      this.form = deepClone(row)
-      this.fileList = [{ name: 'food.jpg', url: 'https://img-bcy-qn.pstatp.com/user/213091/item/c0r3z/45a1ac2a95a54db08c6a5f1e5c31aa6b.jpg?imageMogr2/auto-orient/strip|watermark/2/text/wqnms73mnIgK5Y2K5qyh5YWDIC0gQUNH54ix5aW96ICF56S-5Yy6/fontsize/1824/fill/I2NjY2NjYw==/dx/59/dy/44/font/5b6u6L2v6ZuF6buR' }]
-
+      this.inventoryForm = deepClone(row)
       this.editVisible = true
     },
     delete(id) {
-      this.$confirm('此操作将删除该合作伙伴, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该学校信息, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        partnerApi.deletePartner(id).then(_ => {
+        this.loading = true
+        inventoryApi.deleteSchool({
+          inventoryId: id
+        }).then(_ => {
           this.$message1000('删除成功', 'success')
           this.fetchData()
+        }).catch(() => {
+          this.loading = false
         })
       })
     },
     close() {
-      this.fileList = []
-      this.form = {
-        name: '',
-        display: ''
-      }
+      this.editVisible = false
+      this.resetForm()
     },
     submitForm() {
-      if (this.fileList.length < 1) {
-        this.$message1000('请上传图片', 'warning')
-        return
-      }
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          this.$refs.upload.submit()
+          const param = {
+            ...this.inventoryForm,
+            ...this.pageOption
+          }
+          const getFn = this.isAdd ? inventoryApi.addSchool(param) : inventoryApi.updateSchool(param)
+          getFn.then(res => {
+            this.$message1000('提交成功', 'success')
+            this.close()
+            this.fetchData()
+          })
         } else {
-          console.log('error submit!!')
           return false
         }
       })
@@ -239,5 +196,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+  /deep/ .el-tag{
+    font-size: 16px;
+  }
 </style>

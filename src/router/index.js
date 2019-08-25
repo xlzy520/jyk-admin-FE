@@ -129,6 +129,12 @@ export const constantRoutes = [
         name: '订单管理',
         component: () => import('@/views/orders/index'),
         meta: { title: '订单管理', icon: 'orders' }
+      },
+      {
+        path: 'detail',
+        name: '订单详情',
+        hidden: true,
+        // component: () => import('@/views/orders/detail')
       }
     ]
   },

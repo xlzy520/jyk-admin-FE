@@ -141,7 +141,6 @@ export default {
   methods: {
     beforeUpload(file) {
       this.uploadLoading = true
-      console.log(file)
     },
     onError(err, file, fileList) {
       this.uploadLoading = false
@@ -199,8 +198,15 @@ export default {
     submitForm() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          const res = this.isAdd ? await partnerApi.addPartner(this.form) : await partnerApi.updatePartner(this.form)
-          console.log(res)
+          this.loading = true
+          const service = this.isAdd ? partnerApi.addPartner : partnerApi.updatePartner
+          service(this.form).then(() => {
+            this.loading = false
+            this.close()
+            this.fetchData()
+          }).catch(() => {
+            this.loading = false
+          })
         } else {
           console.log('error submit!!')
           return false
