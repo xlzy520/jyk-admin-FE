@@ -15,54 +15,48 @@
     />
     <el-dialog
       width="40%"
-      :title="isAdd?'新增合作伙伴' : '合作伙伴信息更新'"
+      :title="isAdd?'新增合作伙伴' : '更新合作伙伴信息'"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
       @close="close"
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-        <el-form-item label="名称：" prop="partnersName">
-          <el-input v-model="form.partnersName" />
-        </el-form-item>
-        <el-form-item label="宣传图" prop="fileUrl">
-          <el-upload
-            v-loading="uploadLoading"
-            list-type="picture-card"
-            class="img-uploader"
-            action="market/file/add"
-            :on-error="onError"
-            :on-preview="handlePreview"
-            accept="['.png','.jpg']"
-            :before-upload="beforeUpload"
-            :on-success="uploadOk"
-          >
-            <img
-              v-if="form.fileUrl"
-              :src="'https://axjieyakang.com/assets/'+form.fileUrl"
-              class="img"
-              fit="cover"
+      <div v-loading="dialogLoading">
+        <el-form ref="form" :model="form" label-width="100px" :rules="rules">
+          <el-form-item label="名称：" prop="partnersName">
+            <el-input v-model="form.partnersName" />
+          </el-form-item>
+          <el-form-item label="宣传图" prop="fileUrl">
+            <el-upload
+              v-loading="uploadLoading"
+              list-type="picture-card"
+              class="img-uploader"
+              action="market/file/add"
+              :on-error="onError"
+              accept="['.png','.jpg']"
+              :show-file-list="false"
+              :before-upload="beforeUpload"
+              :on-success="uploadOk"
             >
-            <i v-else class="el-icon-plus img-uploader-icon" />
-          </el-upload>
-          <el-dialog :visible.sync="imgVisible" append-to-body>
-            <el-image :src="'https://axjieyakang.com/assets/'+form.fileUrl" alt="" fit="fit" />
-          </el-dialog>
-        </el-form-item>
-        <el-form-item label="是否展示：" prop="display">
-          <el-switch
-            v-model="form.display"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="展示"
-            inactive-text="隐藏"
-            active-value="1"
-            inactive-value="0"
-          />
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
+              <img v-if="form.fileUrl" :src="'https://axjieyakang.com/assets/'+form.fileUrl" class="img" fit="cover">
+              <i v-else class="el-icon-plus img-uploader-icon" />
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="是否展示：" prop="show">
+            <el-switch
+              v-model="form.show"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              active-text="展示"
+              inactive-text="隐藏"
+              :active-value="true"
+              :inactive-value="false"
+            />
+          </el-form-item>
+        </el-form>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitForm">提交</el-button>
+          <el-button @click="resetForm">重置</el-button>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -73,7 +67,11 @@ import AddButton from '../../components/AddButton'
 import partnerApi from '../../api/partner'
 import { deepClone } from '../../utils'
 import pagination from '../../mixins/pagination'
-
+const initForm = {
+  partnersName: '',
+  show: '',
+  fileUrl: ''
+}
 export default {
   name: 'Partner',
   components: { AddButton },
@@ -110,16 +108,12 @@ export default {
         } }
       ],
       loading: false,
+      dialogLoading: false,
       uploadLoading: false,
 
       isAdd: false,
       editVisible: false,
-      imgVisible: false,
-      form: {
-        partnersName: '',
-        show: '',
-        fileUrl: ''
-      },
+      form: initForm,
       rules: {
         partnersName: [
           { required: true, message: '请输入名称' },
@@ -157,9 +151,6 @@ export default {
       }
       this.uploadLoading = false
     },
-    handlePreview(file) {
-      this.imgVisible = true
-    },
     fetchData() {
       this.loading = true
       partnerApi.getPartner(this.pageOption).then(res => {
@@ -172,6 +163,7 @@ export default {
     add() {
       this.isAdd = true
       this.editVisible = true
+      this.form = initForm
     },
     update(row) {
       this.isAdd = false
@@ -197,16 +189,17 @@ export default {
       this.resetForm()
     },
     submitForm() {
-      this.$refs.form.validate(async(valid) => {
+      console.log(this.form);
+      this.$refs.form.validate((valid) => {
         if (valid) {
-          this.loading = true
+          this.dialogLoading = true
           const service = this.isAdd ? partnerApi.addPartner : partnerApi.updatePartner
           service(this.form).then(() => {
-            this.loading = false
+            this.dialogLoading = false
             this.close()
             this.fetchData()
           }).catch(() => {
-            this.loading = false
+            this.dialogLoading = false
           })
         } else {
           console.log('error submit!!')

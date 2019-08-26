@@ -81,7 +81,7 @@ export default {
             const schoolMap = {
               'unpaid': 'info',
               'unshipped': 'primary',
-              'unreceived': 'info',
+              'unreceived': 'warning',
               'completed': 'success'
             }
             return (
