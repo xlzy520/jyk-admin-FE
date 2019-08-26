@@ -38,7 +38,7 @@ export default {
           render: (h, { props: { row }}) => {
             return (
               <div class='table-img'>
-                <img src={'http://49.234.212.216:8080/market/file/preview?fileUrl=' + row.fileUrls[0]} fit='fit'/>
+                <img src={'https://axjieyakang.com/assets/' + row.fileUrls[0]} fit='fit'/>
               </div>
             )
           }

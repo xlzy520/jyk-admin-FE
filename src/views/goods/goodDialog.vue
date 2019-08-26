@@ -186,7 +186,7 @@ export default {
       this.form.fileUrls.push(res.data)
     },
     handlePictureCardPreview(file) {
-      this.imgUrl = file.url
+      this.imgUrl = 'https://axjieyakang.com/assets/' + file.url
       this.dialogVisible = true
     },
     close() {

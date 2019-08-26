@@ -27,24 +27,25 @@
         <el-form-item label="宣传图" prop="fileUrl">
           <el-upload
             v-loading="uploadLoading"
+            list-type="picture-card"
             class="img-uploader"
             action="market/file/add"
             :on-error="onError"
+            :on-preview="handlePreview"
             accept="['.png','.jpg']"
-            :show-file-list="false"
             :before-upload="beforeUpload"
             :on-success="uploadOk"
           >
             <img
               v-if="form.fileUrl"
-              :src="'/market/file/preview?fileUrl='+form.fileUrl"
+              :src="'https://axjieyakang.com/assets/'+form.fileUrl"
               class="img"
-              @click.prevent.self="handlePreview"
+              fit="cover"
             >
             <i v-else class="el-icon-plus img-uploader-icon" />
           </el-upload>
           <el-dialog :visible.sync="imgVisible" append-to-body>
-            <el-image :src="'/market/file/preview?fileUrl='+form.fileUrl" alt="" fit="fill" />
+            <el-image :src="'https://axjieyakang.com/assets/'+form.fileUrl" alt="" fit="fit" />
           </el-dialog>
         </el-form-item>
         <el-form-item label="是否展示：" prop="display">
@@ -85,7 +86,7 @@ export default {
         { label: '宣传图', prop: 'fileUrl', render: (h, { props: { row }}) => {
           return (
             <div class='table-img'>
-              <el-image src={'/market/file/preview?fileUrl=111' + row.fileUrl} fit='fit'/>
+              <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'/>
             </div>
           )
         } },
