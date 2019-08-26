@@ -83,7 +83,12 @@ export default {
         { label: '名称', prop: 'partnersName' },
         { label: '宣传图', prop: 'fileUrl', render: (h, { props: { row }}) => {
           return (
-            <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'/>
+            <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'
+                      previewSrcList={this.srcList}>
+              <div slot="placeholder" class="image-slot">
+                加载中<span class="dot">...</span>
+              </div>
+            </el-image>
           )
         } },
         { label: '是否展示', prop: 'show', render: (h, { props: { row }}) => {
@@ -120,7 +125,11 @@ export default {
         fileUrl: [
           { required: true, message: '请上传图片', trigger: 'change' }
         ]
-      }
+      },
+      srcList: [
+        'https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg',
+        'https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg'
+      ]
     }
   },
   computed: {

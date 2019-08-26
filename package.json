@@ -12,7 +12,7 @@
     "axios": "^0.18.0",
     "core-js": "^2.6.5",
     "echarts": "^4.2.1",
-    "element-ui": "^2.8.2",
+    "element-ui": "^2.11.1",
     "js-cookie": "2.2.0",
     "md5": "^2.2.1",
     "normalize.css": "7.0.0",
