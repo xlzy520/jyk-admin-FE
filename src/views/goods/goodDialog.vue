@@ -1,32 +1,48 @@
 <template>
   <el-dialog
-    width="40%"
+    width="900px"
     :title="isAdd?'新增商品' : '编辑商品'"
     :close-on-click-modal="true"
     :visible="true"
     @close="close"
   >
-    <el-form ref="form" :model="form" label-width="100px" :rules="rules">
+    <el-form ref="form" :model="form" label-width="120px" :rules="rules">
       <el-form-item label="名称：" prop="goodsName">
         <el-input v-model.trim="form.goodsName" maxLength="20"/>
       </el-form-item>
-      <el-form-item label="宣传图" prop="img">
-        <el-upload
-          ref="upload"
-          action="/market/file/add"
-          list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="removeImg"
-          :on-success="handleSuccess"
-          :auto-upload="true"
-          accept="['.png','.jpg']"
-        >
-          <i class="el-icon-plus"/>
-        </el-upload>
-        <el-dialog :visible.sync="dialogVisible" append-to-body>
-          <img width="100%" :src="imgUrl" alt="">
-        </el-dialog>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="缩略图" prop="thumbnail">
+            <el-upload
+              ref="upload"
+              action="/market/file/add"
+              list-type="picture-card"
+              :on-success="handleSuccess"
+              :auto-upload="true"
+              accept="['.png','.jpg']"
+            >
+              <i class="el-icon-plus"/>
+            </el-upload>
+          </el-form-item>
+        </el-col>
+        <el-col :span="16">
+          <el-form-item label="宣传图" prop="img">
+            <el-upload
+              ref="upload"
+              action="/market/file/add"
+              list-type="picture-card"
+              :on-success="handleSuccess"
+              :auto-upload="true"
+              accept="['.png','.jpg']"
+            >
+              <i class="el-icon-plus"/>
+            </el-upload>
+            <el-dialog :visible.sync="dialogVisible" append-to-body>
+              <img width="100%" :src="imgUrl" alt="">
+            </el-dialog>
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="状态：" prop="status">
         <el-switch
           v-model="form.status"
@@ -46,26 +62,33 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="specsList.length>0" label="规格详情">
-        <el-checkbox-group v-model="form.specsList">
-          <el-checkbox
-            v-for="item in specsList"
-            :key="item.specsName"
-            border
-            :label="item.specsName"
-          >{{ item.specsName }}
-          </el-checkbox>
-        </el-checkbox-group>
+      <el-form-item label="规格详情：">
+        <div class="box-card-warp">
+          <el-card class="box-card" v-for="item in specsList" :key="item.specsId">
+            <div slot="header" class="clearfix">
+              <span>{{item.specsName}}</span>
+            </div>
+            <div class="text">
+              {{item.specsStr}}
+            </div>
+          </el-card>
+        </div>
       </el-form-item>
-      <el-form-item v-if="form.type!==3" label="价格：" prop="priceStr">
+      <el-form-item v-if="form.useTypeId!==3" label="价格：" prop="priceStr">
         <el-input v-model="form.priceStr" maxLength="10"/>
       </el-form-item>
-      <el-form-item v-if="form.type===3" label="规格A价格：" prop="priceStr">
-        <el-input v-model="form.priceStr" maxLength="10"/>
-        <label>规格B价格：</label>
-        <el-input v-model="form.priceStr" maxLength="10"/>
-      </el-form-item>
-
+      <el-row>
+        <el-col :span="12">
+          <el-form-item v-if="form.useTypeId===3" label="规格A价格：" prop="priceStr">
+            <el-input v-model="priceStrA" maxLength="10"/>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item v-if="form.useTypeId===3" label="规格B价格：" prop="priceStr">
+            <el-input v-model="priceStrB" maxLength="10"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <div class="dialog-footer">
       <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
@@ -82,6 +105,7 @@ const initFormData = {
   goodsName: '',
   status: '',
   priceStr: '',
+  thumbnail: '',
   fileUrls: [],
   specsList: [],
   useTypeId: ''
@@ -104,9 +128,12 @@ export default {
       }
     }
     return {
+      priceStrA: '',
+      priceStrB: '',
       submitLoading: false,
       form: initFormData,
       dialogVisible: false,
+      specData: [],
       rules: {
         goodsName: [
           this.$rules.required('请输入商品名称'),
@@ -122,7 +149,10 @@ export default {
         ],
         img: [
           { validator: validateImg }
-        ]
+        ],
+        thumbnail: [
+          { validator: validateImg }
+        ],
       },
       specsList: [],
       fileList: [],
@@ -131,9 +161,7 @@ export default {
     }
   },
   mounted() {
-    if (this.isAdd) {
-      this.getUseTypeList()
-    }
+    this.getUseTypeList()
   },
   methods: {
     typeChange(val) {
@@ -144,7 +172,6 @@ export default {
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
-        console.log(2)
         if (valid) {
           this.submitLoading = true
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
@@ -165,7 +192,6 @@ export default {
       }, 0)
     },
     uploadOk(res) {
-      console.log(res)
       const { success, msg, data } = res
       if (success) {
         this.$message1000('图片上传成功', 'success')
@@ -182,7 +208,6 @@ export default {
       this.form.img = []
     },
     handleSuccess(res, file, fileList) {
-      console.log(res)
       this.form.fileUrls.push(res.data)
     },
     handlePictureCardPreview(file) {
@@ -199,13 +224,38 @@ export default {
     },
     getUseTypeList() {
       guigeApi.getUseTypeList().then(res => {
-        this.useType = res
+        this.useType = res||[]
+        this.typeChange(this.form.useTypeId)
       })
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  /deep/ .el-card__header{
+    font-size: 16px;
+    padding: 0 10px;
+    background: #17c686;
+    color: #fff;
+  }
+  .box-card-warp{
+    display: flex;
+    justify-content: space-between;
+  }
+  .text {
+    font-size: 14px;
+  }
+  .clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+  .clearfix:after {
+    clear: both
+  }
 
+  .box-card {
+    width: 270px;
+  }
 </style>

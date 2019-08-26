@@ -83,9 +83,7 @@ export default {
         { label: '名称', prop: 'partnersName' },
         { label: '宣传图', prop: 'fileUrl', render: (h, { props: { row }}) => {
           return (
-            <div class='table-img'>
-              <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'/>
-            </div>
+            <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'/>
           )
         } },
         { label: '是否展示', prop: 'show', render: (h, { props: { row }}) => {
@@ -163,7 +161,6 @@ export default {
     add() {
       this.isAdd = true
       this.editVisible = true
-      this.form = initForm
     },
     update(row) {
       this.isAdd = false
@@ -186,6 +183,7 @@ export default {
     },
     close() {
       this.editVisible = false
+      this.form = initForm
       this.resetForm()
     },
     submitForm() {
@@ -224,24 +222,17 @@ export default {
       position: relative;
       overflow: hidden;
     }
+    .el-upload--picture-card{
+      width: 200px;
+      height: 150px;
+    }
   }
   .img-uploader .el-upload:hover {
     border-color: #409EFF;
   }
-  .img-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
   .img {
-    width: 178px;
-    height: 178px;
+    width: 200px;
+    height: 150px;
     display: block;
-  }
-  /deep/ .table-img{
-    width: 100px;
   }
 </style>

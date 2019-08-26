@@ -18,8 +18,8 @@ export default {
 <style scoped>
 .add-button{
   position: fixed;
-  right: 40px;
-  bottom: 60px;
+  right: 15px;
+  bottom: 20px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
