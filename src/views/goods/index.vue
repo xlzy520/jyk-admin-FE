@@ -13,7 +13,7 @@
       <el-button type="success" :disabled="selected.length===0" @click="changeStatus(1)">上架</el-button>
       <el-button type="danger" :disabled="selected.length===0" @click="changeStatus(0)">下架</el-button>
     </div>
-    <good-dialog v-if="visible" ref="dialog" :is-add="isAdd" @close="close"/>
+    <good-dialog v-if="visible" ref="dialog" :is-add="isAdd" @close="close" @fetchData="fetchData"/>
   </div>
 </template>
 
@@ -37,9 +37,12 @@ export default {
           label: '图片', prop: 'pic',
           render: (h, { props: { row }}) => {
             return (
-              <div class='table-img'>
-                <img src={'https://axjieyakang.com/assets/' + row.fileUrls[0]} fit='fit'/>
-              </div>
+              <el-image src={this.$baseImgUrl + row.littleUrl} fit='fit'
+                        previewSrcList={[this.$baseImgUrl + row.fileUrl]}>
+                <div slot="placeholder" class="image-slot">
+                  加载中<span class="dot">...</span>
+                </div>
+              </el-image>
             )
           }
         },

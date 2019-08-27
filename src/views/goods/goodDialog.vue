@@ -6,93 +6,95 @@
     :visible="true"
     @close="close"
   >
-    <el-form ref="form" :model="form" label-width="120px" :rules="rules">
-      <el-form-item label="名称：" prop="goodsName">
-        <el-input v-model.trim="form.goodsName" maxLength="20"/>
-      </el-form-item>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="缩略图" prop="thumbnail">
-            <el-upload
-              ref="upload"
-              action="/market/file/add"
-              list-type="picture-card"
-              :on-success="handleSuccess"
-              :auto-upload="true"
-              accept="['.png','.jpg']"
-            >
-              <i class="el-icon-plus"/>
-            </el-upload>
-          </el-form-item>
-        </el-col>
-        <el-col :span="16">
-          <el-form-item label="宣传图" prop="img">
-            <el-upload
-              ref="upload"
-              action="/market/file/add"
-              list-type="picture-card"
-              :on-success="handleSuccess"
-              :auto-upload="true"
-              accept="['.png','.jpg']"
-            >
-              <i class="el-icon-plus"/>
-            </el-upload>
-            <el-dialog :visible.sync="dialogVisible" append-to-body>
-              <img width="100%" :src="imgUrl" alt="">
-            </el-dialog>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-form-item label="状态：" prop="status">
-        <el-switch
-          v-model="form.status"
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          active-text="上架"
-          inactive-text="下架"
-        />
-      </el-form-item>
-      <el-form-item label="商品类型：" prop="useTypeId">
-        <el-select v-model="form.useTypeId" @change="typeChange">
-          <el-option
-            v-for="option in useType"
-            :key="option.useType"
-            :value="option.useTypeId"
-            :label="option.useType"
+    <div v-loading="dialogLoading">
+      <el-form ref="form" :model="form" label-width="120px" :rules="rules">
+        <el-form-item label="名称：" prop="goodsName">
+          <el-input v-model.trim="form.goodsName" maxLength="20"/>
+        </el-form-item>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="缩略图" prop="img">
+              <el-upload
+                ref="upload"
+                class="avatar-uploader"
+                :show-file-list="false"
+                action="/market/file/add"
+                :on-success="res=>handleSuccess(res, 'littleUrl')"
+                :auto-upload="true"
+                accept="['.png','.jpg']"
+              >
+                <img v-if="form.littleUrl" :src="$baseImgUrl+form.littleUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item label="高清图" prop="img">
+              <el-upload
+                ref="upload"
+                class="avatar-uploader"
+                action="/market/file/add"
+                list-type="picture-card"
+                :on-success="res=>handleSuccess(res, 'fileUrls')"
+                :auto-upload="true"
+                accept="['.png','.jpg']"
+              >
+                <i class="el-icon-plus"/>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="状态：" prop="sale">
+          <el-switch
+            v-model="form.sale"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="上架"
+            inactive-text="下架"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="规格详情：">
-        <div class="box-card-warp">
-          <el-card class="box-card" v-for="item in specsList" :key="item.specsId">
-            <div slot="header" class="clearfix">
-              <span>{{item.specsName}}</span>
-            </div>
-            <div class="text">
-              {{item.specsStr}}
-            </div>
-          </el-card>
-        </div>
-      </el-form-item>
-      <el-form-item v-if="form.useTypeId!==3" label="价格：" prop="priceStr">
-        <el-input v-model="form.priceStr" maxLength="10"/>
-      </el-form-item>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item v-if="form.useTypeId===3" label="规格A价格：" prop="priceStr">
-            <el-input v-model="priceStrA" maxLength="10"/>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item v-if="form.useTypeId===3" label="规格B价格：" prop="priceStr">
-            <el-input v-model="priceStrB" maxLength="10"/>
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
-    <div class="dialog-footer">
-      <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
-      <el-button @click="resetForm">重置</el-button>
+        </el-form-item>
+        <el-form-item label="商品类型：" prop="useTypeId">
+          <el-select v-model="form.useTypeId" @change="typeChange">
+            <el-option
+              v-for="option in useType"
+              :key="option.useType"
+              :value="option.useTypeId"
+              :label="option.useType"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="规格详情：" v-if="form.useTypeId">
+          <div class="box-card-warp">
+            <el-card class="box-card" v-for="item in specsList" :key="item.specsId">
+              <div slot="header" class="clearfix">
+                <span>{{item.specsName}}</span>
+              </div>
+              <div class="text">
+                {{item.specsStr}}
+              </div>
+            </el-card>
+          </div>
+        </el-form-item>
+        <el-form-item v-if="form.useTypeId!==3" label="价格：" prop="priceStr">
+          <el-input v-model="form.priceStr" maxLength="10"/>
+        </el-form-item>
+        <el-row v-if="form.useTypeId===3">
+          <el-col :span="12">
+            <el-form-item label="规格A价格：" prop="priceStr">
+              <el-input v-model="form.priceStrAB[0]" maxLength="10"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="规格B价格：" prop="priceStr">
+              <el-input v-model="form.priceStrAB[1]" maxLength="10"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div class="dialog-footer">
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
+        <el-button @click="resetForm">重置</el-button>
+      </div>
     </div>
   </el-dialog>
 </template>
@@ -103,12 +105,13 @@ import goodsApi from '../../api/goods'
 
 const initFormData = {
   goodsName: '',
-  status: '',
+  sale: '',
   priceStr: '',
-  thumbnail: '',
+  littleUrl: '',
   fileUrls: [],
   specsList: [],
-  useTypeId: ''
+  useTypeId: '',
+  priceStrAB: ['', ''],
 }
 
 export default {
@@ -120,16 +123,22 @@ export default {
     }
   },
   data() {
-    const validateImg = (rule, value, callback) => {
+    const validateBigImg = (rule, value, callback) => {
       if (this.form.fileUrls.length === 0) {
         callback(new Error('请上传一张图片'))
       } else {
         callback()
       }
     }
+    const validateSmallImg = (rule, value, callback) => {
+      if (this.form.littleUrl === '') {
+        callback(new Error('请上传一张图片'))
+      } else {
+        callback()
+      }
+    }
     return {
-      priceStrA: '',
-      priceStrB: '',
+      dialogLoading: false,
       submitLoading: false,
       form: initFormData,
       dialogVisible: false,
@@ -147,37 +156,51 @@ export default {
         useTypeId: [
           this.$rules.required('请输入商品类型')
         ],
-        img: [
-          { validator: validateImg }
+        bigImg: [
+          { validator: validateBigImg }
         ],
-        thumbnail: [
-          { validator: validateImg }
+        smallImg: [
+          { validator: validateSmallImg }
         ],
       },
       specsList: [],
-      fileList: [],
-      imgUrl: '',
       useType: []
     }
-  },
-  mounted() {
-    this.getUseTypeList()
   },
   methods: {
     typeChange(val) {
       const index = this.useType.findIndex(v => v.useTypeId === val)
       if (index > 0) {
         this.specsList = this.useType[index].specsList
+        this.form.specsList = this.useType[index].specsList.map((v,index)=>{
+          if (this.form.useTypeId === 3) {
+            return {
+              "specsId": v.specsId,
+              "price":this.form.priceStrAB[index]
+            }
+          }
+          return {
+            "specsId": v.specsId,
+            "price":this.form.priceStr
+          }
+        })
       }
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true
+          if (this.form.priceStr) {
+            this.form.specsList.map(v=>{
+              v.price = this.form.priceStr
+            })
+          }
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
           baseRequest(this.form).then(_ => {
+            this.submitLoading = false
+            this.close()
             this.$message1000(this.isAdd ? '新增成功' : '更新成功', 'success')
-            this.fetchData()
+            this.$emit('fetchData')
           }).catch(() => {
             this.submitLoading = false
           })
@@ -186,36 +209,23 @@ export default {
         }
       })
     },
-    hideUpload(display) {
-      setTimeout(() => {
-        this.$refs.upload.$refs['upload-inner'].$el.style.display = display ? '' : 'none'
-      }, 0)
+    onError(res) {
+      this.$message1000('文件上传出错：'+ res.msg, 'error')
     },
-    uploadOk(res) {
+    handleSuccess(res, name) {
       const { success, msg, data } = res
       if (success) {
         this.$message1000('图片上传成功', 'success')
-        this.form.img = data.imgUrl
+        if (name === 'littleUrl') {
+          this.form[name] = data
+        } else {
+          this.form[name].push(data)
+        }
       } else {
         this.$message1000(msg, 'error')
-        this.fileList = []
       }
     },
-    onError() {
-      this.$message1000('文件上传出错：网络错误', 'error')
-    },
-    removeImg() {
-      this.form.img = []
-    },
-    handleSuccess(res, file, fileList) {
-      this.form.fileUrls.push(res.data)
-    },
-    handlePictureCardPreview(file) {
-      this.imgUrl = 'https://axjieyakang.com/assets/' + file.url
-      this.dialogVisible = true
-    },
     close() {
-      this.fileList = []
       this.form = initFormData
       this.$emit('close')
     },
@@ -223,39 +233,69 @@ export default {
       this.$refs.form.resetFields()
     },
     getUseTypeList() {
+      this.dialogLoading = true
       guigeApi.getUseTypeList().then(res => {
         this.useType = res||[]
         this.typeChange(this.form.useTypeId)
+      }).finally(() => {
+        this.dialogLoading = false
       })
     }
-  }
+  },
+  mounted() {
+    this.getUseTypeList()
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+  /deep/ .avatar-uploader{
+    .el-upload {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      &:hover {
+        border-color: #409EFF;
+      }
+    }
+    &-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 146px;
+      height: 146px;
+      line-height: 146px;
+      text-align: center;
+    }
+    .avatar {
+      width: 146px;
+      display: block;
+    }
+  }
   /deep/ .el-card__header{
     font-size: 16px;
     padding: 0 10px;
     background: #17c686;
     color: #fff;
   }
-  .box-card-warp{
-    display: flex;
-    justify-content: space-between;
+  .box-card {
+    width: 270px;
+    &-warp{
+      display: flex;
+      justify-content: space-between;
+    }
   }
   .text {
     font-size: 14px;
   }
-  .clearfix:before,
-  .clearfix:after {
-    display: table;
-    content: "";
-  }
-  .clearfix:after {
-    clear: both
-  }
-
-  .box-card {
-    width: 270px;
+  .clearfix{
+    &:before,&:after{
+      display: table;
+      content: "";
+    }
+    &:after {
+      clear: both
+    }
   }
 </style>

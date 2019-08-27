@@ -37,7 +37,7 @@
               :before-upload="beforeUpload"
               :on-success="uploadOk"
             >
-              <img v-if="form.fileUrl" :src="'https://axjieyakang.com/assets/'+form.fileUrl" class="img" fit="cover">
+              <img v-if="form.fileUrl" :src="$baseImgUrl+form.fileUrl" class="img" fit="cover">
               <i v-else class="el-icon-plus img-uploader-icon" />
             </el-upload>
           </el-form-item>
@@ -83,8 +83,8 @@ export default {
         { label: '名称', prop: 'partnersName' },
         { label: '宣传图', prop: 'fileUrl', render: (h, { props: { row }}) => {
           return (
-            <el-image src={'https://axjieyakang.com/assets/' + row.fileUrl} fit='fit'
-                      previewSrcList={this.srcList}>
+            <el-image src={this.$baseImgUrl + row.fileUrl} fit='fit'
+                      previewSrcList={[this.$baseImgUrl + row.fileUrl]}>
               <div slot="placeholder" class="image-slot">
                 加载中<span class="dot">...</span>
               </div>

@@ -48,21 +48,23 @@
       :visible.sync="editVisible"
       @close="close"
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-        <el-form-item label="商家名称:" prop="name">
-          <el-input v-model="form.name" maxLength="11" />
-        </el-form-item>
-        <el-form-item label="商家地址:" prop="address">
-          <el-input v-model="form.address" maxLength="11" />
-        </el-form-item>
-        <el-form-item label="金额:" prop="amount">
-          <el-input v-model="form.amount" maxLength="11" />
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-      </div>
+     <div v-loading="dialogLoading">
+       <el-form ref="form" :model="form" label-width="100px" :rules="rules">
+         <el-form-item label="商家名称:" prop="name">
+           <el-input v-model="form.name" maxLength="11" />
+         </el-form-item>
+         <el-form-item label="商家地址:" prop="address">
+           <el-input v-model="form.address" maxLength="11" />
+         </el-form-item>
+         <el-form-item label="金额:" prop="amount">
+           <el-input v-model="form.amount" maxLength="11" />
+         </el-form-item>
+       </el-form>
+       <div class="dialog-footer">
+         <el-button type="primary" @click="submitForm">提交</el-button>
+         <el-button @click="resetForm">重置</el-button>
+       </div>
+     </div>
     </el-dialog>
   </div>
 </template>
@@ -98,6 +100,7 @@ export default {
             )
           } }
       ],
+      dialogLoading: false,
       loading: false,
       editVisible: false,
       searchForm: {
@@ -111,14 +114,12 @@ export default {
         name: '',
         address: '',
         amount: '',
-        payTime: '',
-        saveDate: '',
-        staff: ''
       },
+      isAdd: false,
       rules: {
         name: [
           { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' }
+          { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
         ]
       }
     }
@@ -164,14 +165,22 @@ export default {
         name: '',
         address: '',
         amount: '',
-        payTime: '',
-        saveDate: ''
       }
     },
     submitForm() {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
-          this.fetchData(this.searchForm)
+          this.dialogLoading = true
+          payApi.addPayOffline({
+            ...this.form
+          }).then(()=>{
+            this.close()
+            this.$message1000('新增线下支付记录成功', 'success')
+            this.dialogLoading = false
+            this.fetchData(this.searchForm)
+          }).catch(() => {
+            this.dialogLoading = false
+          })
         } else {
           console.log('error submit!!')
           return false

@@ -10,7 +10,7 @@ export default {
   updatePayOffline(data) {
     return fetch('/pay-offline/update', data)
   },
-  addPayOffline(id) {
-    return fetch('/pay-offline/add', id)
+  addPayOffline(data) {
+    return fetch('/pay-offline/add', data)
   }
 }
