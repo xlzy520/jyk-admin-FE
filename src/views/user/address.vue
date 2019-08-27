@@ -180,12 +180,12 @@ export default {
           { min: 2, max: 15, message: '长度在 2 到 15 个字符' }
         ],
         mobile: [
-          { required: true, message: '请填写手机号' },
+          { required: true, message: '请输入手机号' },
           { pattern: /^(1[0-9])\d{9}$/,
-            message: '请填写符合要求的11位手机号' }
+            message: '请输入符合要求的11位手机号' }
         ],
         address: [
-          { required: true, message: '请填写地址' }
+          { required: true, message: '请输入地址' }
         ]
       },
       schoolOptions: []

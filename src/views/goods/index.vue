@@ -103,7 +103,7 @@ export default {
         goodsApi.changeStatusGoods({ goods: params }).then(res => {
           this.$message1000(text + '成功', 'success')
           this.goodsData.filter(v => this.selected.includes(v.goodsId)).map(v => {
-            v.sale = !v.sale
+            v.sale = status
           })
         }).finally(() => {
           this.loading = false
@@ -129,7 +129,7 @@ export default {
       this.isAdd = false
       this.visible = true
       this.$nextTick(() => {
-        this.$refs.dialog.form = deepClone(row)
+        this.$refs.dialog.form = Object.assign(this.$refs.dialog.form, deepClone(row))
         this.$refs.dialog.fileList = [{ goodsName: row.goodsName, url: row.pic }]
       })
     },

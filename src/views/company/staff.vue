@@ -104,12 +104,11 @@ export default {
           { required: true, message: '请选择一个区域', trigger: 'change' }
         ],
         mobile: [
-          { required: true, message: '请填写手机号', trigger: 'blur' },
-          { pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
-            message: '请填写符合要求的11位手机号', trigger: 'blur' }
+          this.$rules.required('请输入手机号'),
+          this.$rules.phone
         ],
         password: [
-          { required: true, message: '请填写密码', trigger: 'change' },
+          { required: true, message: '请输入密码', trigger: 'change' },
           { pattern: /^[^\\\\\\/:*?\s\\"<>|]+$/, message: '请不要输入特殊字符', trigger: 'blur' },
           { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
         ]

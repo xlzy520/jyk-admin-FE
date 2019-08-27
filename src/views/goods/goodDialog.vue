@@ -11,48 +11,6 @@
         <el-form-item label="名称：" prop="goodsName">
           <el-input v-model.trim="form.goodsName" maxLength="20"/>
         </el-form-item>
-        <el-row>
-          <el-col :span="8">
-            <el-form-item label="缩略图" prop="img">
-              <el-upload
-                ref="upload"
-                class="avatar-uploader"
-                :show-file-list="false"
-                action="/market/file/add"
-                :on-success="res=>handleSuccess(res, 'littleUrl')"
-                :auto-upload="true"
-                accept="['.png','.jpg']"
-              >
-                <img v-if="form.littleUrl" :src="$baseImgUrl+form.littleUrl" class="avatar">
-                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-              </el-upload>
-            </el-form-item>
-          </el-col>
-          <el-col :span="16">
-            <el-form-item label="高清图" prop="img">
-              <el-upload
-                ref="upload"
-                class="avatar-uploader"
-                action="/market/file/add"
-                list-type="picture-card"
-                :on-success="res=>handleSuccess(res, 'fileUrls')"
-                :auto-upload="true"
-                accept="['.png','.jpg']"
-              >
-                <i class="el-icon-plus"/>
-              </el-upload>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="状态：" prop="sale">
-          <el-switch
-            v-model="form.sale"
-            active-color="#13ce66"
-            inactive-color="#ff4949"
-            active-text="上架"
-            inactive-text="下架"
-          />
-        </el-form-item>
         <el-form-item label="商品类型：" prop="useTypeId">
           <el-select v-model="form.useTypeId" @change="typeChange">
             <el-option
@@ -80,16 +38,60 @@
         </el-form-item>
         <el-row v-if="form.useTypeId===3">
           <el-col :span="12">
-            <el-form-item label="规格A价格：" prop="priceStr">
-              <el-input v-model="form.priceStrAB[0]" maxLength="10"/>
+            <el-form-item label="规格A价格：" prop="priceStr0">
+              <el-input v-model="form.priceStr0" maxLength="10"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="规格B价格：" prop="priceStr">
-              <el-input v-model="form.priceStrAB[1]" maxLength="10"/>
+            <el-form-item label="规格B价格：" prop="priceStr1">
+              <el-input v-model="form.priceStr1" maxLength="10"/>
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="缩略图：" prop="smallImg">
+              <el-upload
+                v-loading="uploadLoadingSmallImg"
+                ref="upload"
+                class="avatar-uploader"
+                :show-file-list="false"
+                action="/market/file/add"
+                :on-success="res=>handleSuccess(res, 'littleUrl')"
+                :auto-upload="true"
+                accept="['.png','.jpg']"
+              >
+                <img v-if="form.littleUrl" :src="$baseImgUrl+form.littleUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item label="高清图：" prop="bigImg">
+              <el-upload
+                v-loading="uploadLoadingBigImg"
+                ref="upload"
+                class="avatar-uploader"
+                action="/market/file/add"
+                list-type="picture-card"
+                :on-success="res=>handleSuccess(res, 'fileUrls')"
+                :auto-upload="true"
+                accept="['.png','.jpg']"
+              >
+                <i class="el-icon-plus"/>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="状态：" prop="sale">
+          <el-switch
+            v-model="form.sale"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="上架"
+            inactive-text="下架"
+          />
+        </el-form-item>
       </el-form>
       <div class="dialog-footer">
         <el-button type="primary" :loading="submitLoading" @click="submitForm">提交</el-button>
@@ -111,7 +113,8 @@ const initFormData = {
   fileUrls: [],
   specsList: [],
   useTypeId: '',
-  priceStrAB: ['', ''],
+  priceStr1: '',
+  priceStr2: '',
 }
 
 export default {
@@ -123,21 +126,28 @@ export default {
     }
   },
   data() {
+    const priceRule = [
+      this.$rules.required('请输入商品价格'),
+      this.$rules.float,
+      this.$rules.float5
+    ]
     const validateBigImg = (rule, value, callback) => {
       if (this.form.fileUrls.length === 0) {
-        callback(new Error('请上传一张图片'))
+        callback(new Error('请上传一张商品缩略图'))
       } else {
         callback()
       }
     }
     const validateSmallImg = (rule, value, callback) => {
       if (this.form.littleUrl === '') {
-        callback(new Error('请上传一张图片'))
+        callback(new Error('请上传一张商品高清图'))
       } else {
         callback()
       }
     }
     return {
+      uploadLoadingSmallImg: false,
+      uploadLoadingBigImg: false,
       dialogLoading: false,
       submitLoading: false,
       form: initFormData,
@@ -148,11 +158,9 @@ export default {
           this.$rules.required('请输入商品名称'),
           this.$rules.word_number_chinese
         ],
-        priceStr: [
-          this.$rules.required('请输入商品价格'),
-          this.$rules.float,
-          this.$rules.float5
-        ],
+        priceStr: priceRule,
+        priceStr0: priceRule,
+        priceStr1: priceRule,
         useTypeId: [
           this.$rules.required('请输入商品类型')
         ],
@@ -170,13 +178,13 @@ export default {
   methods: {
     typeChange(val) {
       const index = this.useType.findIndex(v => v.useTypeId === val)
-      if (index > 0) {
+      console.log(index);
+      if (index > -1) {
         this.specsList = this.useType[index].specsList
         this.form.specsList = this.useType[index].specsList.map((v,index)=>{
           if (this.form.useTypeId === 3) {
             return {
-              "specsId": v.specsId,
-              "price":this.form.priceStrAB[index]
+              "specsId": v.specsId
             }
           }
           return {
@@ -193,6 +201,11 @@ export default {
           if (this.form.priceStr) {
             this.form.specsList.map(v=>{
               v.price = this.form.priceStr
+            })
+          }
+          if (this.form.useTypeId === 3) {
+            this.form.specsList.map((v,index)=>{
+              v.price = this.form['priceStr'+index]
             })
           }
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
@@ -219,6 +232,9 @@ export default {
         if (name === 'littleUrl') {
           this.form[name] = data
         } else {
+          if (this.form[name]===null) {
+            this.form[name] = []
+          }
           this.form[name].push(data)
         }
       } else {

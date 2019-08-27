@@ -14,12 +14,6 @@
         <el-form-item prop="count">
           <el-input v-model.number="searchForm.count" maxLength="11" placeholder="金额" />
         </el-form-item>
-        <el-form-item prop="status">
-          <el-select v-model="searchForm.billStatus" placeholder="支付状态">
-            <el-option label="已支付" value="1" />
-            <el-option label="未支付" value="0" />
-          </el-select>
-        </el-form-item>
         <el-form-item prop="addTime">
           <el-date-picker
             v-model="searchForm.addTime"
@@ -66,11 +60,12 @@ export default {
       payData: [],
       columns: [
         { label: '微信昵称', prop: 'payer' },
+        { label: '手机号', prop: 'mobile' },
         { label: '账单号', prop: 'billNumber' },
         { label: '支付单号', prop: 'orderNumber' },
         { label: '支付通道号', prop: 'openNumber' },
-        { label: '金额', prop: 'amount' },
         { label: '支付时间', prop: 'saveDate', sortable: true, width: 100 },
+        { label: '金额', prop: 'amount' },
         { label: '支付状态', prop: 'billStatus', render: (h, { props: { row }}) => {
           if (row.billStatus) {
             return (
@@ -79,14 +74,6 @@ export default {
           }
           return (
             <el-tag effect={'dark'} type={'info'}>未支付</el-tag>
-          )
-        } },
-        { label: '手机号', prop: 'mobile' },
-        { label: '操作', render: (h, { props: { row }}) => {
-          return (
-            <div class='table-action'>
-              <span onClick={() => this.delete(row)}>删 除</span>
-            </div>
           )
         } }
       ],
@@ -98,7 +85,6 @@ export default {
         openNumber: '',
         amount: '',
         saveDate: '',
-        billStatus: ''
       },
       rules: {
         name: [
@@ -122,23 +108,6 @@ export default {
         this.total = res.count
       }).finally(_ => {
         this.loading = false
-      })
-    },
-    delete(row) {
-      this.$confirm('此操作将删除该支付记录, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.loading = true
-        payApi.deletePartner({
-          billId: row.billId
-        }).then(_ => {
-          this.$message1000('删除成功', 'success')
-          this.fetchData()
-        }).catch(() => {
-          this.loading = false
-        })
       })
     },
     submitForm() {

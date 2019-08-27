@@ -9,8 +9,8 @@
         <el-form-item prop="mobile">
           <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号"/>
         </el-form-item>
-        <el-form-item prop="name">
-          <el-input v-model="searchForm.name" maxLength="20" placeholder="商家名称"/>
+        <el-form-item prop="payer">
+          <el-input v-model="searchForm.payer" maxLength="20" placeholder="商家名称"/>
         </el-form-item>
         <el-form-item prop="amount">
           <el-input v-model="searchForm.amount" maxLength="11" placeholder="金额"/>
@@ -50,8 +50,11 @@
     >
      <div v-loading="dialogLoading">
        <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-         <el-form-item label="商家名称:" prop="name">
-           <el-input v-model="form.name" maxLength="11" />
+         <el-form-item label="商家名称:" prop="payer">
+           <el-input v-model="form.payer" maxLength="11" />
+         </el-form-item>
+         <el-form-item label="商家手机号:" prop="mobile">
+           <el-input v-model="form.mobile" maxLength="11" />
          </el-form-item>
          <el-form-item label="商家地址:" prop="address">
            <el-input v-model="form.address" maxLength="11" />
@@ -76,16 +79,18 @@ import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
 
 export default {
-  name: 'Offline',
+  payer: 'Offline',
   components: { AddButton },
   mixins: [pagination],
   data() {
     return {
       payData: [],
       columns: [
-        { label: '商家名称', prop: 'name' },
+        { label: '商家名称', prop: 'payer' },
+        { label: '手机号', prop: 'mobile' },
         { label: '商家地址', prop: 'address' },
-        { label: '金额', prop: 'amount', sortable: true },
+        { label: '数量', prop: 'num', sortable: true },
+        { label: '收款金额', prop: 'amount', sortable: true },
         { label: '收款人', prop: 'staffName' },
         { label: '支付时间', prop: 'payTime', sortable: true },
         { label: '更新时间', prop: 'saveDate', sortable: true },
@@ -94,8 +99,6 @@ export default {
             return (
               <div class='table-action'>
                 <span onClick={() => this.update(row)}>编辑</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.id)}>删除</span>
               </div>
             )
           } }
@@ -104,22 +107,36 @@ export default {
       loading: false,
       editVisible: false,
       searchForm: {
-        name: '',
+        payer: '',
         mobile: '',
         amount: '',
         payTime: '',
         staff: ''
       },
       form: {
-        name: '',
+        payer: '',
+        mobile: '',
         address: '',
+        num: '',
         amount: '',
       },
       isAdd: false,
       rules: {
-        name: [
+        payer: [
           { required: true, message: '请输入名称', trigger: 'blur' },
           { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+        ],
+        mobile: [
+          this.$rules.required('请输入手机号'),
+          this.$rules.phone
+        ],
+        address: [
+          this.$rules.required('请输入地址'),
+          { min: 2, max: 30, message: '长度在 2 到 30 个字符', trigger: 'blur' }
+        ],
+        amount: [
+          this.$rules.required('请输入金额'),
+          this.$rules.float
         ]
       }
     }
@@ -134,7 +151,22 @@ export default {
         ...data,
         ...this.pageOption
       }).then(res => {
-        this.payData = res.list
+        // this.payData = res.list
+        this.payData = [
+          {
+            payer: '某某商家',
+            address: '测试地址测试地址测试地址测试地址测试地址',
+            amount: "100000.00",
+          mobile: "13588043792",
+          payTime: "2019-08-08 22:41:37",
+        payer: "莫某",
+        saveDate: "2019-08-09 20:01:21",
+        staffName: "某某员工",
+        type: 1,
+        num: 2000
+          }
+
+        ]
       }).finally(_ => {
         this.loading = false
       })
@@ -148,21 +180,11 @@ export default {
       this.form = deepClone(row)
       this.editVisible = true
     },
-    delete(id) {
-      this.$confirm('此操作将删除该支付记录, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        payApi.deletePartner(id).then(_ => {
-          this.$message1000('删除成功', 'success')
-          this.fetchData()
-        })
-      })
-    },
     close() {
+      this.editVisible = false
+      this.resetForm()
       this.form = {
-        name: '',
+        payer: '',
         address: '',
         amount: '',
       }

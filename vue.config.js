@@ -33,8 +33,8 @@ module.exports = {
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
         // target: `https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin`,
-        // target: `http://1fa240e7.ngrok.io/market`,
-        target: `https://axjieyakang.com/market`,
+        target: `http://giapeg.natappfree.cc/market`,
+        // target: `http://49.234.212.216:8080/market`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
@@ -85,7 +85,7 @@ module.exports = {
     config
       // https://webpack.js.org/configuration/devtool/#development
       .when(process.env.NODE_ENV === 'development',
-        config => config.devtool('cheap-source-map')
+        config => config.devtool('eval-source-map')
       )
 
     config
