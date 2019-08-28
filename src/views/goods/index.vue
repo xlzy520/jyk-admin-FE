@@ -37,8 +37,7 @@ export default {
           label: '图片', prop: 'pic',
           render: (h, { props: { row }}) => {
             return (
-              <el-image src={this.$baseImgUrl + row.littleUrl} fit='fit'
-                        previewSrcList={[this.$baseImgUrl + row.fileUrl]}>
+              <el-image src={this.$baseImgUrl + row.littleUrl} fit='fit'>
                 <div slot="placeholder" class="image-slot">
                   加载中<span class="dot">...</span>
                 </div>
@@ -129,8 +128,15 @@ export default {
       this.isAdd = false
       this.visible = true
       this.$nextTick(() => {
+        if (row.priceStr.includes('~')) {
+          const priceStrMap = row.priceStr.split('~')
+          row.priceStr1 = priceStrMap[0]
+          row.priceStr2 = priceStrMap[1]
+        }
         this.$refs.dialog.form = Object.assign(this.$refs.dialog.form, deepClone(row))
-        this.$refs.dialog.fileList = [{ goodsName: row.goodsName, url: row.pic }]
+        this.$refs.dialog.fileList = row.fileUrls.map(v=>{
+          return { name: row.goodsName, url: 'https://axjieyakang.com/assets/'+v }
+        })
       })
     },
     delete(id) {

@@ -53,7 +53,6 @@
             <el-form-item label="缩略图：" prop="smallImg">
               <el-upload
                 v-loading="uploadLoadingSmallImg"
-                ref="upload"
                 class="avatar-uploader"
                 :show-file-list="false"
                 action="/market/file/add"
@@ -74,6 +73,9 @@
                 class="avatar-uploader"
                 action="/market/file/add"
                 list-type="picture-card"
+                :limit="2"
+                :on-remove="handleRemove"
+                :file-list="fileList"
                 :on-success="res=>handleSuccess(res, 'fileUrls')"
                 :auto-upload="true"
                 accept="['.png','.jpg']"
@@ -172,13 +174,13 @@ export default {
         ],
       },
       specsList: [],
-      useType: []
+      useType: [],
+      fileList: []
     }
   },
   methods: {
     typeChange(val) {
       const index = this.useType.findIndex(v => v.useTypeId === val)
-      console.log(index);
       if (index > -1) {
         this.specsList = this.useType[index].specsList
         this.form.specsList = this.useType[index].specsList.map((v,index)=>{
@@ -235,14 +237,26 @@ export default {
           if (this.form[name]===null) {
             this.form[name] = []
           }
+          this.fileList.push({
+            name: res.data,
+            url: 'https://axjieyakang.com/assets/' + res.data
+          })
           this.form[name].push(data)
         }
       } else {
         this.$message1000(msg, 'error')
       }
     },
+    handleRemove(file, fileList) {
+      this.fileList = fileList
+      const urlIndex = this.form.fileUrls.findIndex(v => file.url.includes(v))
+      if (urlIndex> -1) {
+        this.form.fileUrls.splice(urlIndex, 1)
+      }
+    },
     close() {
       this.form = initFormData
+      this.fileList = []
       this.$emit('close')
     },
     resetForm() {

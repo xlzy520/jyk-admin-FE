@@ -42,7 +42,6 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
-
   {
     path: '/',
     component: Layout,
@@ -54,7 +53,25 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+  {
+    path: '/inventory',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '进销存管理',
+        component: () => import('@/views/inventory/index'),
+        meta: { title: '进销存管理', icon: 'stores' }
+      }
+    ]
+  }
+]
 
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
   {
     name: '公司管理',
     path: '/company',
@@ -134,7 +151,8 @@ export const constantRoutes = [
         path: 'detail',
         name: '订单详情',
         hidden: true,
-        // component: () => import('@/views/orders/detail')
+        component: () => import('@/views/orders/detail'),
+        meta: { title: '订单详情', icon: 'orders' }
       }
     ]
   },
@@ -158,36 +176,6 @@ export const constantRoutes = [
         meta: { title: '线下支付', icon: 'offline' }
       }
     ]
-  },
-  {
-    path: '/inventory',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: '进销存管理',
-        component: () => import('@/views/inventory/index'),
-        meta: { title: '进销存管理', icon: 'stores' }
-      }
-    ]
-  }
-]
-
-/**
- * asyncRoutes
- * the routes that need to be dynamically loaded based on user roles
- */
-export const asyncRoutes = [
-  {
-    path: '/nested',
-    name: '测试页',
-    component: Layout,
-    children: [{
-      path: 'dashboard',
-      name: '动态路由测试页',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: '动态路由测试页', icon: 'nested' }
-    }]
   },
 
   // 404 page must be placed at the end !!!

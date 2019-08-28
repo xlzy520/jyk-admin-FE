@@ -95,7 +95,7 @@ export default {
             const send = (
               <span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.send(row)}>发 货</span>
+                <span onClick={() => this.delivery(row)}>发 货</span>
               </span>
             )
             return (
@@ -125,7 +125,7 @@ export default {
     this.fetchData()
   },
   methods: {
-    send(row) {
+    delivery(row) {
       this.$confirm('确认发货?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -178,11 +178,13 @@ export default {
       })
     },
     detail(row) {
-      orderApi.orderDetail({
-        orderId: row.orderId
-      }).then(res => {
-        console.log(res);
-      })
+      this.$router.push('/orders/detail?orderId='+row.orderId)
+      // orderApi.orderDetail({
+      //   orderId: row.orderId
+      // }).then(res => {
+      //   console.log(res);
+      // })
+
     },
     close() {
       this.form = {
