@@ -18,15 +18,18 @@
     </div>
     <el-dialog :visible.sync="visible" title="修改密码" append-to-body @close="close">
       <el-form ref="ruleForm" :model="ruleForm" status-icon :rules="rules" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="密码" prop="pass">
-          <el-input v-model="ruleForm.pass" type="password" autocomplete="off" />
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="ruleForm.password" type="password" autocomplete="off" />
         </el-form-item>
         <el-form-item label="确认密码" prop="checkPass">
           <el-input v-model="ruleForm.checkPass" type="password" autocomplete="off" />
         </el-form-item>
+        <el-form-item label="确认密码" prop="newPassword">
+          <el-input v-model="ruleForm.newPassword" type="password" autocomplete="off" />
+        </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-          <el-button @click="resetForm('ruleForm')">重置</el-button>
+          <el-button type="primary" @click="changePassword" :loading="loading">提交</el-button>
+          <el-button @click="resetForm">重置</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -35,9 +38,10 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import fetch from "../../api/base/fetch";
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-
+import md5 from 'md5'
 export default {
   components: {
     Breadcrumb,
@@ -47,17 +51,7 @@ export default {
     const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
-      } else {
-        if (this.ruleForm.checkPass !== '') {
-          this.$refs.ruleForm.validateField('checkPass')
-        }
-        callback()
-      }
-    }
-    const validatePass2 = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请再次输入密码'))
-      } else if (value !== this.ruleForm.pass) {
+      } else if (value !== this.ruleForm.password) {
         callback(new Error('两次输入密码不一致!'))
       } else {
         callback()
@@ -66,17 +60,25 @@ export default {
     return {
       visible: false,
       ruleForm: {
-        pass: '',
-        checkPass: ''
+        password: '',
+        checkPass: '',
+        newPassword: ''
       },
       rules: {
-        pass: [
-          { validator: validatePass, trigger: 'blur' }
+        password: [
+          this.$rules.required('请输入密码'),
+          { min: 5, max: 30, message: '长度在 5 到 30 个字符', trigger: 'blur' }
+        ],
+        newPassword: [
+          this.$rules.required('请输入密码'),
+          { min: 5, max: 30, message: '长度在 5 到 30 个字符', trigger: 'blur' }
         ],
         checkPass: [
-          { validator: validatePass2, trigger: 'blur' }
+          { validator: validatePass, trigger: 'blur' },
+          { min: 5, max: 30, message: '长度在 5 到 30 个字符', trigger: 'blur' }
         ]
-      }
+      },
+      loading: false
     }
   },
   computed: {
@@ -86,10 +88,20 @@ export default {
     ])
   },
   methods: {
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    changePassword() {
+      this.$refs.ruleForm.validate((valid) => {
         if (valid) {
-          alert('submit!')
+          this.loading = true
+          fetch('/staff/password/update', {
+            password: md5(this.ruleForm.password),
+            newPassword: md5(this.ruleForm.newPassword),
+          }).then(res=>{
+            this.$message('修改密码成功', 'success')
+            this.close()
+            this.loading = false
+          }).catch(() => {
+            this.loading = false
+          })
         } else {
           console.log('error submit!!')
           return false
@@ -112,6 +124,10 @@ export default {
     },
     close() {
       this.visible = false
+      this.ruleForm = {
+        pass: '',
+        checkPass: ''
+      }
     },
     handleDropDownCommand(cmd) {
       if (cmd === 'logout') this.logout()
