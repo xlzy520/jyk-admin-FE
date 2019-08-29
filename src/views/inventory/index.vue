@@ -1,5 +1,38 @@
 <template>
   <div class="app-container">
+    <div class="header">
+      <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
+        <el-form-item prop="staff">
+          <el-input v-model="searchForm.staff" maxLength="11" placeholder="收款人"/>
+        </el-form-item>
+        <el-form-item prop="mobile">
+          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号"/>
+        </el-form-item>
+        <el-form-item prop="payer">
+          <el-input v-model="searchForm.payer" maxLength="20" placeholder="商家名称"/>
+        </el-form-item>
+        <el-form-item prop="amount">
+          <el-input v-model="searchForm.amount" maxLength="11" placeholder="金额"/>
+        </el-form-item>
+        <el-form-item prop="payTime">
+          <el-date-picker
+            v-model="searchForm.payTime"
+            type="daterange"
+            align="center"
+            start-placeholder="支付时间起"
+            end-placeholder="支付时间止"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            @click="fetchData(searchForm)"
+          >查询</el-button>
+          <el-button type="info" @click="resetForm">清空</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
     <xl-table
       ref="inventoryTable"
       v-loading="loading"
@@ -13,33 +46,7 @@
       @size-change="sizeChange"
     />
     <add-button @add="add" />
-    <el-dialog
-      width="40%"
-      :title="isAdd?'增加学校信息' : '更新学校信息'"
-      :close-on-click-modal="true"
-      :visible.sync="editVisible"
-      @close="close"
-    >
-      <el-form ref="form" :model="inventoryForm" label-width="80px" :rules="rules">
-        <el-form-item label="学校名称" prop="inventoryName">
-          <el-input v-model="inventoryForm.inventoryName" suffix-icon="el-icon-inventory" maxLength="30" />
-        </el-form-item>
-        <el-form-item label="学校地址" prop="address">
-          <el-input v-model="inventoryForm.address" suffix-icon="el-icon-address" maxLength="60" />
-        </el-form-item>
-        <el-form-item label="学校类型" prop="inventoryType">
-          <el-select v-model="inventoryForm.inventoryType" placeholder="请选择学校类型">
-            <el-option label="幼儿园" value="幼儿园" />
-            <el-option label="小学" value="小学" />
-            <el-option label="中学" value="中学" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-      </div>
-    </el-dialog>
+    <inventory-dialog ref="dialog" v-if="visible" :is-add="isAdd" @close="close"></inventory-dialog>
   </div>
 </template>
 
@@ -48,13 +55,21 @@ import AddButton from '../../components/AddButton'
 import inventoryApi from '../../api/inventory'
 import { deepClone } from '../../utils'
 import pagination from '../../mixins/pagination'
+import InventoryDialog from "./inventoryDialog";
 
 export default {
-  name: 'School',
-  components: { AddButton },
+  name: 'Inventory',
+  components: {InventoryDialog, AddButton },
   mixins: [pagination],
   data() {
     return {
+      searchForm: {
+        payer: '',
+        mobile: '',
+        amount: '',
+        payTime: '',
+        staff: ''
+      },
       inventoryData: [],
       columns: [
         {
@@ -104,36 +119,20 @@ export default {
           }
         }
       ],
+
       loading: false,
       isAdd: false,
-      editVisible: false,
-      inventoryForm: {
-        inventoryName: '',
-        address: '',
-        inventoryType: ''
-      },
-      rules: {
-        inventoryName: [
-          { required: true, message: '请输入学校名称' },
-          { min: 2, max: 30, message: '长度在 2 到 30 个字符' }
-        ],
-        address: [
-          { required: true, message: '请输入学校地址' },
-          { min: 2, max: 100, message: '长度在 2 到 100 个字符' }
-        ],
-        inventoryType: [
-          { required: true, message: '请选择一个学校类型' }
-        ]
-      }
+      visible: false,
     }
   },
-  created() {
-    this.fetchData()
-  },
+
   methods: {
-    fetchData() {
+    fetchData(data) {
       this.loading = true
-      inventoryApi.list(this.pageOption).then(res => {
+      inventoryApi.list({
+        ...data,
+        ...this.pageOption
+      }).then(res => {
         this.inventoryData = res.list
         this.total = res.total
       }).finally(_ => {
@@ -142,15 +141,15 @@ export default {
     },
     add() {
       this.isAdd = true
-      this.editVisible = true
+      this.visible = true
     },
     update(row) {
       this.isAdd = false
       this.inventoryForm = deepClone(row)
-      this.editVisible = true
+      this.visible = true
     },
     delete(id) {
-      this.$confirm('此操作将删除该学校信息, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该进销存记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -167,31 +166,15 @@ export default {
       })
     },
     close() {
-      this.editVisible = false
-      this.resetForm()
+      this.visible = false
     },
-    submitForm() {
-      this.$refs.form.validate(async(valid) => {
-        if (valid) {
-          const param = {
-            ...this.inventoryForm,
-            ...this.pageOption
-          }
-          const getFn = this.isAdd ? inventoryApi.addSchool(param) : inventoryApi.updateSchool(param)
-          getFn.then(res => {
-            this.$message1000('提交成功', 'success')
-            this.close()
-            this.fetchData()
-          })
-        } else {
-          return false
-        }
-      })
-    },
-    resetForm() {
-      this.$refs.form.resetFields()
+    resetForm(){
+      this.$refs.searchForm.resetFields()
     }
-  }
+  },
+  created() {
+    this.fetchData()
+  },
 }
 </script>
 

@@ -90,6 +90,7 @@ export default {
           } },
         { label: '金额/元', prop: 'amount', align: 'center', width: 120 },
         { label: '提交时间', prop: 'saveDate', sortable: true, width: 200 },
+        { label: '备注', prop: 'mark', sortable: true, showOverflowTooltip: true,width: 120 },
         { label: '操作', prop: 'operate', fixed: 'right', width: 150,
           render: (h, { props: { row }}) => {
             const send = (
@@ -102,6 +103,8 @@ export default {
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详 情</span>
                 {row.statusCode === 'unshipped' ? send : null}
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.orderDelete('one', row.id)}>设为完成</span>
                 <el-divider direction={'vertical'}/>
                 <span onClick={() => this.orderDelete('one', row.id)}>删 除</span>
               </div>

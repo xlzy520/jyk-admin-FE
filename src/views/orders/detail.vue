@@ -212,31 +212,4 @@
     margin-right: 20px
   }
 
-  .table-layout {
-    margin-top: 20px;
-    border-left: 1px solid #DCDFE6;
-    border-top: 1px solid #DCDFE6;
-  }
-
-  .table-cell {
-    height: 60px;
-    line-height: 40px;
-    border-right: 1px solid #DCDFE6;
-    border-bottom: 1px solid #DCDFE6;
-    padding: 10px;
-    font-size: 14px;
-    color: #606266;
-    text-align: center;
-    overflow: hidden;
-  }
-
-  .table-cell-title {
-    border-right: 1px solid #DCDFE6;
-    border-bottom: 1px solid #DCDFE6;
-    padding: 10px;
-    background: #F2F6FC;
-    text-align: center;
-    font-size: 14px;
-    color: #303133;
-  }
 </style>

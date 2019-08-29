@@ -1,11 +1,10 @@
 <template>
   <div class="dashboard-editor-container">
-    <div class=" clearfix">
-      您的角色:
-      <span v-for="item in userData.roles" :key="item" class="pan-info-roles">{{ item }}</span>
+    <div class="clearfix">
       <div class="info-container">
-        <span class="display_name">{{ name }}</span>
-        <span style="font-size:20px;padding-top:20px;display:inline-block;">欢迎</span>
+        <span class="display_name"> 您的角色:{{ format(userData.roleCode) }}</span>
+        <span class="display_name"> 您的姓名:{{ userData.username }}</span>
+        <span style="font-size:36px;padding-top:20px;display:inline-block;">欢迎</span>
       </div>
     </div>
     <div>
@@ -28,7 +27,17 @@ export default {
     ...mapGetters([
       'userData'
     ])
-  }
+  },
+  methods: {
+    format(role) {
+      const roleMap = {
+        'staff': '员工',
+        'admin': '管理员',
+        'super': '超级管理员',
+      }
+      return roleMap[role]
+    }
+  },
 }
 </script>
 
@@ -50,16 +59,15 @@ export default {
       display: block;
     }
     .info-container {
+      display: flex;
+      flex-direction: column;
       position: relative;
-      margin-left: 190px;
       height: 150px;
       line-height: 200px;
       .display_name {
-        font-size: 48px;
+        font-size: 36px;
         line-height: 48px;
         color: #212121;
-        position: absolute;
-        top: 25px;
       }
     }
   }
