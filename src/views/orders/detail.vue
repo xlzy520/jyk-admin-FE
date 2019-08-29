@@ -171,7 +171,7 @@
             orderId: this.orderId
           }).then(()=>{
             this.loading = false
-            this.$message('订单关闭成功', 'success')
+            this.$message1000('订单关闭成功', 'success')
             this.getOrderDetail()
           }).catch(() => {
             this.loading = false

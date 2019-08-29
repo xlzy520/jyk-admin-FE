@@ -96,7 +96,7 @@ export default {
             password: md5(this.ruleForm.password),
             newPassword: md5(this.ruleForm.newPassword),
           }).then(res=>{
-            this.$message('修改密码成功', 'success')
+            this.$message1000('修改密码成功', 'success')
             this.close()
             this.loading = false
           }).catch(() => {
