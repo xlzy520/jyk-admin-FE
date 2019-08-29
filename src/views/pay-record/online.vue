@@ -2,23 +2,25 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="nickname">
-          <el-input v-model="searchForm.nickname" maxLength="11" placeholder="昵称" />
+        <el-form-item prop="username">
+          <el-input v-model="searchForm.username" maxLength="11" placeholder="昵称" />
         </el-form-item>
         <el-form-item prop="orderNumber">
-          <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="支付单号" />
+          <el-input v-model="searchForm.orderNumber" maxLength="30" placeholder="支付单号" />
         </el-form-item>
-        <el-form-item prop="payChannel">
-          <el-input v-model="searchForm.payChannel" maxLength="11" placeholder="支付通道订单号" />
+        <el-form-item prop="openNumber">
+          <el-input v-model="searchForm.openNumber" maxLength="30" placeholder="支付通道订单号" />
         </el-form-item>
-        <el-form-item prop="count">
-          <el-input v-model.number="searchForm.count" maxLength="11" placeholder="金额" />
+        <el-form-item prop="amount">
+          <el-input v-model.number="searchForm.amount" maxLength="11" placeholder="金额" />
         </el-form-item>
         <el-form-item prop="addTime">
           <el-date-picker
             v-model="searchForm.addTime"
             type="daterange"
             align="center"
+            :default-time="['00:00:00', '23:59:59']"
+            value-format="yyyy-MM-dd HH:mm:ss"
             start-placeholder="支付开始日期"
             end-placeholder="支付结束日期"
           />
@@ -79,12 +81,11 @@ export default {
       ],
       loading: false,
       searchForm: {
-        payer: '',
-        billNumber: '',
+        addTime: [],
+        username: '',
         orderNumber: '',
         openNumber: '',
         amount: '',
-        saveDate: '',
       },
       rules: {
         name: [
@@ -100,24 +101,24 @@ export default {
   methods: {
     fetchData(data) {
       this.loading = true
+      let params = {}
+      if (data) {
+        params = data
+      }
+      if (params.addTime&&params.addTime.length>0) {
+        params = Object.assign(params, {
+          startDate: params.addTime[0],
+          endDate: params.addTime[1]
+        })
+      }
       payApi.getPayOnline({
-        ...data,
+        ...params,
         ...this.pageOption
       }).then(res => {
         this.payData = res.list
         this.total = res.count
       }).finally(_ => {
         this.loading = false
-      })
-    },
-    submitForm() {
-      this.$refs.form.validate(async(valid) => {
-        if (valid) {
-          this.fetchData(this.searchForm)
-        } else {
-          console.log('error submit!!')
-          return false
-        }
       })
     },
     resetForm() {
