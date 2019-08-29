@@ -50,7 +50,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: '首页',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard',roles: ['staff','admin', 'super'] }
     }]
   },
   {
@@ -61,7 +61,7 @@ export const constantRoutes = [
         path: 'index',
         name: '进销存管理',
         component: () => import('@/views/inventory/index'),
-        meta: { title: '进销存管理', icon: 'stores' }
+        meta: { title: '进销存管理', icon: 'stores',roles: ['staff','admin', 'super'] }
       }
     ]
   }
@@ -76,7 +76,7 @@ export const asyncRoutes = [
     name: '公司管理',
     path: '/company',
     component: Layout,
-    meta: { title: '公司管理', icon: 'company' },
+    meta: { title: '公司管理', icon: 'company', roles: ['admin', 'super'] },
     children: [
       {
         path: 'staff',
@@ -109,7 +109,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/user/list',
     name: '用户管理',
-    meta: { title: '用户管理', icon: 'peoples' },
+    meta: { title: '用户管理', icon: 'peoples',roles: ['admin', 'super'] },
     children: [
       {
         path: 'list',
@@ -133,7 +133,7 @@ export const asyncRoutes = [
         path: 'index',
         name: '商品管理',
         component: () => import('@/views/goods/index'),
-        meta: { title: '商品管理', icon: 'goods' }
+        meta: { title: '商品管理', icon: 'goods',roles: ['admin', 'super'] }
       }
     ]
   },
@@ -145,14 +145,14 @@ export const asyncRoutes = [
         path: 'index',
         name: '订单管理',
         component: () => import('@/views/orders/index'),
-        meta: { title: '订单管理', icon: 'orders' }
+        meta: { title: '订单管理', icon: 'orders',roles: ['admin', 'super'] }
       },
       {
         path: 'detail',
         name: '订单详情',
         hidden: true,
         component: () => import('@/views/orders/detail'),
-        meta: { title: '订单详情', icon: 'orders' }
+        meta: { title: '订单详情', icon: 'orders',roles: ['admin', 'super'] }
       }
     ]
   },
@@ -161,7 +161,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/pay-record/list',
     name: '支付记录',
-    meta: { title: '支付记录', icon: 'pay-record' },
+    meta: { title: '支付记录', icon: 'pay-record',roles: ['admin', 'super'] },
     children: [
       {
         path: 'online',
