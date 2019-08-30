@@ -18,5 +18,8 @@ export default {
   },
   orderClose(id) {
     return fetch('close', id)
+  },
+  orderConfirm(data){
+    return fetch('confirm', data)
   }
 }

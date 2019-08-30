@@ -21,15 +21,18 @@ baseRequest.interceptors.response.use(
       })
       // token已过期
       if (res.code === 1027) {
-        MessageBox.confirm('Token 过期了，您可以取消继续留在该页面，或者重新登录', '确定登出', {
-          confirmButtonText: '重新登录',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          resetRouter()
-          router.push('/login')
-          // location.reload()
-        })
+        if (!sessionStorage.getItem('tokenExpired')) {
+          sessionStorage.setItem('tokenExpired') // todo 需要测试
+          MessageBox.confirm('Token 过期了，您可以取消继续留在该页面，或者重新登录', '确定登出', {
+            confirmButtonText: '重新登录',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            resetRouter()
+            router.push('/login')
+            // location.reload()
+          })
+        }
       }
       return Promise.reject(res)
     } else {

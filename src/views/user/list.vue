@@ -68,6 +68,8 @@ export default {
           prop: 'city',
           formatter: (row) => row.city === 'Changde' ? '常德' : row.city
         },
+        {label: '手机号', prop: 'mobile',},
+        {label: '默认地址', prop: 'city',},
         {
           label: '头像',
           prop: 'fileUrl',
@@ -88,7 +90,20 @@ export default {
           label: '微信唯一ID',
           prop: 'openId',
           width: 270
-        }
+        },
+        {label: '状态', prop: 'black'},
+        {label: '备注', prop: 'mark'},
+        { label: '操作', render: (h, { props: { row }}) => {
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.mark(row)}>备注</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.black(row)}>拉黑</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.delete(row.userId)}>删 除</span>
+              </div>
+            )
+          }}
       ],
       loading: false
     }
@@ -117,6 +132,34 @@ export default {
         this.total = res.total
       }).finally(_ => {
         this.loading = false
+      })
+    },
+    mark(row){
+      this.$prompt('请输入备注', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^\w{0,100}$/,
+        inputErrorMessage: '备注过长'
+      }).then(({ value }) => {
+        userApi.markUser({
+          userId: row.userId,
+          mark: value
+        }).then(() => {
+          this.$message1000('备注成功', 'success')
+          this.fetchData()
+        })
+      })
+    },
+    black(row){
+      this.$confirm('此操作将拉黑该人员, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'danger'
+      }).then(() => {
+        userApi.blackUser({
+          userId: row.userId,
+          black: true
+        })
       })
     },
     resetForm() {

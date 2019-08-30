@@ -31,7 +31,7 @@
           <el-button
             type="primary"
             icon="el-icon-search"
-            @click="fetchData(searchForm)"
+            @click="fetchData"
           >查询</el-button>
         </el-form-item>
       </el-form>
@@ -96,17 +96,17 @@ export default {
             const send = (
               <span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delivery(row)}>发 货</span>
+                <span onClick={() => this.delivery(row)}>发货</span>
               </span>
             )
             return (
               <div class='table-action'>
-                <span onClick={() => this.detail(row)}>详 情</span>
+                <span onClick={() => this.detail(row)}>详情</span>
                 {row.statusCode === 'unshipped' ? send : null}
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.orderDelete('one', row.id)}>设为完成</span>
+                <span onClick={() => this.markMonth('one', row.id)}>月结</span>
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.orderDelete('one', row.id)}>删 除</span>
+                <span onClick={() => this.orderDelete('one', row.id)}>删除</span>
               </div>
             )
           }
@@ -128,6 +128,25 @@ export default {
     this.fetchData()
   },
   methods: {
+    markMonth(row){
+      this.loading = true
+      this.$confirm('确定将此订单标记为月结用户?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(()=>{
+        orderApi.orderConfirm({
+          isMonthSettle:true,
+          orderId: row.orderId
+        }).then(res => {
+          this.loading = false
+          this.$message1000('标记成功！', 'success')
+          this.fetchData()
+        }).finally(() => {
+          this.loading = false
+        })
+      })
+    },
     delivery(row) {
       this.$confirm('确认发货?', '提示', {
         confirmButtonText: '确定',
@@ -168,10 +187,10 @@ export default {
     handleSelectionChange(rows) {
       this.selected = rows.map(v => v.id)
     },
-    fetchData(data) {
+    fetchData() {
       this.loading = true
       orderApi.getOrder({
-        ...data,
+        ...this.searchForm,
         ...this.pageOption
       }).then(res => {
         this.orderData = res.list
@@ -217,7 +236,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  /deep/.stores{
+  /deep/ .table-action{
+    text-align: left;
+  }
+  /deep/ .stores{
     font-size: 20px;
     margin-bottom: 10px;
   }

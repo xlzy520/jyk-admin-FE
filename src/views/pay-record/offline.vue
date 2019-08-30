@@ -86,9 +86,9 @@ export default {
     return {
       payData: [],
       columns: [
-        { label: '商家名称', prop: 'payer' },
+        { label: '名称', prop: 'payer' },
         { label: '手机号', prop: 'mobile' },
-        { label: '商家地址', prop: 'address' },
+        { label: '地址', prop: 'address' },
         { label: '数量', prop: 'num', sortable: true },
         { label: '收款金额', prop: 'amount', sortable: true },
         { label: '收款人', prop: 'staffName' },
