@@ -57,19 +57,24 @@ export default {
       },
       userListData: [],
       columns: [
-        {
-          label: '昵称',
-          prop: 'username',
-          width: '180',
-          showOverflowTooltip: true
-        },
-        {
-          label: '城市',
-          prop: 'city',
-          formatter: (row) => row.city === 'Changde' ? '常德' : row.city
-        },
-        {label: '手机号', prop: 'mobile',},
-        {label: '默认地址', prop: 'city',},
+        { label: '操作',width: '140',fixed: 'right', render: (h, { props: { row }}) => {
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.mark(row)}>备注</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.black(row)}>拉黑</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.delete(row.userId)}>删 除</span>
+              </div>
+            )
+          }},
+        {label: '昵称', prop: 'username', width: 120,},
+        {label: '城市', prop: 'city', width: 100, formatter: (row) => row.city === 'Changde' ? '常德' : row.city},
+        {label: '手机号', prop: 'mobile',width: 120,formatter: (row) => '13588043792'},
+        {label: '默认地址', prop: 'city',width: 120,showOverflowTooltip: false,
+          formatter: (row) => '测试地址测试地址测试地址测试地址测试地址'},
+        {label: '备注', prop: 'mark',width: 120,},
+        {label: '状态', prop: 'black'},
         {
           label: '头像',
           prop: 'fileUrl',
@@ -81,29 +86,8 @@ export default {
             )
           }
         },
-        {
-          label: '注册时间',
-          prop: 'saveDate',
-          sortable: true
-        },
-        {
-          label: '微信唯一ID',
-          prop: 'openId',
-          width: 270
-        },
-        {label: '状态', prop: 'black'},
-        {label: '备注', prop: 'mark'},
-        { label: '操作', render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
-                <span onClick={() => this.mark(row)}>备注</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.black(row)}>拉黑</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.userId)}>删 除</span>
-              </div>
-            )
-          }}
+        {label: '注册时间', prop: 'saveDate',width: 120, sortable: true},
+        {label: '微信唯一ID',prop: 'openId', width: 120},
       ],
       loading: false
     }
@@ -154,7 +138,7 @@ export default {
       this.$confirm('此操作将拉黑该人员, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'danger'
+        type: 'warning'
       }).then(() => {
         userApi.blackUser({
           userId: row.userId,

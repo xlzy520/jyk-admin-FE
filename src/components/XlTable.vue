@@ -20,7 +20,8 @@
       <el-table-column
         v-if="index"
         type="index"
-        width="55"
+        min-width="40"
+        label="序号"
       />
       <el-table-column
         v-for="col in columns"

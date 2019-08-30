@@ -78,7 +78,7 @@ export default {
   mounted() {
     this.$notify({
       title: '提示',
-      message: '所有数据均为模拟数据',
+      message: '此页面数据均为模拟数据,待有真实数据后完善',
       type: 'info'
     })
   },
