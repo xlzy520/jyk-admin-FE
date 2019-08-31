@@ -42,7 +42,7 @@
       :table-columns="columns"
     />
     <el-dialog
-      width="40%"
+      :width="width"
       :title="isAdd?'新增线下支付信息' : '线下支付信息更新'"
       :close-on-click-modal="true"
       :visible.sync="editVisible"
@@ -50,14 +50,17 @@
     >
      <div v-loading="dialogLoading">
        <el-form ref="form" :model="form" label-width="100px" :rules="rules">
-         <el-form-item label="商家名称:" prop="payer">
+         <el-form-item label="名称:" prop="payer">
            <el-input v-model="form.payer" maxLength="11" />
          </el-form-item>
-         <el-form-item label="商家手机号:" prop="mobile">
+         <el-form-item label="手机号:" prop="mobile">
            <el-input v-model="form.mobile" maxLength="11" />
          </el-form-item>
-         <el-form-item label="商家地址:" prop="address">
+         <el-form-item label="地址:" prop="address">
            <el-input v-model="form.address" maxLength="11" />
+         </el-form-item>
+         <el-form-item label="数量:" prop="amount">
+           <el-input v-model="form.amount" maxLength="11" />
          </el-form-item>
          <el-form-item label="金额:" prop="amount">
            <el-input v-model="form.amount" maxLength="11" />
@@ -74,7 +77,7 @@
 
 <script>
 import AddButton from '../../components/AddButton'
-import payApi from '../../api/pay'
+import payApi from '../../api/bill'
 import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
 
@@ -91,7 +94,6 @@ export default {
         { label: '地址', prop: 'address' },
         { label: '数量', prop: 'num', sortable: true },
         { label: '收款金额', prop: 'amount', sortable: true },
-        { label: '收款人', prop: 'staffName' },
         { label: '支付时间', prop: 'payTime', sortable: true },
         { label: '更新时间', prop: 'saveDate', sortable: true },
         { label: '操作',
@@ -141,6 +143,14 @@ export default {
       }
     }
   },
+  computed:{
+    width(){
+      if (window.innerWidth< 960) {
+        return '80vw'
+      }
+      return '40%'
+    }
+  },
   created() {
     this.fetchData()
   },
@@ -151,22 +161,7 @@ export default {
         ...data,
         ...this.pageOption
       }).then(res => {
-        // this.payData = res.list
-        this.payData = [
-          {
-            payer: '某某商家',
-            address: '测试地址测试地址测试地址测试地址测试地址',
-            amount: "100000.00",
-          mobile: "13588043792",
-          payTime: "2019-08-08 22:41:37",
-        payer: "莫某",
-        saveDate: "2019-08-09 20:01:21",
-        staffName: "某某员工",
-        type: 1,
-        num: 2000
-          }
-
-        ]
+        this.payData = res.list
       }).finally(_ => {
         this.loading = false
       })

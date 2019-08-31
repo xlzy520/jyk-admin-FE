@@ -2,16 +2,20 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="username">
-          <el-input v-model="searchForm.username" maxLength="11" placeholder="昵称" />
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="searchForm.username" maxLength="11" placeholder="用户名" />
         </el-form-item>
-        <el-form-item prop="orderNumber">
+        <el-form-item label="支付单号" prop="orderNumber">
           <el-input v-model="searchForm.orderNumber" maxLength="30" placeholder="支付单号" />
         </el-form-item>
-        <el-form-item prop="openNumber">
-          <el-input v-model="searchForm.openNumber" maxLength="30" placeholder="支付通道订单号" />
+        <el-form-item label="支付方式" prop="statusCode">
+          <el-select v-model="searchForm.type" placeholder="支付方式" clearable>
+            <el-option label="全部" value="" />
+            <el-option label="线上" :value="0" />
+            <el-option label="线下" :value="1" />
+          </el-select>
         </el-form-item>
-        <el-form-item prop="amount">
+        <el-form-item label="金额" prop="amount">
           <el-input v-model.number="searchForm.amount" maxLength="11" placeholder="金额" />
         </el-form-item>
         <el-form-item prop="addTime">
@@ -26,12 +30,9 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            @click="fetchData(searchForm)"
-          >查询</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData(searchForm)">查询</el-button>
           <el-button type="info" @click="resetForm">清空</el-button>
+          <el-button type="success" @click="downloadExcel">导出记录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -41,7 +42,7 @@
       :loading="loading"
       :table-data="payData"
       :table-columns="columns"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       @change-page="pageChange"
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-import payApi from '../../api/pay'
+import billApi from '../../api/bill'
 import pagination from '../../mixins/pagination'
 
 export default {
@@ -61,7 +62,7 @@ export default {
     return {
       payData: [],
       columns: [
-        { label: '微信昵称', prop: 'payer' },
+        { label: '用户名', prop: 'payer' },
         { label: '手机号', prop: 'mobile' },
         { label: '账单号', prop: 'billNumber' },
         { label: '支付单号', prop: 'orderNumber' },
@@ -77,7 +78,15 @@ export default {
           return (
             <el-tag effect={'dark'} type={'info'}>未支付</el-tag>
           )
-        } }
+        } },
+        { label: '操作',
+          render: (h, { props: { row }}) => {
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.viewOrder(row)}>{row.type? '': '查看订单详情'}</span>
+              </div>
+            )
+          } }
       ],
       loading: false,
       searchForm: {
@@ -99,6 +108,17 @@ export default {
     this.fetchData()
   },
   methods: {
+    viewOrder(row){
+      this.$router.push('/orders/detail?orderId='+row.orderId)
+    },
+    downloadExcel(){
+      axios.post('/market/bill/list/export', this.searchForm, {
+        responseType: 'blob'
+      }).then(res=>{
+        const url = URL.createObjectURL(res.data)
+        downloadFile(url, '支付记录.xlsx')
+      })
+    },
     fetchData(data) {
       this.loading = true
       let params = {}
@@ -111,12 +131,12 @@ export default {
           endDate: params.addTime[1]
         })
       }
-      payApi.getPayOnline({
+      billApi.getBill({
         ...params,
         ...this.pageOption
       }).then(res => {
         this.payData = res.list
-        this.total = res.count
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })

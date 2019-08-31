@@ -37,12 +37,12 @@
           <el-row>
             <el-col :span="8" class="table-cell-title">支付方式</el-col>
             <el-col :span="8" class="table-cell-title">订单金额</el-col>
-            <el-col :span="8" class="table-cell-title">订单类型</el-col>
+            <el-col :span="8" class="table-cell-title">是否月结</el-col>
           </el-row>
           <el-row>
-            <el-col :span="8" class="table-cell">月结或在线支付</el-col>
+            <el-col :span="8" class="table-cell">{{order.type?'线下支付':'线上支付'}}</el-col>
             <el-col :span="8" class="table-cell">{{ order.amount}}</el-col>
-            <el-col :span="8" class="table-cell">月结或在线支付</el-col>
+            <el-col :span="8" class="table-cell">月结</el-col>
           </el-row>
         </div>
         <div style="margin-top: 20px">

@@ -24,7 +24,7 @@
         </el-form-item>
         <el-form-item label="员工类型" prop="addRoleCode">
           <el-radio-group v-model="form.addRoleCode">
-            <el-radio label="admin" border>管理员</el-radio>
+            <el-radio label="admin" border v-if="userData.roleCode === 'super'">管理员</el-radio>
             <el-radio label="staff" border>普通员工</el-radio>
           </el-radio-group>
         </el-form-item>
@@ -44,11 +44,18 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
 import AddButton from '../../components/AddButton'
 import staffApi from '../../api/staff'
 import { deepClone } from '../../utils'
 import md5 from 'md5'
-
+const initForm = {
+  username: '',
+  addRoleCode: 'staff',
+  mobile: '',
+  password: '',
+  area: ''
+}
 export default {
   name: 'Staff',
   components: { AddButton },
@@ -85,13 +92,7 @@ export default {
       loading: false,
       isAdd: false,
       editVisible: false,
-      form: {
-        username: '',
-        addRoleCode: 'staff',
-        mobile: '',
-        password: '',
-        area: ''
-      },
+      form: initForm,
       rules: {
         username: [
           { required: true, message: '请输入姓名', trigger: 'blur' },
@@ -115,6 +116,11 @@ export default {
       },
       submitLoading: false
     }
+  },
+  computed: {
+    ...mapGetters([
+      'userData'
+    ])
   },
   created() {
     this.fetchData()
@@ -168,8 +174,9 @@ export default {
       })
     },
     close() {
-      this.editVisible = false
       this.$refs.form.resetFields()
+      this.form = initForm
+      this.editVisible = false
     },
     submitForm() {
       this.$refs.form.validate(async(valid) => {

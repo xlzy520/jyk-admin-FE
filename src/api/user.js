@@ -8,6 +8,6 @@ export default {
     return fetch('/user/mark/update', data)
   },
   blackUser(data) {
-    return fetch('/user/black', data)
+    return fetch('/user/white/update', data)
   }
 }

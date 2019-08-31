@@ -157,23 +157,14 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/pay-record',
+    path: '/bill',
     component: Layout,
-    redirect: '/pay-record/list',
-    name: '支付记录',
-    meta: { title: '支付记录', icon: 'pay-record',roles: ['admin', 'super'] },
     children: [
       {
-        path: 'online',
-        name: '线上支付',
-        component: () => import('@/views/pay-record/online'),
-        meta: { title: '线上支付', icon: 'online' }
-      },
-      {
-        path: 'offline',
-        name: '线下支付',
-        component: () => import('@/views/pay-record/offline'),
-        meta: { title: '线下支付', icon: 'offline' }
+        path: 'index',
+        name: '支付记录',
+        component: () => import('@/views/bill/index'),
+        meta: { title: '支付记录', icon: 'online',roles: ['admin', 'super'] },
       }
     ]
   },

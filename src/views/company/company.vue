@@ -7,6 +7,9 @@
       <el-form-item label="公司地址" prop="partnersName">
         <el-input v-model="comForm.partnersName" maxLength="30" />
       </el-form-item>
+      <el-form-item label="短信通知" prop="shortMessage">
+        <el-input v-model="shortMessage" maxLength="12" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="update">更新</el-button>
       </el-form-item>
@@ -24,12 +27,17 @@ export default {
       loading: false,
       comForm: {
         phone: '',
-        partnersName: ''
+        partnersName: '',
       },
+      shortMessage: '',
       rule: {
         phone: [
           { required: true, message: '请输入手机或电话' },
           { pattern: /^(\d+(-\d*)?)?$/g, message: '请输入合法的手机或电话', trigger: 'change' }
+        ],
+        shortMessage: [
+          { required: true, message: '请输入手机号码' },
+          { pattern: /^(\d+(-\d*)?)?$/g, message: '请输入合法的手机号码', trigger: 'change' }
         ],
         partnersName: [
           { required: true, message: '请输入公司地址' }
@@ -41,6 +49,9 @@ export default {
     this.fetchData()
   },
   methods: {
+    saveShortMessageMobile(){
+
+    },
     fetchData() {
       this.loading = true
       companyApi.getCompanyInfo().then(res => {
@@ -58,7 +69,7 @@ export default {
       }).finally(() => {
         this.loading = false
       })
-    }
+    },
   }
 }
 </script>

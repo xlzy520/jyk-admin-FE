@@ -7,7 +7,7 @@
       :index="true"
       :table-data="partnerData"
       :table-columns="columns"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       @change-page="pageChange"
@@ -162,7 +162,7 @@ export default {
       this.loading = true
       partnerApi.getPartner(this.pageOption).then(res => {
         this.partnerData = res.list
-        this.total = res.total
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })

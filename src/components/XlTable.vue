@@ -22,6 +22,7 @@
         type="index"
         min-width="40"
         label="序号"
+        align="center"
       />
       <el-table-column
         v-for="col in columns"
@@ -35,7 +36,7 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      v-if="total>pageSize"
+      v-if="count>pageSize"
       class="pagination"
       background
       :current-page="pageNo"
@@ -43,7 +44,7 @@
       prev-text="上一页"
       next-text="下一页"
       layout="sizes,prev, pager, next, jumper"
-      :total="total"
+      :total="count"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
     />
@@ -86,7 +87,7 @@ export default {
       type: Boolean,
       default: false
     },
-    total: {
+    count: {
       type: Number,
       default: 0
     },

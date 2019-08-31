@@ -1,6 +1,6 @@
 export default {
-  required: (text) => {
-    return { required: true, message: text, trigger: 'blur' }
+  required: (text, method = 'blur') => {
+    return { required: true, message: text, trigger: method }
   },
   chinese: { pattern: /[\u4e00-\u9fa5]/g, message: '请输入汉字', trigger: 'change' },
   word_number: { pattern: /^\w+$/g, message: '请输入字母、数字' },

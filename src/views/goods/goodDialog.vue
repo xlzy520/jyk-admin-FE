@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    width="900px"
+    width="1000px"
     :title="isAdd?'新增商品' : '编辑商品'"
     :close-on-click-modal="true"
     :visible="true"

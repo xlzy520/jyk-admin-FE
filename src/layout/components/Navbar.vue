@@ -9,7 +9,7 @@
         <div>{{ userData.username }}<i class="el-icon-arrow-down el-icon--right" /></div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>主页</el-dropdown-item>
+            <el-dropdown-item>首页</el-dropdown-item>
           </router-link>
           <el-dropdown-item divided command="changePassword">修改密码</el-dropdown-item>
           <el-dropdown-item divided command="logout">注销</el-dropdown-item>
@@ -24,7 +24,7 @@
         <el-form-item label="确认密码" prop="checkPass">
           <el-input v-model="ruleForm.checkPass" type="password" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="确认密码" prop="newPassword">
+        <el-form-item label="新密码" prop="newPassword">
           <el-input v-model="ruleForm.newPassword" type="password" autocomplete="off" />
         </el-form-item>
         <el-form-item>

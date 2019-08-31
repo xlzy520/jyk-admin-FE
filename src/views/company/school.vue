@@ -6,7 +6,7 @@
       :index="true"
       :table-data="schoolData"
       :table-columns="columns"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       @change-page="pageChange"
@@ -135,7 +135,7 @@ export default {
       this.loading = true
       schoolApi.getSchool(this.pageOption).then(res => {
         this.schoolData = res.list
-        this.total = res.total
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })

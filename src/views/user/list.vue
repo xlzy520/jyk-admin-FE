@@ -31,7 +31,7 @@
       ref="userListTable"
       v-loading="loading"
       :index="true"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       :table-data="userListData"
@@ -57,37 +57,37 @@ export default {
       },
       userListData: [],
       columns: [
-        { label: '操作',width: '140',fixed: 'right', render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
-                <span onClick={() => this.mark(row)}>备注</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.black(row)}>拉黑</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.delete(row.userId)}>删 除</span>
-              </div>
-            )
-          }},
-        {label: '昵称', prop: 'username', width: 120,},
+        {label: '昵称', prop: 'username', width: 100,showOverflowTooltip: true,},
         {label: '城市', prop: 'city', width: 100, formatter: (row) => row.city === 'Changde' ? '常德' : row.city},
-        {label: '手机号', prop: 'mobile',width: 120,formatter: (row) => '13588043792'},
-        {label: '默认地址', prop: 'city',width: 120,showOverflowTooltip: false,
-          formatter: (row) => '测试地址测试地址测试地址测试地址测试地址'},
-        {label: '备注', prop: 'mark',width: 120,},
-        {label: '状态', prop: 'black'},
-        {
-          label: '头像',
-          prop: 'fileUrl',
+        {label: '手机号', prop: 'addressMobile',width: 120},
+        {label: '默认地址', prop: 'defaultAddress',width: 160,showOverflowTooltip: true,
+          formatter: (row) => {
+            if (row.address) {
+              return row.address + ' / ' + row.consignee
+            }
+            return ''
+          }},
+        {label: '备注', prop: 'mark'},
+        { label: '状态', prop: 'white',width: 80,
           render: (h, { props: { row }}) => {
             return (
-              <div class='table-img'>
-                <el-image style='width: 50px; height: 50px' src={row.fileUrl} fit='fit'/>
+              <div class='is-default-icon'>
+                <i class={'el-icon-' + (row.white ? 'success' : 'error')}/>
               </div>
             )
           }
         },
-        {label: '注册时间', prop: 'saveDate',width: 120, sortable: true},
-        {label: '微信唯一ID',prop: 'openId', width: 120},
+        {label: '注册时间', prop: 'saveDate',width: 100, sortable: true},
+        {label: '微信唯一ID',prop: 'openId', width: 95, showOverflowTooltip: true},
+        { label: '操作',width: '120', render: (h, { props: { row }}) => {
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.mark(row)}>备注</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.black(row)}>{row.white?'拉黑': '取消拉黑'}</span>
+              </div>
+            )
+          }},
       ],
       loading: false
     }
@@ -113,17 +113,23 @@ export default {
         ...this.pageOption
       }).then(res => {
         this.userListData = res.list
-        this.total = res.total
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })
     },
     mark(row){
-      this.$prompt('请输入备注', '提示', {
+      this.$prompt('', '请输入备注', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /^\w{0,100}$/,
-        inputErrorMessage: '备注过长'
+        inputValue: row.mark,
+        inputValidator: function (val) {
+          if (val === '') {
+            return '请输入备注'
+          } else if (val.length > 100) {
+            return '请输入100字以内备注'
+          }
+        }
       }).then(({ value }) => {
         userApi.markUser({
           userId: row.userId,
@@ -135,14 +141,18 @@ export default {
       })
     },
     black(row){
-      this.$confirm('此操作将拉黑该人员, 是否继续?', '提示', {
+      const text = row.white?'取消拉黑': '拉黑'
+      this.$confirm(`此操作将${text}该用户, 是否继续?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         userApi.blackUser({
           userId: row.userId,
-          black: true
+          white: !row.white
+        }).then(() => {
+          this.$message1000(`${text}成功`, 'success')
+          this.fetchData()
         })
       })
     },

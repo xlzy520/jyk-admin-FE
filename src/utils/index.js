@@ -368,3 +368,13 @@ export function removeClass(ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+export function downloadFile(href, filename = '') {
+  const download = document.createElement('a')
+  download.download = filename
+  download.style.display = 'none'
+  download.href = href
+  document.body.appendChild(download)
+  download.click()
+  document.body.removeChild(download)
+}

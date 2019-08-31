@@ -8,8 +8,8 @@
   >
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="name">
-          <el-input v-model="searchForm.name" maxLength="11" placeholder="姓名" />
+        <el-form-item prop="payer">
+          <el-input v-model="searchForm.payer" maxLength="11" placeholder="用户名" />
         </el-form-item>
         <el-form-item prop="mobile">
           <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
@@ -17,22 +17,20 @@
         <el-form-item prop="orderNumber">
           <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="订单编号" />
         </el-form-item>
-        <el-form-item prop="statusName">
-          <el-select v-model="searchForm.statusName" placeholder="订单状态">
+        <el-form-item prop="statusCode">
+          <el-select v-model="searchForm.statusCode" placeholder="订单状态" clearable>
             <el-option label="全部" value="" />
-            <el-option label="订单关闭" value="订单关闭" />
-            <el-option label="待支付" value="待支付" />
-            <el-option label="待发货" value="待发货" />
-            <el-option label="已发货" value="已发货" />
-            <el-option label="交易完成" value="交易完成" />
+            <el-option label="待支付" value="unpaid" />
+            <el-option label="待发货" value="unshipped" />
+            <el-option label="已发货" value="unreceived" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="月结" value="monthSettle" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            @click="fetchData"
-          >查询</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData">查询</el-button>
+          <el-button type="info" @click="resetForm">清空</el-button>
+          <el-button type="success" @click="downloadExcel">导出记录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -42,15 +40,18 @@
       :selection="true"
       :table-data="orderData"
       :table-columns="columns"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       @change-page="pageChange"
       @size-change="sizeChange"
       @selection-change="handleSelectionChange"
     />
-    <div class="footer">
-      <el-button v-if="orderData.length>0" :disabled="selected.length<1" type="danger" @click="orderDelete('all')">批量删除</el-button>
+    <div class="footer" v-if="orderData.length>0">
+      <el-button :disabled="selected.length<1"
+                 type="danger" @click="orderDelete('all')">批量删除</el-button>
+      <el-button :disabled="selected.length<1"
+                 type="success" @click="complete('all')">批量完成</el-button>
     </div>
     <order-detail v-if="visible" ref="dialog" @close="close"/>
   </div>
@@ -58,40 +59,49 @@
 
 <script>
 import orderApi from '../../api/order'
-import { deepClone } from '../../utils/index'
+import axios from 'axios'
+import { downloadFile} from '../../utils/index'
 import pagination from '../../mixins/pagination'
 import OrderDetail from './detail'
 
 export default {
-  name: 'OrderList',
+  payer: 'OrderList',
   components: { OrderDetail },
   mixins: [pagination],
   data() {
     return {
       orderData: [],
       columns: [
-        { label: '用户', prop: 'payer', width: 120, showOverflowTooltip: true, formatter: row => {
-
-        } },
+        { label: '用户', prop: 'payer', width: 100, showOverflowTooltip: true, formatter: row => {} },
+        { label: '用户备注', prop: 'mark', width: 100, showOverflowTooltip: true, },
         { label: '手机号', prop: 'mobile', width: 120 },
-        { label: '数量', prop: 'total', width: 120 },
-        { label: '订单号', prop: 'orderNumber', width: 120 },
-        { label: '状态', prop: 'statusName',
+        { label: '数量', prop: 'count', width: 80 },
+        { label: '订单号', prop: 'orderNumber', width: 115 },
+        { label: '支付方式', prop: 'method', width: 80,
+          render: (h, { props: { row }}) => {
+            const typeMap = ['#007BFB', '#EA3F33']
+            return (
+              <el-tag effect="dark" color={typeMap[row.type]}>
+                {row.type?'线下':'线上' }
+              </el-tag>
+            )
+          }},
+        { label: '状态', prop: 'statusCode',
           render: (h, { props: { row }}) => {
             const schoolMap = {
               'unpaid': 'info',
               'unshipped': 'primary',
               'unreceived': 'warning',
-              'completed': 'success'
+              'completed': 'success',
+              'monthSettle': 'danger'
             }
             return (
               <el-tag effect='dark' type={schoolMap[row.statusCode]}>{row.statusName }</el-tag>
             )
           } },
-        { label: '金额/元', prop: 'amount', align: 'center', width: 120 },
-        { label: '提交时间', prop: 'saveDate', sortable: true, width: 200 },
-        { label: '备注', prop: 'mark', sortable: true, showOverflowTooltip: true,width: 120 },
-        { label: '操作', prop: 'operate', fixed: 'right', width: 150,
+        { label: '金额/元', prop: 'amount', align: 'center', width: 100 },
+        { label: '提交时间', prop: 'saveDate', sortable: true, width: 100 },
+        { label: '操作', prop: 'operate',
           render: (h, { props: { row }}) => {
             const send = (
               <span>
@@ -99,14 +109,19 @@ export default {
                 <span onClick={() => this.delivery(row)}>发货</span>
               </span>
             )
+            const month = (
+              <span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.markMonth(row)}>月结</span>
+              </span>
+            )
             return (
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详情</span>
                 {row.statusCode === 'unshipped' ? send : null}
+                {row.statusCode === 'unpaid' ? month : null}
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.markMonth('one', row.id)}>月结</span>
-                <el-divider direction={'vertical'}/>
-                <span onClick={() => this.orderDelete('one', row.id)}>删除</span>
+                <span onClick={() => this.orderDelete(row)}>删除</span>
               </div>
             )
           }
@@ -115,28 +130,36 @@ export default {
       loading: false,
       visible: false,
       searchForm: {
-        name: '',
+        payer: '',
         mobile: '',
-        statusName: '',
+        statusCode: '',
         orderNumber: ''
       },
       selected: [],
-      total: 0
+      count: 0
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    downloadExcel(){
+      axios.post('/market/order/list/export', this.searchForm, {
+        responseType: 'blob'
+      }).then(res=>{
+        const url = URL.createObjectURL(res.data)
+        downloadFile(url, '订单记录.xlsx')
+      })
+    },
     markMonth(row){
-      this.loading = true
       this.$confirm('确定将此订单标记为月结用户?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(()=>{
+        this.loading = true
         orderApi.orderConfirm({
-          isMonthSettle:true,
+          monthSettle:true,
           orderId: row.orderId
         }).then(res => {
           this.loading = false
@@ -194,25 +217,19 @@ export default {
         ...this.pageOption
       }).then(res => {
         this.orderData = res.list
-        this.total = res.count
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })
     },
     detail(row) {
       this.$router.push('/orders/detail?orderId='+row.orderId)
-      // orderApi.orderDetail({
-      //   orderId: row.orderId
-      // }).then(res => {
-      //   console.log(res);
-      // })
-
     },
     close() {
       this.form = {
-        name: '',
+        payer: '',
         stores: '',
-        statusName: '',
+        statusCode: '',
         price: ''
       }
     },
@@ -229,13 +246,16 @@ export default {
       })
     },
     resetForm() {
-      this.$refs.form.resetFields()
+      this.$refs.searchForm.resetFields()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  /deep/ .el-tag{
+    border-color: unset;
+  }
   /deep/ .table-action{
     text-align: left;
   }

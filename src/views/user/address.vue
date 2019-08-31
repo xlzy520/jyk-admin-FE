@@ -53,7 +53,7 @@
       :index="true"
       :table-data="addressData"
       :table-columns="columns"
-      :total="total"
+      :count="count"
       :pageSize="pageOption.pageSize"
       :pageNo="pageOption.pageIndex"
       @change-page="pageChange"
@@ -73,21 +73,17 @@
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="addressForm.mobile" suffix-icon="el-icon-mobile" maxLength="11" />
         </el-form-item>
-        <el-form-item :label="addressForm.addressType?'详细地址':'学校'" prop="address">
-          <el-input
-            v-if="addressForm.addressType === 1"
-            v-model="addressForm.address"
-            suffix-icon="el-icon-location"
-            maxLength="40"
-            type="textarea"
-            :rows="2"
-          />
-          <el-select v-else v-model="addressForm.schoolId" suffix-icon="el-icon-location">
+        <el-form-item label="详细地址" prop="address" v-if="addressForm.addressType">
+          <el-input v-model="addressForm.address" suffix-icon="el-icon-location" maxLength="40"
+                    type="textarea" :rows="2"/>
+        </el-form-item>
+        <el-form-item label="学校" prop="schoolId" v-else>
+          <el-select v-model="addressForm.schoolId" suffix-icon="el-icon-location">
             <el-option
               v-for="option in schoolOptions"
               :key="option.schoolId"
               :value="option.schoolId"
-              :label="option.address"
+              :label="option.schoolName+'————'+option.address"
             />
           </el-select>
         </el-form-item>
@@ -164,8 +160,8 @@ export default {
         username: '',
         consignee: '',
         mobile: '',
-        addressType: '',
-        isDefault: '',
+        addressType: null,
+        isDefault: null,
         saveDate: ''
       },
       addressForm: {
@@ -186,6 +182,9 @@ export default {
         ],
         address: [
           { required: true, message: '请输入地址' }
+        ],
+        schoolId: [
+          { required: true, message: '请选择学校' }
         ]
       },
       schoolOptions: []
@@ -215,7 +214,7 @@ export default {
         ...this.pageOption
       }).then(res => {
         this.addressData = res.list
-        this.total = res.total
+        this.count = res.count
       }).finally(_ => {
         this.loading = false
       })
