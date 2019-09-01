@@ -177,14 +177,16 @@ export default {
       this.$refs.form.resetFields()
       this.form = initForm
       this.editVisible = false
+``      this.submitLoading = false
     },
     submitForm() {
-      this.$refs.form.validate(async(valid) => {
+      this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true
-          const cache = this.form
-          cache.password = md5(cache.password)
-          const result = await this.isAdd ? staffApi.addStaff(this.form) : staffApi.updateStaff(this.form)
+          if (this.form.password) {
+            this.form.password = md5(this.form.password)
+          }
+          const result = this.isAdd ? staffApi.addStaff(this.form) : staffApi.updateStaff(this.form)
           result.then(res => {
             this.$message1000('提交成功', 'success')
             this.close()
