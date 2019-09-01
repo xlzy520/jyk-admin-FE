@@ -113,7 +113,7 @@ export default {
           }
         },
         {label: '餐具类型', prop: 'useType', width: 100},
-        {label: '餐具详情', prop: 'detail',minWidth: 270,showOverflowTooltip: false, render: (h, { props: { row }}) => {
+        {label: '餐具详情', prop: 'detail',minWidth: 270, render: (h, { props: { row }}) => {
             return (
               <div class="detail">
                 {row.inventoryDetailList.map(v=>{
@@ -132,10 +132,15 @@ export default {
         {
           label: '操作', prop: 'region',minWidth: 100,
           render: (h, { props: { row }}) => {
-            return (
-              <div class='table-action'>
+            const update = (
+              <span>
                 <span onClick={() => this.update(row)}>编辑</span>
                 <el-divider direction={'vertical'}/>
+              </span>
+            )
+            return (
+              <div class='table-action'>
+                {row.inventoryType ? update : null}
                 <span onClick={() => this.delete(row.inventoryId)}>删除</span>
               </div>
             )
@@ -290,7 +295,7 @@ export default {
   }
   /deep/ .detail{
     .title{
-      width: 60px;
+
     }
     .detail-row{
       display: flex;
