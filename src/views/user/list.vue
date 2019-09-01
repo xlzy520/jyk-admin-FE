@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="keyword">
-          <el-input v-model="searchForm.keyword" max-length="11" placeholder="昵称" />
+        <el-form-item prop="keyword" label="微信昵称">
+          <el-input v-model="searchForm.keyword" max-length="11" placeholder="微信昵称" />
         </el-form-item>
-        <el-form-item prop="saveDate">
+        <el-form-item prop="saveDate" label="注册时间">
           <el-date-picker
             v-model="searchForm.saveDate"
             type="daterange"
@@ -57,7 +57,7 @@ export default {
       },
       userListData: [],
       columns: [
-        {label: '昵称', prop: 'username', width: 100,showOverflowTooltip: true,},
+        {label: '微信昵称', prop: 'username', width: 100,showOverflowTooltip: true,},
         {label: '城市', prop: 'city', width: 100, formatter: (row) => row.city === 'Changde' ? '常德' : row.city},
         {label: '手机号', prop: 'addressMobile',width: 120},
         {label: '默认地址', prop: 'defaultAddress',width: 160,showOverflowTooltip: true,
