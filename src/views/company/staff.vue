@@ -177,7 +177,7 @@ export default {
       this.$refs.form.resetFields()
       this.form = initForm
       this.editVisible = false
-``      this.submitLoading = false
+      this.submitLoading = false
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
