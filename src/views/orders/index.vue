@@ -109,7 +109,7 @@ export default {
           } },
         { label: '金额/元', prop: 'amount', align: 'center', width: 100 },
         { label: '提交时间', prop: 'saveDate', sortable: true, minWidth: 100 },
-        { label: '操作', prop: 'operate', minWidth: 120,
+        { label: '操作', prop: 'operate', minWidth: 135,
           render: (h, { props: { row }}) => {
             const send = (
               <span>
@@ -127,7 +127,7 @@ export default {
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详情</span>
                 {row.statusCode === 'unshipped' ? send : null}
-                {row.statusCode === 'unpaid' ? month : null}
+                {row.statusCode === 'unpaid'&& row.type? month : null}
                 <el-divider direction={'vertical'}/>
                 <span onClick={() => this.orderDelete(row)}>删除</span>
               </div>
