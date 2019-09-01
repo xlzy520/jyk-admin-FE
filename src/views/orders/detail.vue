@@ -116,38 +116,41 @@
               return (row.quantity * Number(row.price)).toFixed(2)
             } },
         ],
+        steps: []
       }
     },
     computed:{
-      steps(){
-        if (this.order.monthSettle) {
-          return [
-            {title: '提交订单', description: this.order.submitTime},
-            {title: '支付订单', description: this.order.saveDate},
-            {title: '平台发货', description: this.order.deliveryTime},
-            {title: '月结待结算', description: ''},
-            {title: '交易完成', description: this.order.completedTime},
-          ]
-        }
-        return [
-          {title: '提交订单', description: this.order.submitTime},
-          {title: '支付订单', description: this.order.saveDate},
-          {title: '平台发货', description: this.order.deliveryTime},
-          {title: '交易完成', description: this.order.completedTime},
-        ]
-      }
+
     },
     created() {
       this.orderId = this.$route.query.orderId
       this.getOrderDetail()
     },
     methods: {
+      setSteps(order){
+        if (order.monthSettle) {
+          return [
+            {title: '提交订单', description: order.submitTime},
+            {title: '支付订单', description: order.saveDate},
+            {title: '平台发货', description: order.deliveryTime},
+            {title: '月结待结算', description: ''},
+            {title: '交易完成', description: order.completedTime},
+          ]
+        }
+        return [
+          {title: '提交订单', description: order.submitTime},
+          {title: '支付订单', description: order.saveDate},
+          {title: '平台发货', description: order.deliveryTime},
+          {title: '交易完成', description: order.completedTime},
+        ]
+      },
       getOrderDetail(){
         this.loading = true
         orderApi.orderDetail({
           orderId: this.orderId
         }).then(res => {
           const { orderDetails, ...order } = res
+          this.steps = this.setSteps(order)
           this.order = order
           this.goodsTableData = orderDetails
         }).finally(() => {
