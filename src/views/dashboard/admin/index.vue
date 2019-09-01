@@ -42,9 +42,10 @@ export default {
   },
   methods: {
     getData(){
-      userApi.visitTrend().then(res=>{
-        this.visitPv = res[0].visitPv
-      })
+      // userApi.visitTrend().then(res=>{
+      //   this.visitPv = res[0].visitPv
+      // })
+      this.visitPv = 150  // todo visitPv接口报错  模拟数据
     },
     getbillStatistics(){
       billApi.billStatistics().then(res=>{
