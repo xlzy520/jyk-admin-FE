@@ -227,6 +227,11 @@ export default {
           startDate: params.addTime[0],
           endDate: params.addTime[1]
         })
+      }else {
+        params = Object.assign(params, {
+          startDate:'',
+          endDate: ''
+        })
       }
       billApi.getBill({
         ...params,

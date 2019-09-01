@@ -19,7 +19,7 @@ export default {
 .add-button{
   position: fixed;
   right: 15px;
-  bottom: 20px;
+  bottom: 80px;
   width: 50px;
   height: 50px;
   border-radius: 50%;

@@ -1,8 +1,8 @@
 <template>
   <div class="login-container">
     <div class="bg-animation" v-if="canvas">
-      <canvas id="cvs_bg" width="1443" height="596" />
-      <canvas id="cvs_key" />
+<!--      <canvas id="cvs_bg" width="1443" height="596" />-->
+<!--      <canvas id="cvs_key" />-->
     </div>
     <el-form
       ref="loginForm"
@@ -168,6 +168,7 @@ export default {
     height: 100%;
     width: 100%;
     background-color: $bg;
+    /*background: url("../../assets/bg.jpg");*/
     @media screen and (max-width: 960px){
       .login-form{
         width: auto!important;

@@ -27,6 +27,18 @@
             <el-option label="月结" value="monthSettle" />
           </el-select>
         </el-form-item>
+        <el-form-item prop="addTime" label="日期">
+          <el-date-picker
+            v-model="searchForm.addTime"
+            type="daterange"
+            align="center"
+            :default-time="['00:00:00', '23:59:59']"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            :picker-options="pickerOptions"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" @click="fetchData">查询</el-button>
           <el-button type="info" @click="resetForm">清空</el-button>
@@ -71,6 +83,34 @@ export default {
   data() {
     return {
       orderData: [],
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+      },
       columns: [
         { label: '用户', prop: 'payer', minWidth: 100, showOverflowTooltip: true, formatter: row => {} },
         { label: '用户备注', prop: 'mark', minWidth: 100, showOverflowTooltip: true, },
@@ -109,7 +149,7 @@ export default {
           } },
         { label: '金额/元', prop: 'amount', align: 'center', width: 100 },
         { label: '提交时间', prop: 'saveDate', sortable: true, minWidth: 100 },
-        { label: '操作', prop: 'operate', minWidth: 135,
+        { label: '操作', prop: 'operate', minWidth: 135,fixed: 'right',
           render: (h, { props: { row }}) => {
             const send = (
               <span>
@@ -123,13 +163,19 @@ export default {
                 <span onClick={() => this.markMonth(row)}>月结</span>
               </span>
             )
+            let canSend = false
+            if (row.statusCode === 'unshipped') {
+              canSend = true
+            } else if (row.statusCode === 'unpaid' && row.type) {
+              canSend = true
+            }
             return (
               <div class='table-action'>
                 <span onClick={() => this.detail(row)}>详情</span>
-                {row.statusCode === 'unshipped' ? send : null}
+                {canSend ? send : null}
                 {row.statusCode === 'unpaid'&& row.type? month : null}
                 <el-divider direction={'vertical'}/>
-                <span onClick={() => this.orderDelete(row)}>删除</span>
+                <span onClick={() => this.orderDelete('single',row)}>删除</span>
               </div>
             )
           }
@@ -141,9 +187,14 @@ export default {
         payer: '',
         mobile: '',
         statusCode: '',
-        orderNumber: ''
+        orderNumber: '',
+        addTime: []
       },
       selected: [],
+      pageOption: {
+        pageIndex: 1,
+        pageSize: 50
+      },
       count: 0
     }
   },
@@ -169,7 +220,14 @@ export default {
       })
     },
     downloadExcel(){
-      axios.post('/market/order/list/export', this.searchForm, {
+      let params = this.searchForm
+      if (params.addTime&&params.addTime.length>0) {
+        params = Object.assign(params, {
+          startDate: params.addTime[0],
+          endDate: params.addTime[1]
+        })
+      }
+      axios.post('/market/order/list/export', params, {
         responseType: 'blob'
       }).then(res=>{
         const url = URL.createObjectURL(res.data)
@@ -213,16 +271,17 @@ export default {
         })
       })
     },
-    orderDelete(type, id) {
+    orderDelete(type, row) {
       this.$confirm('此操作将删除订单,并且无法恢复,是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.loading = true
-        const params = type === 'all' ? this.selected.map(v=>v.id) : id
+        console.log(row);
+        const params = type === 'all' ? this.selected.map(v=>v.orderId) : row.orderId
         orderApi.deleteOrder({
-          id: params
+          orderId: params
         }).then(res => {
           this.$message1000('删除成功', 'success')
           this.loading = false
@@ -237,12 +296,24 @@ export default {
     },
     fetchData() {
       this.loading = true
+      let params = this.searchForm
+      if (params.addTime&&params.addTime.length>0) {
+        params = Object.assign(params, {
+          startDate: params.addTime[0],
+          endDate: params.addTime[1]
+        })
+      } else {
+        params = Object.assign(params, {
+          startDate:'',
+          endDate: ''
+        })
+      }
       orderApi.getOrder({
-        ...this.searchForm,
+        ...params,
         ...this.pageOption
       }).then(res => {
         this.orderData = res.list
-        this.count = res.count
+        this.count = 100
       }).finally(_ => {
         this.loading = false
       })

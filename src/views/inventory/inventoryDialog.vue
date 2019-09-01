@@ -89,7 +89,7 @@
             <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="学校" prop="schoolId" v-else>
+        <el-form-item label="学校" prop="schoolId" v-if="userType">
           <el-select v-model="formData.schoolId" placeholder="请选择学校" filterable>
             <el-option v-for="school in schoolList" :key="school.schoolId"
                        :label="school.schoolName" :value="school.schoolId"/>
@@ -251,7 +251,7 @@
         return list.filter(v=>!arr.includes(v.useType))
       },
       userTypeChange(){
-        this.formData.useTypeId = ''
+        this.formData.userId = null
         this.formData.specsId = ''
         this.curTableWare.useType = ''
       },

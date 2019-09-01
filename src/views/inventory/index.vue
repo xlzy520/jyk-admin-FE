@@ -44,7 +44,7 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-search" @click="fetchData(searchForm)">查询</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="fetchData">查询</el-button>
           <el-button type="info" @click="resetForm">清空</el-button>
           <el-button type="success" @click="downloadExcel">导出记录</el-button>
         </el-form-item>
@@ -198,11 +198,15 @@ export default {
         this.tablewareList = res
       })
     },
-    fetchData(data) {
+    fetchData() {
+      let data = this.searchForm
       this.loading = true
       if (data&&data.payTime&&data.payTime.length>0) {
         data.startDate = data.payTime[0]
         data.endDate = data.payTime[1]
+      } else {
+        data.startDate = ''
+        data.endDate = ''
       }
       inventoryApi.list({
         ...data,
