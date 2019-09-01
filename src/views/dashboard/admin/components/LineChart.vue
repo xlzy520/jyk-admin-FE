@@ -92,7 +92,7 @@ export default {
         },
         grid: {
           left: 10,
-          right: 10,
+          right: 50,
           bottom: 20,
           top: 30,
           containLabel: true
@@ -110,10 +110,10 @@ export default {
           }
         },
         legend: {
-          data: ['金额']
+          data: ['当月日付款金额']
         },
         series: [{
-          name: '金额', itemStyle: {
+          name: '当月日付款金额', itemStyle: {
             normal: {
               color: '#FF005A',
               lineStyle: {
@@ -122,7 +122,7 @@ export default {
               }
             }
           },
-          smooth: true,
+          smooth: false,
           type: 'line',
           data: value,
           animationDuration: 2800,
