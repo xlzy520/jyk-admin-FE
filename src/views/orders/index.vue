@@ -8,17 +8,17 @@
   >
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="payer">
-          <el-input v-model="searchForm.payer" maxLength="11" placeholder="用户名" />
+        <el-form-item prop="payer" label="用户名">
+          <el-input v-model="searchForm.payer" maxLength="11" placeholder="输入用户名" />
         </el-form-item>
-        <el-form-item prop="mobile">
-          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
+        <el-form-item prop="mobile" label="手机号">
+          <el-input v-model="searchForm.mobile" maxLength="11" placeholder="输入手机号" />
         </el-form-item>
-        <el-form-item prop="orderNumber">
-          <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="订单编号" />
+        <el-form-item prop="orderNumber" label="订单编号">
+          <el-input v-model="searchForm.orderNumber" maxLength="11" placeholder="输入订单编号" />
         </el-form-item>
-        <el-form-item prop="statusCode">
-          <el-select v-model="searchForm.statusCode" placeholder="订单状态" clearable>
+        <el-form-item prop="statusCode" label="订单状态">
+          <el-select v-model="searchForm.statusCode" placeholder="选择订单状态" clearable>
             <el-option label="全部" value="" />
             <el-option label="待支付" value="unpaid" />
             <el-option label="待发货" value="unshipped" />
@@ -51,7 +51,7 @@
       <el-button :disabled="selected.length<1"
                  type="danger" @click="orderDelete('all')">批量删除</el-button>
       <el-button :disabled="selected.length<1"
-                 type="success" @click="complete('all')">批量完成</el-button>
+                 type="success" @click="monthSettle">完成月结</el-button>
     </div>
     <order-detail v-if="visible" ref="dialog" @close="close"/>
   </div>
@@ -72,10 +72,10 @@ export default {
     return {
       orderData: [],
       columns: [
-        { label: '用户', prop: 'payer', width: 100, showOverflowTooltip: true, formatter: row => {} },
-        { label: '用户备注', prop: 'mark', width: 100, showOverflowTooltip: true, },
+        { label: '用户', prop: 'payer', minWidth: 100, showOverflowTooltip: true, formatter: row => {} },
+        { label: '用户备注', prop: 'mark', minWidth: 100, showOverflowTooltip: true, },
         { label: '手机号', prop: 'mobile', width: 120 },
-        { label: '数量', prop: 'count', width: 80 },
+        { label: '数量', prop: 'total', width: 80 },
         { label: '订单号', prop: 'orderNumber', width: 115 },
         { label: '支付方式', prop: 'method', width: 80,
           render: (h, { props: { row }}) => {
@@ -86,7 +86,7 @@ export default {
               </el-tag>
             )
           }},
-        { label: '状态', prop: 'statusCode',
+        { label: '状态', prop: 'statusCode',minWidth: 120,
           render: (h, { props: { row }}) => {
             const schoolMap = {
               'unpaid': 'info',
@@ -95,13 +95,21 @@ export default {
               'completed': 'success',
               'monthSettle': 'danger'
             }
+            let text = row.statusName
+            if (row.monthSettle) {
+              if (row.statusCode !== 'monthSettle') {
+                text = '月结' + text
+              } else {
+                text = '月结待结算'
+              }
+            }
             return (
-              <el-tag effect='dark' type={schoolMap[row.statusCode]}>{row.statusName }</el-tag>
+              <el-tag effect='dark' type={schoolMap[row.statusCode]}>{text}</el-tag>
             )
           } },
         { label: '金额/元', prop: 'amount', align: 'center', width: 100 },
-        { label: '提交时间', prop: 'saveDate', sortable: true, width: 100 },
-        { label: '操作', prop: 'operate',
+        { label: '提交时间', prop: 'saveDate', sortable: true, minWidth: 100 },
+        { label: '操作', prop: 'operate', minWidth: 120,
           render: (h, { props: { row }}) => {
             const send = (
               <span>
@@ -143,6 +151,23 @@ export default {
     this.fetchData()
   },
   methods: {
+    monthSettle(){
+      let canMonthComplete = this.selected.some(v=>v.statusCode!=='monthSettle')
+      if (canMonthComplete) {
+        this.$message1000('存在不是月结状态的订单，请选择月结状态的订单！', 'error')
+        return false
+      }
+      this.loading = true
+      orderApi.monthCompleted({
+        orderIds: this.selected.map(v=>v.orderId)
+      }).then(res=>{
+        this.loading = false
+        this.$message1000('完成月结', 'success')
+        this.fetchData()
+      }).catch(() => {
+        this.loading = false
+      })
+    },
     downloadExcel(){
       axios.post('/market/order/list/export', this.searchForm, {
         responseType: 'blob'
@@ -195,7 +220,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.loading = true
-        const params = type === 'all' ? this.selected : id
+        const params = type === 'all' ? this.selected.map(v=>v.id) : id
         orderApi.deleteOrder({
           id: params
         }).then(res => {
@@ -208,7 +233,7 @@ export default {
       })
     },
     handleSelectionChange(rows) {
-      this.selected = rows.map(v => v.id)
+      this.selected = rows
     },
     fetchData() {
       this.loading = true
@@ -253,12 +278,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  /deep/ .el-tag{
-    border-color: unset;
-  }
-  /deep/ .table-action{
-    text-align: left;
-  }
   /deep/ .stores{
     font-size: 20px;
     margin-bottom: 10px;

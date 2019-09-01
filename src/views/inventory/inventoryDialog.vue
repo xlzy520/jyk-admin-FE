@@ -159,7 +159,22 @@
         type: Boolean,
         default: false,
         required: true
-      }
+      },
+      schoolList:{
+        type: Array,
+        default: false,
+        required: true
+      },
+      userList:{
+        type: Array,
+        default: false,
+        required: true
+      },
+      tablewareList:{
+        type: Array,
+        default: false,
+        required: true
+      },
     },
     data() {
       return {
@@ -170,9 +185,6 @@
           recoveryDetail: ['', '', '', ''],
           lossyDetail: ['', '', '', '']
         },
-        schoolList: [],
-        userList: [],
-        tablewareList: [],
         specsList: [],
         curTableWare: {
           useType: ''
@@ -238,19 +250,10 @@
         }
         return list.filter(v=>!arr.includes(v.useType))
       },
-      getSchoolList(){
-        this.loading = true
-        schoolApi.getSchool({
-          pageIndex: 1,
-          pageSize: 100
-        }).then(res => {
-          this.schoolList = res.list
-        }).finally(() => {
-          this.loading = false
-        })
-      },
       userTypeChange(){
         this.formData.useTypeId = ''
+        this.formData.specsId = ''
+        this.curTableWare.useType = ''
       },
       userChange (){
         this.getDefaultAddress()
@@ -260,9 +263,10 @@
         this.getspecsDetail()
       },
       tablewareChange(val){
-        if (!this.isAdd) {
-          this.formData.specsId = ''
-        }
+        this.formData.specsId = ''
+        this.setSpecsList(val)
+      },
+      setSpecsList(val){
         this.curTableWare = this.tablewareList.find(v=>v.useTypeId === val)
         if (this.curTableWare.useType === '幼儿园餐具') {
           this.specsList = this.curTableWare.specsList
@@ -283,16 +287,6 @@
           }
         }).finally(() => {
           this.loading = false
-        })
-      },
-      getUserList(){
-        inventoryApi.userList().then(res => {
-          this.userList = res
-        })
-      },
-      getTablewareList(){
-        inventoryApi.tablewareList().then(res => {
-          this.tablewareList = res
         })
       },
       resetForm() {
@@ -319,7 +313,6 @@
               ...tablewareData,
               inventoryType: 1
             }
-            console.log(this.tablewareData);
             const service = this.isAdd ? inventoryApi.save(param) : inventoryApi.update(param)
             service.then(res => {
               this.$message1000('提交成功', 'success')
@@ -338,15 +331,35 @@
             this.defaultAddress = res
           }
         })
+      },
+      edit(cloneRow){
+        let tablewareData= {
+          recoveryDetail: [],
+          lossyDetail: []
+        }
+        cloneRow.inventoryDetailList.map(v=>{
+          if (v.inventoryName === '回收') {
+            v.inventoryDetail.map((d,index)=>{
+              tablewareData.recoveryDetail[index] = d.quantity
+            })
+          } else {
+            v.inventoryDetail.map((d,index)=>{
+              tablewareData.lossyDetail[index] = d.quantity
+            })
+          }
+        })
+        this.formData = cloneRow
+        this.userType = ['餐馆餐具','宴席餐具'].includes(cloneRow.useType)? 0: 1
+        this.tablewareData = tablewareData
+        this.getspecsDetail()
+        this.setSpecsList(cloneRow.useTypeId)
+        if (cloneRow.userId) {
+          this.getDefaultAddress()
+        }
       }
     },
     mounted() {
-      this.getUserList()
-      this.getTablewareList()
-      this.getSchoolList()
-      if (!this.isAdd) {
-        this.getDefaultAddress()
-      }
+
     }
   }
 </script>

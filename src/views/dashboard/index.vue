@@ -23,7 +23,7 @@ export default {
     ])
   },
   created() {
-    if (!this.userData.roleCode.includes('super')) {
+    if (!['super', 'admin'].includes(this.userData.roleCode)) {
       this.currentRole = 'editorDashboard'
     }
   }

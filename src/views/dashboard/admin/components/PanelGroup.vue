@@ -1,41 +1,54 @@
 <template>
   <el-row :gutter="40" class="panel-group">
-    <el-col :xs="16" :sm="16" :lg="8" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+          <svg-icon icon-class="orders" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            新 顾 客
+            未 发 货 订 单 数
           </div>
-          <count-to :start-val="0" :end-val="102" :duration="1000" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="data.unshippedCount" :duration="1000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-    <el-col :xs="16" :sm="16" :lg="8" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('purchases')">
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel">
+        <div class="card-panel-icon-wrapper icon-message">
+          <svg-icon icon-class="month" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+            待 月 结 订 单 数
+          </div>
+          <count-to :start-val="0" :end-val="data.monthSettleCount" :duration="1000" class="card-panel-num" />
+        </div>
+      </div>
+    </el-col>
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-money">
           <svg-icon icon-class="money" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            日 成 交 额
+            日 交 易 额
           </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="Number(data.dailyAmountCount)" :decimals="2" :duration="1000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-    <el-col :xs="16" :sm="16" :lg="8" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('shoppings')">
+    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+      <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="shopping" class-name="card-panel-icon" />
+          <svg-icon icon-class="visit" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            日 购 物 量
+            日 访 问 量
           </div>
-          <count-to :start-val="0" :end-val="600" :duration="600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="visitPv" :duration="1000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -46,14 +59,23 @@
 import CountTo from 'vue-count-to'
 
 export default {
+  props: {
+    visitPv: {
+      default: 0
+    },
+    data:{
+      default: ()=>{
+        return {
+          unshippedCount: 0,
+          monthSettleCount: 0,
+          dailyAmountCount: 0
+        }
+      }
+    }
+  },
   components: {
     CountTo
   },
-  methods: {
-    handleSetLineChartData(type) {
-      this.$emit('handleSetLineChartData', type)
-    }
-  }
 }
 </script>
 

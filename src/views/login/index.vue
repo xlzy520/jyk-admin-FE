@@ -107,6 +107,7 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.loading = false
+            sessionStorage.removeItem('expire')
             this.$router.push({ path: this.redirect || '/' })
             this.$message1000('登录成功', 'success')
           }).catch(() => {

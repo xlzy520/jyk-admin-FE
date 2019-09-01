@@ -12,13 +12,13 @@
           <el-input v-model="searchForm.mobile" maxLength="11" placeholder="手机号" />
         </el-form-item>
         <el-form-item prop="type">
-          <el-select v-model="searchForm.addressType" placeholder="用户类型">
+          <el-select v-model="searchForm.addressType" placeholder="用户类型" clearable>
             <el-option label="全部" value="" />
             <el-option label="餐厅" value="1" />
             <el-option label="学校" value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item prop="isDefault">
+        <el-form-item prop="isDefault" clearable>
           <el-select v-model="searchForm.isDefault" placeholder="是否默认地址">
             <el-option label="全部" value="" />
             <el-option label="默认" value="1" />
@@ -34,7 +34,6 @@
             end-placeholder="添加日期止"
             :default-time="['00:00:00', '23:59:59']"
             value-format="yyyy-MM-dd HH:mm:ss"
-            :clearable="false"
           />
         </el-form-item>
         <el-form-item>

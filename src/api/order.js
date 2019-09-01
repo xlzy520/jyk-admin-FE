@@ -21,5 +21,8 @@ export default {
   },
   orderConfirm(data){
     return fetch('confirm', data)
+  },
+  monthCompleted(data){
+    return fetch('/month/completed', data)
   }
 }

@@ -1,43 +1,65 @@
 <template>
   <div class="dashboard-editor-container">
 
+    <panel-group :visit-pv="visitPv" :data="billStatistics"/>
+
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <h3>本周交易额</h3>
       <line-chart :chart-data="lineChartData" />
     </el-row>
   </div>
 </template>
 
 <script>
+import PanelGroup from './components/PanelGroup'
 import LineChart from './components/LineChart'
-
-const lineChartData = {
-  newVisitis: {
-    expectedData: [100, 120, 161, 134, 105, 160, 165],
-    actualData: [120, 82, 91, 154, 162, 140, 145]
-  },
-}
+import userApi from '../../../api/user'
+import billApi from '../../../api/bill'
 
 export default {
   name: 'DashboardAdmin',
   components: {
+    PanelGroup,
     LineChart,
   },
   data() {
     return {
-      lineChartData: lineChartData.newVisitis
+      lineChartData: {
+        date: [],
+        value: []
+      },
+      visitPv: null,
+      billStatistics: {
+        unshippedCount: null,
+        monthSettleCount: null,
+        dailyAmountCount: null
+      },
     }
   },
   mounted() {
-    this.$notify({
-      title: '提示',
-      message: '此页面数据均为模拟数据,待有真实数据后完善',
-      type: 'info'
-    })
+    this.getData()
+    this.getbillStatistics()
+    this.getSalesStatistics()
   },
   methods: {
-    handleSetLineChartData(type) {
-      this.lineChartData = lineChartData[type]
+    getData(){
+      userApi.visitTrend().then(res=>{
+        this.visitPv = res[0].visitPv
+      })
+    },
+    getbillStatistics(){
+      billApi.billStatistics().then(res=>{
+        this.billStatistics = res
+      })
+    },
+    getSalesStatistics(){
+      billApi.getSalesStatistics().then(res => {
+        const date = res.map(v=>v.time.substr(0,10))
+        const value = res.map(v=>Number(v.amount))
+        this.lineChartData = {
+          date: date,
+          value: value
+        }
+      })
     }
   }
 }

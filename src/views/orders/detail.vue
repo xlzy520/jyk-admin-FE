@@ -2,21 +2,18 @@
   <div class="detail-container" v-loading="loading">
     <div class="detail-header">
       <el-steps :active="formatStepStatus(order.statusCode)" finish-status="success" align-center>
-        <el-step title="提交订单" :description="order.submitTime"/>
-        <el-step title="支付订单" :description="order.saveDate"/>
-        <el-step title="平台发货" :description="order.deliveryTime"/>
-        <el-step title="交易完成" :description="order.completedTime"/>
+        <el-step v-for="step in steps" :key="step.title" :title="step.title" :description="step.description"/>
       </el-steps>
     </div>
     <div class="detail-status">
       <el-card shadow="never" style="margin-top: 15px">
         <div class="operate-container">
           <i class="el-icon-warning color-danger" style="margin-left: 20px"/>
-          <span class="color-danger">当前订单状态：{{ order.statusName }}</span>
+          <span class="color-danger">当前订单状态：{{order.monthSettle&&order.statusCode!=='monthSettle'?'月结':''}}{{ order.statusName }}{{order.statusCode==='monthSettle'?'待结算':''}}</span>
           <span style="font-size: 12px" v-if="order.statusCode==='unpaid'">(剩余{{order.lastTime}}自动关闭)</span>
           <div class="operate-button-container">
             <el-button v-show="order.statusCode==='unshipped'" size="mini" @click="delivery">确认发货</el-button>
-            <el-button v-show="order.statusCode!=='completed'" size="mini" @click="orderClose">关闭订单</el-button>
+            <el-button v-show="!['completed', 'monthSettle'].includes(order.statusCode)" size="mini" @click="orderClose">关闭订单</el-button>
           </div>
         </div>
         <div style="margin-top: 20px">
@@ -42,7 +39,7 @@
           <el-row>
             <el-col :span="8" class="table-cell">{{order.type?'线下支付':'线上支付'}}</el-col>
             <el-col :span="8" class="table-cell">{{ order.amount}}</el-col>
-            <el-col :span="8" class="table-cell">月结</el-col>
+            <el-col :span="8" class="table-cell">{{order.monthSettle?'月结': '否'}}</el-col>
           </el-row>
         </div>
         <div style="margin-top: 20px">
@@ -59,7 +56,7 @@
           <el-row>
             <el-col :span="6" class="table-cell">{{ order.consignee }}</el-col>
             <el-col :span="6" class="table-cell">{{ order.mobile }}</el-col>
-            <el-col :span="6" class="table-cell">{{ order.addressType?'学校':'餐馆' }}</el-col>
+            <el-col :span="6" class="table-cell">{{ order.addressType?'餐馆':'学校' }}</el-col>
             <el-col :span="6" class="table-cell">{{ order.address }}</el-col>
           </el-row>
         </div>
@@ -121,6 +118,25 @@
         ],
       }
     },
+    computed:{
+      steps(){
+        if (this.order.monthSettle) {
+          return [
+            {title: '提交订单', description: this.order.submitTime},
+            {title: '支付订单', description: this.order.saveDate},
+            {title: '平台发货', description: this.order.deliveryTime},
+            {title: '月结待结算', description: ''},
+            {title: '交易完成', description: this.order.completedTime},
+          ]
+        }
+        return [
+          {title: '提交订单', description: this.order.submitTime},
+          {title: '支付订单', description: this.order.saveDate},
+          {title: '平台发货', description: this.order.deliveryTime},
+          {title: '交易完成', description: this.order.completedTime},
+        ]
+      }
+    },
     created() {
       this.orderId = this.$route.query.orderId
       this.getOrderDetail()
@@ -179,11 +195,22 @@
         })
       },
       formatStepStatus(value) {
-        const statusMap = {
-          'unpaid': 1,
-          'unshipped': 2,
-          'unreceived': 3,
-          'completed': 4
+        let statusMap = {}
+        if (this.order.monthSettle) {
+          statusMap = {
+            'unpaid': 1,
+            'unshipped': 2,
+            'unreceived': 3,
+            'monthSettle': 4,
+            'completed': 5
+          }
+        } else {
+          statusMap = {
+            'unpaid': 1,
+            'unshipped': 2,
+            'unreceived': 3,
+            'completed': 4
+          }
         }
         return statusMap[value]
       },

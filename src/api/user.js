@@ -9,5 +9,8 @@ export default {
   },
   blackUser(data) {
     return fetch('/user/white/update', data)
+  },
+  visitTrend(data) {
+    return fetch('/user/visit/trend', data)
   }
 }

@@ -39,6 +39,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import fetch from "../../api/base/fetch";
+import { resetRouter } from '@/router'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import md5 from 'md5'
@@ -118,6 +119,7 @@ export default {
       this.$store.dispatch('user/logout').then(() => {
         this.$message1000('注销成功。', 'success')
       }).finally(() => {
+        resetRouter()
         this.$router.push(`/login?redirect=${this.$route.fullPath}`)
         // location.reload() // 为了重新实例化vue-router对象 避免bug
       })

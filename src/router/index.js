@@ -101,7 +101,13 @@ export const asyncRoutes = [
         name: '学校管理',
         component: () => import('@/views/company/school'),
         meta: { title: '学校管理', icon: 'school' }
-      }
+      },
+      {
+        path: 'notice',
+        name: '下单短信通知',
+        component: () => import('@/views/company/notice'),
+        meta: { title: '下单短信通知', icon: 'example' }
+      },
     ]
   },
   {
@@ -152,7 +158,7 @@ export const asyncRoutes = [
         name: '订单详情',
         hidden: true,
         component: () => import('@/views/orders/detail'),
-        meta: { title: '订单详情', icon: 'orders',roles: ['admin', 'super'] }
+        meta: { title: '订单详情',roles: ['admin', 'super'] }
       }
     ]
   },
@@ -164,7 +170,7 @@ export const asyncRoutes = [
         path: 'index',
         name: '支付记录',
         component: () => import('@/views/bill/index'),
-        meta: { title: '支付记录', icon: 'online',roles: ['admin', 'super'] },
+        meta: { title: '支付记录', icon: 'pay-record',roles: ['admin', 'super'] },
       }
     ]
   },

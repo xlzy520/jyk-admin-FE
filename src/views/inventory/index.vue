@@ -2,34 +2,35 @@
   <div class="app-container">
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
-        <el-form-item prop="userId">
+        <el-form-item prop="userId" label="用户">
           <el-select v-model="searchForm.userId" placeholder="请选择用户" filterable @change="userChange" clearable>
             <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>
           </el-select>
         </el-form-item>
-        <el-form-item>
+
+        <el-form-item label="学校">
           <el-select v-model="searchForm.schoolId" placeholder="请选择学校" filterable clearable>
             <el-option v-for="school in schoolList" :key="school.schoolId"
                        :label="school.schoolName" :value="school.schoolId"/>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="记录类型">
           <el-select v-model="searchForm.inventoryType" placeholder="请选择记录类型" clearable>
             <el-option label="全部" value="" />
             <el-option label="回收" :value="1" />
             <el-option label="进货" :value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="餐具类型">
           <el-select v-model="searchForm.useTypeId" placeholder="请选择餐具类型" clearable>
             <el-option v-for="tableware in tablewareList" :key="tableware.useTypeId"
                        :label="tableware.useType" :value="tableware.useTypeId"/>
           </el-select>
         </el-form-item>
-        <el-form-item prop="mobile">
+        <el-form-item prop="mobile" label="手机号">
           <el-input v-model="searchForm.mobile" maxLength="11" placeholder="请输入手机号"/>
         </el-form-item>
-        <el-form-item prop="payTime">
+        <el-form-item prop="payTime" label="记录时间">
           <el-date-picker
             v-model="searchForm.payTime"
             type="daterange"
@@ -63,7 +64,8 @@
     />
     <add-button @add="add" />
 
-    <inventory-dialog ref="dialog" v-if="visible" :is-add="isAdd" @close="close"></inventory-dialog>
+    <inventory-dialog ref="dialog" v-if="visible" :is-add="isAdd" :user-list="userList"
+                      :school-list="schoolList" :tableware-list="tablewareList" @close="close"></inventory-dialog>
   </div>
 </template>
 
@@ -89,15 +91,17 @@ export default {
         amount: '',
         payTime: '',
         userId: '',
-        school: '',
-        inventoryType: null,
-        useTypeId: null
+        schoolId: '',
+        inventoryType: '',
+        useTypeId: ''
       },
       inventoryData: [],
       columns: [
-        {label: '用户', prop: 'username'},
-        {label: '手机号', prop: 'mobile',width: 100},
-        {label: '学校', prop: 'schoolName',width: 100,showOverflowTooltip: true},
+        {label: '用户', prop: 'username', width: 100,showOverflowTooltip: true,},
+        {label: '手机号', prop: 'mobile',minWidth: 110},
+        {label: '学校/地址', prop: 'schoolName',minWidth: 100,showOverflowTooltip: true,formatter: row=>{
+          return row.schoolName || row.address
+          }},
         {label: '记录类型', prop: 'recordType',width: 80,
           render: (h, { props: { row }}) => {
             const recordTypeMap = ['#EA3F33', '#007BFB']
@@ -108,10 +112,10 @@ export default {
             )
           }
         },
-        {label: '餐具类型', prop: 'useType',},
-        {label: '餐具详情', prop: 'detail',width: 270,showOverflowTooltip: false, render: (h, { props: { row }}) => {
+        {label: '餐具类型', prop: 'useType', width: 100},
+        {label: '餐具详情', prop: 'detail',minWidth: 270,showOverflowTooltip: false, render: (h, { props: { row }}) => {
             return (
-              <div>
+              <div class="detail">
                 {row.inventoryDetailList.map(v=>{
                   return (
                     <div class="detail-row">
@@ -123,10 +127,10 @@ export default {
               </div>
             )
           }},
-        {label: '添加时间', prop: 'saveDate', sortable: true,width: 100},
-        {label: '更新时间', prop: 'modifyDate', sortable: true,width: 100},
+        {label: '添加时间', prop: 'saveDate', sortable: true,minWidth: 100},
+        {label: '更新时间', prop: 'modifyDate', sortable: true,minWidth: 100},
         {
-          label: '操作', prop: 'region',width: 100,
+          label: '操作', prop: 'region',minWidth: 100,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
@@ -217,29 +221,7 @@ export default {
           this.$refs.dialog.userType = 1
         }
         let cloneRow = deepClone(row)
-        let tablewareData= {
-          recoveryDetail: [],
-          lossyDetail: []
-        }
-        cloneRow.inventoryDetailList.map(v=>{
-          if (v.inventoryName === '回收') {
-            v.inventoryDetail.map((d,index)=>{
-              tablewareData.recoveryDetail[index] = d.quantity
-            })
-          } else {
-            v.inventoryDetail.map((d,index)=>{
-              tablewareData.lossyDetail[index] = d.quantity
-            })
-          }
-        })
-        console.log(row);
-        this.$refs.dialog.formData = cloneRow
-        this.$refs.dialog.tablewareData = tablewareData
-        this.$refs.dialog.getspecsDetail()
-        this.$refs.dialog.tablewareChange(row.useTypeId)
-        if (row.userId) {
-          this.$refs.dialog.getDefaultAddress()
-        }
+        this.$refs.dialog.edit(cloneRow)
       })
 
     },
@@ -274,7 +256,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.loading = true
-        inventoryApi.deleteSchool({
+        inventoryApi.delete({
           inventoryId: id
         }).then(_ => {
           this.$message1000('删除成功', 'success')
@@ -306,12 +288,17 @@ export default {
     font-size: 16px;
     border-color: unset;
   }
-  /deep/ .detail-row{
-    display: flex;
-    justify-content: space-between;
-    .detail-content{
-      color: #787878;
-      font-size: 12px;
+  /deep/ .detail{
+    .title{
+      width: 60px;
+    }
+    .detail-row{
+      display: flex;
+      justify-content: space-between;
+      .detail-content{
+        color: #787878;
+        font-size: 12px;
+      }
     }
   }
 </style>

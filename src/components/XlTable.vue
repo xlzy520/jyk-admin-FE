@@ -20,7 +20,7 @@
       <el-table-column
         v-if="index"
         type="index"
-        min-width="40"
+        width="55"
         label="序号"
         align="center"
       />

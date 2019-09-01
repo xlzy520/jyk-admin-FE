@@ -81,10 +81,10 @@ export default {
         this.__resizeHandler()
       }
     },
-    setOptions({ expectedData, actualData } = {}) {
+    setOptions({ date, value } = {}) {
       this.chart.setOption({
         xAxis: {
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+          data: date,
           boundaryGap: false,
           axisTick: {
             show: false
@@ -124,7 +124,7 @@ export default {
           },
           smooth: true,
           type: 'line',
-          data: expectedData,
+          data: value,
           animationDuration: 2800,
           animationEasing: 'cubicInOut'
         }]

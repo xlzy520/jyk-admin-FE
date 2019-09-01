@@ -13,7 +13,6 @@ router.beforeEach(async(to, from, next) => {
   NProgress.start()
   document.title = getPageTitle(to.meta.title)
   const hasRoles = store.getters.userData.roleCode
-  console.log(to.path);// todo 登录页弹登录已过期
   if (!hasRoles) {
     if (!whiteList.includes(to.path)) {
       try {
