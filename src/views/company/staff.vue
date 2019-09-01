@@ -24,6 +24,7 @@
         </el-form-item>
         <el-form-item label="员工类型" prop="addRoleCode">
           <el-radio-group v-model="form.addRoleCode">
+            <el-radio label="super" border v-if="userData.roleCode === 'super'">超级管理员</el-radio>
             <el-radio label="admin" border v-if="userData.roleCode === 'super'">管理员</el-radio>
             <el-radio label="staff" border>普通员工</el-radio>
           </el-radio-group>
