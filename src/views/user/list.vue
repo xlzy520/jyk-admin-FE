@@ -63,7 +63,7 @@ export default {
         {label: '默认地址', prop: 'defaultAddress',width: 160,showOverflowTooltip: true,
           formatter: (row) => {
             if (row.address) {
-              return row.address + ' / ' + row.consignee
+              return row.address|| row.schoolName + ' / ' + row.consignee
             }
             return ''
           }},
