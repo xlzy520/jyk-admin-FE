@@ -12,5 +12,14 @@ export default {
   },
   visitTrend(data) {
     return fetch('/user/visit/trend', data)
+  },
+  getProduceUser(data) {
+    return fetch('/user/produce/list', data)
+  },
+  addProduceUser(data) {
+    return fetch('/user/produce/add', data)
+  },
+  removeProduceUser(data) {
+    return fetch('/user/produce/remove', data)
   }
 }

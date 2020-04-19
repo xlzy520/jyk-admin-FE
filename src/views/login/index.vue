@@ -1,8 +1,8 @@
 <template>
   <div class="login-container">
     <div class="bg-animation" v-if="canvas">
-<!--      <canvas id="cvs_bg" width="1443" height="596" />-->
-<!--      <canvas id="cvs_key" />-->
+      <canvas id="cvs_bg" width="1443" height="596" />
+      <canvas id="cvs_key" />
     </div>
     <el-form
       ref="loginForm"
@@ -85,10 +85,10 @@ export default {
     }
   },
   mounted() {
-    // const canvasAnimate = new CanvasAnimate(document.getElementById('cvs_bg'),
-    //   { length: 100, clicked: true, moveon: true })
-    // canvasAnimate.Run()
-    // autoRun()
+    const canvasAnimate = new CanvasAnimate(document.getElementById('cvs_bg'),
+      { length: 100, clicked: true, moveon: true })
+    canvasAnimate.Run()
+    autoRun()
     // todo 优化登录动画内存释放
   },
   methods: {

@@ -33,8 +33,9 @@ module.exports = {
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
         // target: `https://www.easy-mock.com/mock/5cdb6b1c196b3a1793f9fcad/jyk-admin`,
-        target: `https://axjieyakang.com/market`,
-        // target: `http://49.234.212.216:8080/market`,
+        // target: `https://axjieyakang.com/market`,
+        target: `http://localhost:8080/market`,
+        // target: `http://auv4nb.natappfree.cc/market`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''

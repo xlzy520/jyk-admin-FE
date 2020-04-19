@@ -144,6 +144,26 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/productData',
+    name: '生产数据',
+    meta: { title: '生产数据', icon: 'peoples',roles: ['admin', 'super'] },
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: '授权人员',
+        component: () => import('@/views/productData/staff'),
+        meta: { title: '授权人员', icon: 'staff',roles: ['admin', 'super'] }
+      },
+      {
+        path: 'manage',
+        name: '生产数据管理',
+        component: () => import('@/views/productData/list'),
+        meta: { title: '生产数据', icon: 'goods',roles: ['admin', 'super'] }
+      }
+    ]
+  },
+  {
     path: '/orders',
     component: Layout,
     children: [

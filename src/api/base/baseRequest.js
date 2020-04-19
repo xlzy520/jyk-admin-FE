@@ -8,7 +8,7 @@ const baseRequest = axios.create({
   withCredentials: true,
   timeout: 20 * 1000
 })
-let expire = false
+let expire = 0
 
 // response interceptor
 baseRequest.interceptors.response.use(
@@ -22,12 +22,13 @@ baseRequest.interceptors.response.use(
       })
       // token已过期
       if (res.code === 1027) {
-        if (!expire) {
+        expire++
+        if (expire < 2) {
           expire = true
-          Message.error('token凭证过期了，需要重新登录')
+          // Message.error('token凭证过期了，需要重新登录')
           resetRouter()
           router.push('/login')
-          expire = false
+          expire = 0
         }
       }
       return Promise.reject(res)
