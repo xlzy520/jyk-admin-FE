@@ -57,13 +57,16 @@ export default {
         },
         { label: '价格', prop: 'priceStr' },
         { label: '销量', prop: 'sales' },
+        { label: '所属学校', prop: 'schoolId' },
         { label: '添加时间', width: '240', prop: 'saveDate' },
         {
-          label: '操作', prop: 'region',
+          label: '操作', prop: 'region', width: 240,
           render: (h, { props: { row }}) => {
             return (
               <div class='table-action'>
                 <span onClick={() => this.update(row)}>编 辑</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.copy(row)}>复 制</span>
                 <el-divider direction={'vertical'}/>
                 <span onClick={() => this.delete(row.goodsId)}>删 除</span>
               </div>
@@ -124,6 +127,22 @@ export default {
       this.isAdd = true
       this.visible = true
     },
+    copy(row) {
+      this.isAdd = true
+      this.visible = true
+      this.$nextTick(() => {
+        if (row.priceStr.includes('~')) {
+          const priceStrMap = row.priceStr.split('~')
+          row.priceStr1 = priceStrMap[0]
+          row.priceStr2 = priceStrMap[1]
+        }
+        this.$refs.dialog.form = Object.assign(this.$refs.dialog.form, deepClone(row))
+        this.$refs.dialog.fileList = row.fileUrls.map(v=>{
+          return { name: row.goodsName, url: 'https://axjieyakang.com/assets/'+v }
+        })
+      })
+    },
+
     update(row) {
       this.isAdd = false
       this.visible = true

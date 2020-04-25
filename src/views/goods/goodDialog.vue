@@ -21,6 +21,16 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="所属学校：" prop="schoolId">
+          <el-select v-model="form.schoolId">
+            <el-option
+              v-for="school in schools"
+              :key="school.schoolId"
+              :value="school.schoolId"
+              :label="school.schoolName"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="规格详情：" v-if="form.useTypeId">
           <div class="box-card-warp">
             <el-card class="box-card" v-for="item in specsList" :key="item.specsId">
@@ -106,9 +116,11 @@
 <script>
 import guigeApi from '../../api/guige'
 import goodsApi from '../../api/goods'
+import schoolApi from "../../api/school";
 
 const initFormData = {
   goodsName: '',
+  schoolId: '',
   sale: '',
   priceStr: '',
   littleUrl: '',
@@ -153,6 +165,7 @@ export default {
       dialogLoading: false,
       submitLoading: false,
       form: initFormData,
+      schools: [],
       dialogVisible: false,
       specData: [],
       rules: {
@@ -179,6 +192,14 @@ export default {
     }
   },
   methods: {
+    fetchSchoolData() {
+      schoolApi.getSchool({
+        pageSize: 1000,
+        pageIndex: 1
+      }).then(res => {
+        this.schools = res.list
+      })
+    },
     typeChange(val) {
       const index = this.useType.findIndex(v => v.useTypeId === val)
       if (index > -1) {
@@ -209,6 +230,9 @@ export default {
             this.form.specsList.map((v,index)=>{
               v.price = this.form['priceStr'+index]
             })
+          }
+          if (this.form.goodsId) {
+            delete this.form.goodsId
           }
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
           baseRequest(this.form).then(_ => {
@@ -274,6 +298,7 @@ export default {
   },
   mounted() {
     this.getUseTypeList()
+    this.fetchSchoolData()
   },
 }
 </script>
