@@ -1,9 +1,15 @@
 import baseFetch from './base/fetch'
 export default {
-  getProduceAuthUser(data) {
-    return baseFetch('/produce/authUserList', data)
+  addProduce(data) {
+    return baseFetch('/produce/add', data)
   },
-  updateCompanyInfo(data) {
-    return baseFetch('/partner/update', data)
+  getProduceList(data) {
+    return baseFetch('/produce/list', data)
+  },
+  updateProduce(data) {
+    return baseFetch('/produce/update', data)
+  },
+  getProduceCount(data) {
+    return baseFetch('/produce/count', data)
   }
 }

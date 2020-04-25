@@ -4,6 +4,9 @@ export default {
   getUserList(data) {
     return fetch('/user/list', data)
   },
+  getUserByMobile(data) {
+    return fetch('/user/getProduceUserByMobile', data)
+  },
   markUser(data) {
     return fetch('/user/mark/update', data)
   },
@@ -21,5 +24,5 @@ export default {
   },
   removeProduceUser(data) {
     return fetch('/user/produce/remove', data)
-  }
+  },
 }

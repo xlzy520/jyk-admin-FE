@@ -57,9 +57,9 @@ const defaultComponent = function() {
     functional: true,
     render(h, { props: { row, col }, _v: text }) {
       const { formatter } = col
-      if (row[col.prop] === 0) {
-        return text(0)
-      }
+      // if (row[col.prop] === 0) {
+      //   return text(0)
+      // }
       const v = formatter && formatter(row, col) || row[col.prop] || ''
       return text && text(v) || v
     }

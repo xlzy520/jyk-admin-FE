@@ -23,11 +23,11 @@ import '@/permission' // permission control
 Vue.use(ElementUI)
 Vue.prototype.$rules = formRules
 Vue.prototype.$baseImgUrl = 'https://axjieyakang.com/assets/'
-Vue.prototype.$message1000 = (message, type) => { // 默认消息提示持续1S
+Vue.prototype.$message1000 = (message, type = 'success', duration = 1000) => { // 默认消息提示持续1S
   ElementUI.Message({
     message: message,
-    type: type,
-    duration: 1000
+    type,
+    duration
   })
 }
 
