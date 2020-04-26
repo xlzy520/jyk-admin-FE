@@ -57,7 +57,7 @@ export default {
         },
         { label: '价格', prop: 'priceStr' },
         { label: '销量', prop: 'sales' },
-        { label: '所属学校', prop: 'schoolId' },
+        { label: '所属学校', prop: 'schoolName' },
         { label: '添加时间', width: '240', prop: 'saveDate' },
         {
           label: '操作', prop: 'region', width: 240,
@@ -135,6 +135,12 @@ export default {
           const priceStrMap = row.priceStr.split('~')
           row.priceStr1 = priceStrMap[0]
           row.priceStr2 = priceStrMap[1]
+        }
+        if (row.goodsId) {
+          delete row.goodsId
+        }
+        if (!row.schoolId) {
+          row.schoolId = ''
         }
         this.$refs.dialog.form = Object.assign(this.$refs.dialog.form, deepClone(row))
         this.$refs.dialog.fileList = row.fileUrls.map(v=>{

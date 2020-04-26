@@ -171,7 +171,6 @@ export default {
       rules: {
         goodsName: [
           this.$rules.required('请输入商品名称'),
-          this.$rules.word_number_chinese
         ],
         priceStr: priceRule,
         priceStr0: priceRule,
@@ -232,7 +231,7 @@ export default {
             })
           }
           if (this.form.goodsId) {
-            delete this.form.goodsId
+            // delete this.form.goodsId
           }
           const baseRequest = this.isAdd ? goodsApi.addGoods : goodsApi.updateGoods
           baseRequest(this.form).then(_ => {
