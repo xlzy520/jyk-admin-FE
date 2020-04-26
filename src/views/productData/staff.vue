@@ -116,7 +116,7 @@ export default {
   },
   created() {
     this.fetchData()
-    this.getReporters()
+    // this.getReporters()
   },
   methods: {
     searchUser(){
