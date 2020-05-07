@@ -7,8 +7,22 @@
     @close="close"
   >
     <div v-loading="loading">
+      <el-tabs v-model="activeName" type="card" @tab-click="handleTabClick">
+        <el-tab-pane label="生产数据" name="3"></el-tab-pane>
+        <el-tab-pane label="发货数据" name="4"></el-tab-pane>
+        <el-tab-pane label="回收数据" name="1"></el-tab-pane>
+      </el-tabs>
+
       <el-form v-if="!isSmallScreen" ref="form" :model="formData" label-width="80px" :rules="rules">
-        <el-row>
+        <el-form-item label="所属车辆" prop="vehicle" v-if="activeName === '4'">
+          <el-select v-model="formData.vehicle" placeholder="请选择所属车辆">
+            <el-option label="A" value="A"/>
+            <el-option label="B" value="B"/>
+            <el-option label="C" value="C"/>
+            <el-option label="D" value="D"/>
+          </el-select>
+        </el-form-item>
+        <el-row v-if="!isProduce">
           <el-col :span="12">
             <el-form-item label="用户类型" prop="userType">
               <el-radio-group v-model="userType" @change="userTypeChange">
@@ -31,7 +45,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="默认地址" v-if="formData.userId">
+        <el-form-item label="默认地址" v-if="!isProduce || formData.userId">
           姓名：{{defaultAddress.consignee}}<div style="width: 40px;display: inline-block"></div>
           手机号：{{defaultAddress.mobile}}<div style="width: 40px;display: inline-block"></div>
           地址：{{defaultAddress.address}}
@@ -54,6 +68,11 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row>
+          <el-form-item label="中转箱" prop="boxNum">
+            <el-input v-model.number="formData.boxNum"></el-input>
+          </el-form-item>
+        </el-row>
         <div class="write-container">
           <el-row>
             <el-col :span="spanHeader" class="table-cell-title">类型/餐具</el-col>
@@ -62,13 +81,13 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="spanHeader" class="table-cell">回收</el-col>
+            <el-col :span="spanHeader" class="table-cell">{{firstCol}}</el-col>
             <el-col :span="span" class="table-cell" v-for="(tablewareItem, index) in tableware"
                     :key="tablewareItem.label">
               <el-input v-model.number="tablewareData.recoveryDetail[index]"></el-input>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row v-if="activeName === '1'">
             <el-col :span="spanHeader" class="table-cell">损耗</el-col>
             <el-col :span="span" class="table-cell" v-for="(tablewareItem, index) in tableware"
                     :key="tablewareItem.label">
@@ -78,24 +97,24 @@
         </div>
       </el-form>
       <el-form v-else ref="form" :model="formData" label-width="80px" :rules="rules">
-        <el-form-item label="用户类型" prop="userType">
+        <el-form-item label="用户类型" prop="userType" v-if="!isProduce">
           <el-radio-group v-model="userType" @change="userTypeChange">
             <el-radio-button :label="0">餐馆</el-radio-button>
             <el-radio-button :label="1">学校</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="用户" prop="userId" v-if="!userType">
+        <el-form-item label="用户" prop="userId" v-if="!isProduce || !userType">
           <el-select v-model="formData.userId" placeholder="请选择用户,可筛选查询" filterable @change="userChange">
             <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="学校" prop="schoolId" v-if="userType">
+        <el-form-item label="学校" prop="schoolId" v-if="!isProduce || userType">
           <el-select v-model="formData.schoolId" placeholder="请选择学校" filterable>
             <el-option v-for="school in schoolList" :key="school.schoolId"
                        :label="school.schoolName" :value="school.schoolId"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="默认地址" v-if="formData.userId">
+        <el-form-item label="默认地址" v-if="!isProduce || formData.userId">
           姓名：{{defaultAddress.consignee}}<div style="width: 40px"></div>
           手机号：{{defaultAddress.mobile}}<div style="width: 40px"></div>
           地址：{{defaultAddress.address}}
@@ -146,11 +165,15 @@
 <script>
   import inventoryApi from '../../api/inventory'
   import schoolApi from '../../api/school'
+  import {deepClone} from "../../utils";
+
   const initForm = {
     userId: '',
     specsId: '',
     schoolId: '',
     useTypeId: '',
+    boxNum: '',
+    vehicle: 'A'
   }
   export default {
     name: 'inventoryDialog',
@@ -178,6 +201,7 @@
     },
     data() {
       return {
+        activeName: '3',
         loading: false,
         userType: 0,
         tableware: [],
@@ -203,6 +227,12 @@
           ],
           specsId: [
             this.$rules.required('请选择规格', 'change'),
+          ],
+          vehicle: [
+            this.$rules.required('请选择所属车辆', 'change'),
+          ],
+          boxNum: [
+            this.$rules.required('请输入中转箱数量', 'change'),
           ],
           num: [
             // this.$rules.required('请输入数量', 'change'),
@@ -240,11 +270,30 @@
       },
       isSmallScreen(){
         return window.innerWidth< 960
+      },
+      isProduce(){
+        return this.activeName === '3'
+      },
+      firstCol(){
+        if (this.isProduce) {
+          return '生产'
+        } else if (this.activeName === '4') {
+          return '发货'
+        } else if (this.activeName === '1') {
+          return '回收'
+        }
       }
     },
     methods: {
+      handleTabClick(){
+        this.resetForm()
+      },
       myFilter(list){
         let arr = ['餐馆餐具','宴席餐具']
+        // let all = ['学生餐具', '幼儿园餐具', '餐馆餐具', '宴席餐具']
+        if (this.isProduce) {
+          return list
+        }
         if (!this.userType) {
           return list.filter(v=>arr.includes(v.useType))
         }
@@ -253,6 +302,7 @@
       userTypeChange(){
         this.formData.userId = null
         this.formData.specsId = ''
+        this.formData.useTypeId = ''
         this.curTableWare.useType = ''
       },
       userChange (){
@@ -267,7 +317,7 @@
         this.setSpecsList(val)
       },
       setSpecsList(val){
-        this.curTableWare = this.tablewareList.find(v=>v.useTypeId === val)
+        this.curTableWare = deepClone(this.tablewareList).find(v=>v.useTypeId === val)
         if (this.curTableWare.useType === '幼儿园餐具') {
           this.specsList = this.curTableWare.specsList
         } else {
@@ -299,19 +349,34 @@
       submitForm() {
         this.$refs.form.validate((valid) => {
           if (valid) {
-            let tablewareData = JSON.parse(JSON.stringify(this.tablewareData))
-            this.tableware.map((v,index)=>{
-              for (const item in this.tablewareData) {
-                tablewareData[item][index] = {
-                  tablewareId: v.tablewareId,//餐具Id
-                  quantity:  this.tablewareData[item][index]||0//数量
+            let tablewareData = deepClone(this.tablewareData)
+            if (this.isProduce) {
+              this.tableware.map((v,index)=>{
+                for (const item in this.tablewareData) {
+                  tablewareData[item][index] = {
+                    tablewareId: v.tablewareId,//餐具Id
+                    quantity:  this.tablewareData[item][index]||0//数量
+                  }
                 }
-              }
-            })
+              })
+            } else {
+              this.tableware.map((v,index)=>{
+                for (const item in this.tablewareData) {
+                  tablewareData[item][index] = {
+                    tablewareId: v.tablewareId,//餐具Id
+                    quantity:  this.tablewareData[item][index]||0//数量
+                  }
+                }
+              })
+            }
+            // if (this.isProduce) {
+            //   delete tablewareData.lossyDetail
+            // }
+
             const param = {
               ...this.formData,
               ...tablewareData,
-              inventoryType: 1
+              inventoryType: this.activeName
             }
             const service = this.isAdd ? inventoryApi.save(param) : inventoryApi.update(param)
             service.then(res => {
@@ -368,8 +433,14 @@
    .write-container {
     border-left: 1px solid #cbcbcb;
   }
+   /deep/ .el-dialog__body{
+     padding: 0 20px 20px;
+   }
    @media screen and (min-width: 960px){
      /deep/ .el-select{
+       width: 300px;
+     }
+     /deep/ .el-form-item__content .el-input{
        width: 300px;
      }
    }

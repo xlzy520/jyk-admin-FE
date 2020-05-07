@@ -18,7 +18,9 @@
           <el-select v-model="searchForm.inventoryType" placeholder="请选择记录类型" clearable>
             <el-option label="全部" value="" />
             <el-option label="回收" :value="1" />
-            <el-option label="进货" :value="0" />
+            <el-option label="购买" :value="0" />
+            <el-option label="生产" :value="3" />
+            <el-option label="发货" :value="4" />
           </el-select>
         </el-form-item>
         <el-form-item label="餐具类型">
@@ -104,22 +106,23 @@ export default {
           }},
         {label: '记录类型', prop: 'recordType',width: 80,
           render: (h, { props: { row }}) => {
-            const recordTypeMap = ['#EA3F33', '#007BFB']
+            const recordTypeMap = ['#EA3F33', '#007BFB', '', '#00CC33', '#6633FF']
+            const typeMap = ['购买', '回收', '', '生产', '发货']
             return (
               <el-tag effect="dark" color={recordTypeMap[row.inventoryType]}>
-                {row.inventoryType?'回收':'进货'}
+                {typeMap[Number(row.inventoryType)]}
               </el-tag>
             )
           }
         },
         {label: '餐具类型', prop: 'useType', width: 100},
-        {label: '餐具详情', prop: 'detail',minWidth: 270, render: (h, { props: { row }}) => {
+        {label: '餐具详情', prop: 'detail',minWidth: 360, render: (h, { props: { row }}) => {
             return (
               <div class="detail">
                 {row.inventoryDetailList.map(v=>{
                   return (
                     <div class="detail-row">
-                      <div class="title">{row.inventoryType?v.inventoryName: '进货'}</div>
+                      <div class="title">{row.inventoryType?v.inventoryName: '购买'}</div>
                       <div class="detail-content">{v.inventoryDetail.map(d=>d.tablewareName+':'+d.quantity+' ')}</div>
                     </div>
                   )
@@ -127,10 +130,11 @@ export default {
               </div>
             )
           }},
-        {label: '添加时间', prop: 'saveDate', sortable: true,minWidth: 100},
-        {label: '更新时间', prop: 'modifyDate', sortable: true,minWidth: 100},
+        {label: '中转箱', prop: 'boxNum', width: 100},
+        {label: '添加时间', prop: 'saveDate', sortable: true,minWidth: 180},
+        {label: '更新时间', prop: 'modifyDate', sortable: true,minWidth: 180},
         {
-          label: '操作', prop: 'region',minWidth: 100,
+          label: '操作', prop: 'region',minWidth: 100, fixed: 'right',
           render: (h, { props: { row }}) => {
             const update = (
               <span>
@@ -298,6 +302,8 @@ export default {
     border-color: unset;
   }
   /deep/ .detail{
+    border: 1px solid #e7b1b1;
+    padding: 2px 5px;
     .title{
 
     }
@@ -307,6 +313,11 @@ export default {
       .detail-content{
         color: #787878;
         font-size: 12px;
+      }
+      &:last-child{
+      }
+      &+.detail-row{
+        border-top: 1px solid #eee;
       }
     }
   }

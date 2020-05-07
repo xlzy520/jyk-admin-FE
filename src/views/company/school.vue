@@ -34,6 +34,9 @@
             <el-option label="中学" value="中学" />
           </el-select>
         </el-form-item>
+        <el-form-item label="二维码" prop="salt">
+          <el-input v-model="schoolForm.salt" placeholder="通过改变此文本来改变二维码" maxLength="6" />
+        </el-form-item>
       </el-form>
       <div class="dialog-footer">
         <el-button type="primary" @click="submitForm">提交</el-button>
@@ -81,6 +84,12 @@ export default {
           }
         },
         {
+          label: '二维码',
+          prop: 'salt',
+          align: 'left',
+          width: 80
+        },
+        {
           label: '添加时间',
           prop: 'saveDate',
           sortable: true
@@ -110,7 +119,8 @@ export default {
       schoolForm: {
         schoolName: '',
         address: '',
-        schoolType: ''
+        schoolType: '',
+        salt: ''
       },
       rules: {
         schoolName: [

@@ -117,7 +117,7 @@ export default {
         {label: '学生餐具', value: 0},
         {label: '幼儿园餐具', value: 1},
         {label: '餐馆餐具', value: 2},
-        {label: '宴请餐具', value: 3},
+        {label: '宴席餐具', value: 3},
       ],
       produceDayData: {
         produceTypeId: '',

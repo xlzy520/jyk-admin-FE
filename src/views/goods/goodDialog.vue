@@ -21,7 +21,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="所属学校：" prop="schoolId">
+        <el-form-item label="所属学校：" prop="schoolId" v-if="isStudent">
           <el-select v-model="form.schoolId">
             <el-option
               v-for="school in schools"
@@ -48,13 +48,13 @@
         </el-form-item>
         <el-row v-if="form.useTypeId===3">
           <el-col :span="12">
-            <el-form-item label="规格A价格：" prop="priceStr0">
-              <el-input v-model="form.priceStr0" maxLength="10"/>
+            <el-form-item label="规格A价格：" prop="priceStr1">
+              <el-input v-model="form.priceStr1" maxLength="10"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="规格B价格：" prop="priceStr1">
-              <el-input v-model="form.priceStr1" maxLength="10"/>
+            <el-form-item label="规格B价格：" prop="priceStr2">
+              <el-input v-model="form.priceStr2" maxLength="10"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -137,6 +137,21 @@ export default {
     isAdd: {
       type: Boolean,
       default: true
+    },
+    schools: {
+      type: Array,
+      default: ()=>([])
+    },
+
+    useType: {
+      type: Array,
+      default: ()=>([])
+    },
+
+  },
+  computed: {
+    isStudent() {
+      return this.form.useTypeId>2
     }
   },
   data() {
@@ -165,7 +180,6 @@ export default {
       dialogLoading: false,
       submitLoading: false,
       form: initFormData,
-      schools: [],
       dialogVisible: false,
       specData: [],
       rules: {
@@ -173,10 +187,13 @@ export default {
           this.$rules.required('请输入商品名称'),
         ],
         priceStr: priceRule,
-        priceStr0: priceRule,
         priceStr1: priceRule,
+        priceStr2: priceRule,
         useTypeId: [
           this.$rules.required('请输入商品类型')
+        ],
+        schoolId: [
+          this.$rules.required('请选择所属学校', 'change')
         ],
         bigImg: [
           { validator: validateBigImg }
@@ -186,19 +203,11 @@ export default {
         ],
       },
       specsList: [],
-      useType: [],
+      // useType: [],
       fileList: []
     }
   },
   methods: {
-    fetchSchoolData() {
-      schoolApi.getSchool({
-        pageSize: 1000,
-        pageIndex: 1
-      }).then(res => {
-        this.schools = res.list
-      })
-    },
     typeChange(val) {
       const index = this.useType.findIndex(v => v.useTypeId === val)
       if (index > -1) {
@@ -227,7 +236,7 @@ export default {
           }
           if (this.form.useTypeId === 3) {
             this.form.specsList.map((v,index)=>{
-              v.price = this.form['priceStr'+index]
+              v.price = this.form['priceStr'+(index + 1)]
             })
           }
           if (this.form.goodsId) {
@@ -296,8 +305,12 @@ export default {
     }
   },
   mounted() {
-    this.getUseTypeList()
-    this.fetchSchoolData()
+    console.log(this.form.useTypeId);
+    this.$nextTick(() => {
+      this.typeChange(this.form.useTypeId)
+
+    })
+    // this.getUseTypeList()
   },
 }
 </script>

@@ -53,18 +53,6 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard',roles: ['staff','admin', 'super'] }
     }]
   },
-  {
-    path: '/inventory',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: '进销存管理',
-        component: () => import('@/views/inventory/index'),
-        meta: { title: '进销存管理', icon: 'stores',roles: ['staff','admin', 'super'] }
-      }
-    ]
-  }
 ]
 
 /**
@@ -72,6 +60,38 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    name: '进销存管理',
+    path: '/inventory',
+    component: Layout,
+    meta: { title: '进销存管理', icon: 'stores', roles: ['admin', 'super'] },
+    children: [
+      {
+        path: 'index',
+        name: '进销存管理',
+        component: () => import('@/views/inventory/index'),
+        meta: { title: '总览', icon: 'stores',roles: ['admin', 'super'] }
+      },
+      {
+        path: 'produce',
+        name: '生产数据',
+        component: () => import('@/views/productData/list'),
+        meta: { title: '生产数据', icon: 'goods',roles: ['admin', 'super'] }
+      },
+      {
+        path: 'send',
+        name: '发货数据',
+        component: () => import('@/views/productData/list'),
+        meta: { title: '发货数据', icon: 'goods',roles: ['admin', 'super'] }
+      },
+      {
+        path: 'staff',
+        name: '授权人员',
+        component: () => import('@/views/productData/staff'),
+        meta: { title: '授权人员', icon: 'staff',roles: ['admin', 'super'] }
+      },
+    ]
+  },
   {
     name: '公司管理',
     path: '/company',
@@ -144,23 +164,15 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/productData',
-    name: '生产数据',
-    meta: { title: '生产数据', icon: 'peoples',roles: ['admin', 'super'] },
+    path: '/payProcessAndNotify',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: '授权人员',
-        component: () => import('@/views/productData/staff'),
-        meta: { title: '授权人员', icon: 'staff',roles: ['admin', 'super'] }
+        name: '收费流程与公告',
+        component: () => import('@/views/payProcess/basePayProcess'),
+        meta: { title: '收费流程与公告', icon: 'peoples',roles: ['admin', 'super'] },
       },
-      {
-        path: 'manage',
-        name: '生产数据管理',
-        component: () => import('@/views/productData/list'),
-        meta: { title: '生产数据', icon: 'goods',roles: ['admin', 'super'] }
-      }
     ]
   },
   {

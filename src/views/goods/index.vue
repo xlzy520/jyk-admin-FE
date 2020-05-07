@@ -1,6 +1,44 @@
 <template>
   <div v-loading="loading" class="app-container">
     <add-button @add="add"/>
+    <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
+<!--      <el-form-item prop="keyword" label="餐具类型">-->
+<!--        <el-input v-model="searchForm.keyword" max-length="11" placeholder="餐具类型" />-->
+<!--      </el-form-item>-->
+      <el-form-item label="商品类型：" prop="useTypeId">
+        <el-select v-model="searchForm.useTypeId">
+          <el-option label="全部" value="" />
+
+          <el-option
+              v-for="option in useType"
+              :key="option.useType"
+              :value="option.useTypeId"
+              :label="option.useType"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="所属学校" prop="schoolId">
+        <el-select v-model="searchForm.schoolId">
+          <el-option label="全部" value="" />
+          <el-option
+              v-for="school in schools"
+              :key="school.schoolId"
+              :value="school.schoolId"
+              :label="school.schoolName"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item>
+        <el-button
+            type="primary"
+            icon="el-icon-search"
+            @click="fetchData"
+        >查询</el-button>
+        <el-button type="info" @click="resetForm">清空</el-button>
+      </el-form-item>
+    </el-form>
     <xl-table
       ref="goodsTable"
       :index="true"
@@ -13,7 +51,7 @@
       <el-button type="success" :disabled="selected.length===0" @click="changeStatus(1)">上架</el-button>
       <el-button type="danger" :disabled="selected.length===0" @click="changeStatus(0)">下架</el-button>
     </div>
-    <good-dialog v-if="visible" ref="dialog" :is-add="isAdd" @close="close" @fetchData="fetchData"/>
+    <good-dialog v-if="visible" ref="dialog" :schools="schools" :useType="useType" :is-add="isAdd" @close="close" @fetchData="fetchData"/>
   </div>
 </template>
 
@@ -23,6 +61,8 @@ import goodsApi from '../../api/goods'
 import { deepClone } from '../../utils/index'
 import pagination from '../../mixins/pagination'
 import GoodDialog from './goodDialog'
+import schoolApi from "../../api/school";
+import guigeApi from "../../api/guige";
 
 export default {
   name: 'GoodsList',
@@ -30,6 +70,12 @@ export default {
   mixins: [pagination],
   data() {
     return {
+      searchForm: {
+        useTypeId: '',
+        schoolId: ''
+      },
+      useType: [],
+      schools: [],
       goodsData: [],
       columns: [
         { label: '名称', prop: 'goodsName', align: 'left' },
@@ -82,8 +128,28 @@ export default {
   },
   created() {
     this.fetchData()
+    this.fetchSchoolData()
+    this.getUseTypeList()
   },
   methods: {
+    getUseTypeList() {
+      this.dialogLoading = true
+      guigeApi.getUseTypeList().then(res => {
+        this.useType = res||[]
+      }).finally(() => {
+        this.dialogLoading = false
+      })
+    },
+
+    fetchSchoolData() {
+      schoolApi.getSchool({
+        pageSize: 1000,
+        pageIndex: 1
+      }).then(res => {
+        this.schools = res.list
+      })
+    },
+
     changeStatus(status) {
       if (this.selected.length === 0) {
         this.$message1000('请选择商品', 'info')
@@ -117,7 +183,7 @@ export default {
     },
     fetchData() {
       this.loading = true
-      goodsApi.getGoods({ ...this.pageOption, ...this.form }).then(res => {
+      goodsApi.getGoods({ ...this.pageOption, ...this.searchForm }).then(res => {
         this.goodsData = res.list
       }).finally(_ => {
         this.loading = false
@@ -158,6 +224,7 @@ export default {
           row.priceStr1 = priceStrMap[0]
           row.priceStr2 = priceStrMap[1]
         }
+        row.schoolId = row.schoolId === 0? '': row.schoolId
         this.$refs.dialog.form = Object.assign(this.$refs.dialog.form, deepClone(row))
         this.$refs.dialog.fileList = row.fileUrls.map(v=>{
           return { name: row.goodsName, url: 'https://axjieyakang.com/assets/'+v }
@@ -182,6 +249,9 @@ export default {
     },
     close() {
       this.visible = false
+    },
+    resetForm() {
+      this.$refs.searchForm.resetFields()
     }
   }
 }
