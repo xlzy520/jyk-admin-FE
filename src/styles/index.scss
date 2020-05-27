@@ -114,3 +114,38 @@ div:focus {
   font-size: 14px;
   color: #303133;
 }
+.detail{
+  border: 1px solid #e7b1b1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  .title{
+
+  }
+  .detail-row{
+    display: flex;
+    justify-content: space-between;
+    .detail-content{
+      display: flex;
+      color: #787878;
+      font-size: 12px;
+      .detail-content-item{
+        display: inline-block;
+        span:first-child{
+          color: #ff001c;
+        }
+        span:last-child{
+          color: #2d8cf0;
+          font-weight: bold;
+        }
+        &+.detail-content-item{
+          margin-left: 10px;
+        }
+      }
+    }
+    &:last-child{
+    }
+    &+.detail-row{
+      border-top: 1px solid #eee;
+    }
+  }
+}

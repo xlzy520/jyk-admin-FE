@@ -199,13 +199,13 @@ export default {
     fetchData() {
       let seachParams = {}
       const { saveDate } = this.searchForm
-      if (saveDate.length === 2) {
-        const [startDate, endDate] = this.searchForm.saveDate
-        seachParams = {
-          startDate: startDate,
-          endDate: endDate
-        }
-      }
+      // if (saveDate.length === 2) {
+      //   const [startDate, endDate] = this.searchForm.saveDate
+      //   seachParams = {
+      //     startDate: startDate,
+      //     endDate: endDate
+      //   }
+      // }
       this.loading = true
       addressApi.getAddress({
         ...seachParams,

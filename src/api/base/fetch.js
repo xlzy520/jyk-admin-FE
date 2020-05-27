@@ -1,7 +1,14 @@
 import baseRequest from './baseRequest'
 
-export default function fetch(url, value, method = 'post', options = {}) {
+export default function fetch(url, value = {}, method = 'post', options = {}) {
   if (method === 'post') {
+    const saveDate = value.saveDate
+    // 统一处理日期选择
+    if (saveDate && saveDate.length === 2) {
+      const [startDate, endDate] = saveDate
+      value.startDate = startDate
+      value.endDate = endDate
+    }
     return baseRequest.post(url, value, options)
   } else if (method === 'get') {
     return baseRequest.get(url, { params: value }, options)

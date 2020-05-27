@@ -73,6 +73,12 @@ export const asyncRoutes = [
         meta: { title: '总览', icon: 'stores',roles: ['admin', 'super'] }
       },
       {
+        path: 'jieying',
+        name: '每日结营',
+        component: () => import('@/views/inventory/jieying'),
+        meta: { title: '每日结营', icon: 'goods',roles: ['admin', 'super'] }
+      },
+      {
         path: 'produce',
         name: '生产数据',
         component: () => import('@/views/productData/list'),
@@ -80,10 +86,11 @@ export const asyncRoutes = [
       },
       {
         path: 'send',
-        name: '发货数据',
-        component: () => import('@/views/productData/list'),
-        meta: { title: '发货数据', icon: 'goods',roles: ['admin', 'super'] }
+        name: '发货与回收',
+        component: () => import('@/views/inventory/sendAndRecycle'),
+        meta: { title: '发货与回收', icon: 'goods',roles: ['admin', 'super'] }
       },
+     
       {
         path: 'staff',
         name: '授权人员',
@@ -109,6 +116,12 @@ export const asyncRoutes = [
         name: '公司信息',
         component: () => import('@/views/company/company'),
         meta: { title: '公司信息', icon: 'company' }
+      },
+      {
+        path: 'cars',
+        name: '车辆管理',
+        component: () => import('@/views/company/cars'),
+        meta: { title: '车辆管理', icon: 'cars' }
       },
       {
         path: 'partner',
@@ -175,6 +188,7 @@ export const asyncRoutes = [
       },
     ]
   },
+  
   {
     path: '/orders',
     component: Layout,

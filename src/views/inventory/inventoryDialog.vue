@@ -8,18 +8,15 @@
   >
     <div v-loading="loading">
       <el-tabs v-model="activeName" type="card" @tab-click="handleTabClick">
-        <el-tab-pane label="生产数据" name="3"></el-tab-pane>
-        <el-tab-pane label="发货数据" name="4"></el-tab-pane>
-        <el-tab-pane label="回收数据" name="1"></el-tab-pane>
+        <el-tab-pane label="生产数据" name="3" v-if="isAdd || updateType == 3"></el-tab-pane>
+        <el-tab-pane label="发货数据" name="4" v-if="isAdd || updateType == 4"></el-tab-pane>
+        <el-tab-pane label="回收数据" name="1" v-if="isAdd || updateType == 1"></el-tab-pane>
       </el-tabs>
 
       <el-form v-if="!isSmallScreen" ref="form" :model="formData" label-width="80px" :rules="rules">
-        <el-form-item label="所属车辆" prop="vehicle" v-if="activeName === '4'">
+        <el-form-item label="所属车辆" prop="vehicle" v-if="activeName === '4' || activeName==='1'">
           <el-select v-model="formData.vehicle" placeholder="请选择所属车辆">
-            <el-option label="A" value="A"/>
-            <el-option label="B" value="B"/>
-            <el-option label="C" value="C"/>
-            <el-option label="D" value="D"/>
+            <el-option v-for="car in cars" :label="car.carNum + '——'+car.mark" :value="car.carId"/>
           </el-select>
         </el-form-item>
         <el-row v-if="!isProduce">
@@ -164,7 +161,7 @@
 
 <script>
   import inventoryApi from '../../api/inventory'
-  import schoolApi from '../../api/school'
+  import carApi from '../../api/cars'
   import {deepClone} from "../../utils";
 
   const initForm = {
@@ -173,7 +170,7 @@
     schoolId: '',
     useTypeId: '',
     boxNum: '',
-    vehicle: 'A'
+    vehicle: ''
   }
   export default {
     name: 'inventoryDialog',
@@ -213,6 +210,8 @@
         curTableWare: {
           useType: ''
         },
+        cars: [],
+        updateType: '',
         defaultAddress: {},
         formData: initForm,
         rules: {
@@ -285,6 +284,11 @@
       }
     },
     methods: {
+      getCars(){
+        carApi.getCar().then(res=>{
+          this.cars = res
+        })
+      },
       handleTabClick(){
         this.resetForm()
       },
@@ -344,6 +348,7 @@
       },
       close() {
         this.$emit('close');
+        this.updateType = ''
         this.resetForm()
       },
       submitForm() {
@@ -424,7 +429,7 @@
       }
     },
     mounted() {
-
+      this.getCars()
     }
   }
 </script>

@@ -3,27 +3,27 @@
     <div class="header">
       <el-form ref="searchForm" :model="searchForm" :inline="true" size="medium">
         <el-form-item prop="userId" label="用户">
-          <el-select v-model="searchForm.userId" placeholder="请选择用户" filterable @change="userChange" clearable>
+          <el-select v-model="searchForm.userId" placeholder="请选择用户" filterable clearable>
             <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>
           </el-select>
         </el-form-item>
 
-        <el-form-item label="学校">
+        <el-form-item label="学校" prop="schoolId">
           <el-select v-model="searchForm.schoolId" placeholder="请选择学校" filterable clearable>
             <el-option v-for="school in schoolList" :key="school.schoolId"
                        :label="school.schoolName" :value="school.schoolId"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="记录类型">
+        <el-form-item label="记录类型" prop="inventoryType">
           <el-select v-model="searchForm.inventoryType" placeholder="请选择记录类型" clearable>
             <el-option label="全部" value="" />
-            <el-option label="回收" :value="1" />
-            <el-option label="购买" :value="0" />
             <el-option label="生产" :value="3" />
             <el-option label="发货" :value="4" />
+            <el-option label="回收" :value="1" />
+            <el-option label="购买" :value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item label="餐具类型">
+        <el-form-item label="餐具类型" prop="useTypeId">
           <el-select v-model="searchForm.useTypeId" placeholder="请选择餐具类型" clearable>
             <el-option v-for="tableware in tablewareList" :key="tableware.useTypeId"
                        :label="tableware.useType" :value="tableware.useTypeId"/>
@@ -107,7 +107,7 @@ export default {
         {label: '记录类型', prop: 'recordType',width: 80,
           render: (h, { props: { row }}) => {
             const recordTypeMap = ['#EA3F33', '#007BFB', '', '#00CC33', '#6633FF']
-            const typeMap = ['购买', '回收', '', '生产', '发货']
+            const typeMap = ['进货', '回收', '', '生产', '发货']
             return (
               <el-tag effect="dark" color={recordTypeMap[row.inventoryType]}>
                 {typeMap[Number(row.inventoryType)]}
@@ -116,20 +116,46 @@ export default {
           }
         },
         {label: '餐具类型', prop: 'useType', width: 100},
-        {label: '餐具详情', prop: 'detail',minWidth: 360, render: (h, { props: { row }}) => {
+        {label: '餐具详情', prop: 'detail',width: 360, render: (h, { props: { row }}) => {
             return (
               <div class="detail">
                 {row.inventoryDetailList.map(v=>{
                   return (
                     <div class="detail-row">
-                      <div class="title">{row.inventoryType?v.inventoryName: '购买'}</div>
-                      <div class="detail-content">{v.inventoryDetail.map(d=>d.tablewareName+':'+d.quantity+' ')}</div>
+                      <div class="title">{v.inventoryName}</div>
+                      <div class="detail-content">
+                        {
+                          v.inventoryDetail.map(d=> {
+                            return (
+                              <div class="detail-content-item">
+                                <span>{d.tablewareName}: </span>
+                                <span>{d.quantity}</span>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
                     </div>
                   )
                 })}
               </div>
             )
           }},
+
+        // {label: '餐具详情', prop: 'detail',minWidth: 360, render: (h, { props: { row }}) => {
+        //     return (
+        //       <div class="detail">
+        //         {row.inventoryDetailList.map(v=>{
+        //           return (
+        //             <div class="detail-row">
+        //               <div class="title">{row.inventoryType?v.inventoryName: '购买'}</div>
+        //               <div class="detail-content">{v.inventoryDetail.map(d=>d.tablewareName+':'+d.quantity+' ')}</div>
+        //             </div>
+        //           )
+        //         })}
+        //       </div>
+        //     )
+        //   }},
         {label: '中转箱', prop: 'boxNum', width: 100},
         {label: '添加时间', prop: 'saveDate', sortable: true,minWidth: 180},
         {label: '更新时间', prop: 'modifyDate', sortable: true,minWidth: 180},
@@ -156,15 +182,22 @@ export default {
 
       pickerOptions: {
         shortcuts: [
-          {
-          text: '最近一周',
+          {text: '今天',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date(new Date().setHours(0, 0, 0, 0));
+              picker.$emit('pick', [start, end]);
+            }
+          },
+          {text: '最近一周',
           onClick(picker) {
             const end = new Date();
             const start = new Date();
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
             picker.$emit('pick', [start, end]);
           }
-        }, {
+        },
+          {
           text: '最近一个月',
           onClick(picker) {
             const end = new Date();
@@ -172,15 +205,17 @@ export default {
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
             picker.$emit('pick', [start, end]);
           }
-        }, {
-          text: '最近三个月',
-          onClick(picker) {
+        },
+          {
+            text: '最近三个月',
+            onClick(picker) {
             const end = new Date();
             const start = new Date();
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
             picker.$emit('pick', [start, end]);
           }
-        }]
+        }
+        ]
       },
       loading: false,
       isAdd: false,
@@ -189,7 +224,7 @@ export default {
       // 默认50条， 差不多一个月的订单量
       pageOption: {
         pageIndex: 1,
-        pageSize: 50
+        pageSize: 20
       },
       count: 0,
       tablewareList: []
@@ -233,6 +268,8 @@ export default {
         if (row.schoolId) {
           this.$refs.dialog.userType = 1
         }
+        this.$refs.dialog.updateType = row.inventoryType
+        this.$refs.dialog.activeName = row.inventoryType.toString()
         let cloneRow = deepClone(row)
         this.$refs.dialog.edit(cloneRow)
       })
@@ -247,7 +284,7 @@ export default {
       })
     },
     userChange (){
-      this.getDefaultAddress()
+      // this.getDefaultAddress()
     },
     getSchoolList(){
       schoolApi.getSchool({
@@ -301,28 +338,9 @@ export default {
     font-size: 16px;
     border-color: unset;
   }
-  /deep/ .detail{
-    border: 1px solid #e7b1b1;
-    padding: 2px 5px;
-    .title{
-
-    }
-    .detail-row{
-      display: flex;
-      justify-content: space-between;
-      .detail-content{
-        color: #787878;
-        font-size: 12px;
-      }
-      &:last-child{
-      }
-      &+.detail-row{
-        border-top: 1px solid #eee;
-      }
-    }
-  }
 </style>
 <style lang="scss">
+
   .view-container{
     border-left: 1px solid #cbcbcb;
     width: 280px;

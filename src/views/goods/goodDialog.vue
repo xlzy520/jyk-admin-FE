@@ -316,6 +316,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  /deep/ .el-input{
+    width: 360px;
+  }
   /deep/ .avatar-uploader{
     .el-upload {
       border: 1px dashed #d9d9d9;
@@ -345,6 +348,9 @@ export default {
     padding: 0 10px;
     background: #17c686;
     color: #fff;
+  }
+  /deep/ .el-card__body{
+    padding: 10px 20px;
   }
   .box-card {
     width: 270px;

@@ -11,12 +11,6 @@
           </el-select>
         </el-form-item>
 
-<!--        <el-form-item prop="keyword" label="规格">-->
-<!--          <el-select v-model="searchForm.useTypeId" placeholder="规格" clearable>-->
-<!--            <el-option label="全部" value="" />-->
-<!--            <el-option v-for="option in typeOptions" :label="option.label" :value="option.value" />-->
-<!--          </el-select>-->
-<!--        </el-form-item>-->
         <el-form-item prop="saveDate" label="生产日期">
           <el-date-picker
             v-model="searchForm.saveDate"
@@ -29,12 +23,12 @@
             :clearable="false"
           />
         </el-form-item>
-<!--        <el-form-item prop="keyword" label="填报人">-->
-<!--          <el-select v-model="searchForm.realName" placeholder="填报人" clearable>-->
-<!--            <el-option label="全部" value="" />-->
-<!--            <el-option v-for="reporter in reporters" :label="reporter.realName" :value="reporter.userId" />-->
-<!--          </el-select>-->
-<!--        </el-form-item>-->
+        <el-form-item prop="keyword" label="填报人">
+          <el-select v-model="searchForm.realName" placeholder="填报人" clearable>
+            <el-option label="全部" value="" />
+            <el-option v-for="reporter in reporters" :label="reporter.realName" :value="reporter.userId" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button
             type="primary"
@@ -47,15 +41,15 @@
     </div>
     <div class="table-ext-header" v-if="false">
       <div class="table-ext-header-item">
-        <span>今日累计生产量：</span>
+        <span>今日累计发货量：</span>
         <span>{{countData.todayProduceCount}}</span>
       </div>
       <div class="table-ext-header-item">
-        <span>今日累计出货量：</span>
+        <span>今日累计回收量：</span>
         <span>{{countData.todaySendCount}}</span>
       </div>
       <div class="table-ext-header-item">
-        <span>累计出货量：</span>
+        <span>今日结营量：</span>
         <span>{{countData.totalSendCount}}</span>
       </div>
     </div>
@@ -78,13 +72,11 @@
         @close="close"
     >
       <el-form ref="form" :model="produceDayData" label-width="80px" :rules="rules">
-        <el-form-item label="餐具类型" prop="useTypeId">
-          <el-select v-model="produceDayData.useTypeId" placeholder="请选择餐具类型" clearable>
-            <el-option v-for="tableware in tablewareList" :key="tableware.useTypeId"
-                       :label="tableware.useType" :value="tableware.useTypeId"/>
+        <el-form-item prop="produceTypeId" label="规格">
+          <el-select v-model="produceDayData.produceTypeId" placeholder="规格" clearable>
+            <el-option v-for="option in typeOptions" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
-
         <el-form-item label="生产数量" prop="produceCount">
           <el-input v-model="produceDayData.produceCount" />
         </el-form-item>
@@ -130,7 +122,7 @@ export default {
         sendCount: ''
       },
       searchForm: {
-        useTypeId: '',
+        produceTypeId: '',
         saveDate: []
       },
       rules: {
@@ -152,6 +144,7 @@ export default {
       produceData: [],
       columns: [
         {label: '规格种类', prop: 'useType'},
+        {label: '所属车辆', prop: 'vehicle'},
         {label: '生产数量详情', prop: 'detail',width: 360, render: (h, { props: { row }}) => {
             return (
               <div class="detail">
@@ -186,7 +179,6 @@ export default {
             return count
           }},
         {label: '生产时间', prop: 'saveDate'},
-        // {label: '填报人', prop: 'reporterName'},
         // {label: '操作', render: (h, { props: { row }}) => {
         //     return (
         //       <div class='table-action'>
@@ -212,6 +204,7 @@ export default {
     ]),
     hasAuth() {
       return ['super', 'admin'].includes(this.userData.roleCode)
+
     }
   },
   methods: {

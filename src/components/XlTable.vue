@@ -33,6 +33,13 @@
         <template v-if="col.component" slot-scope="scope">
           <component :is="col.component" v-bind="getComponentBind(scope, col)" />
         </template>
+        <el-table-column
+            v-for="scopeCol in col.columns"
+            :key="scopeCol.label"
+            :align="scopeCol.align||'center'"
+            v-bind="scopeCol"
+        >
+        </el-table-column>
       </el-table-column>
     </el-table>
     <el-pagination

@@ -22,7 +22,13 @@ export default {
   tablewareDetail(data) {
     return baseFetch('/tableware/list', data)
   },
+  settlementList(data) {
+    return baseFetch('/inventory/settlement/list', data)
+  },
   defaultAddress(data) {
     return baseFetch('/address/user/default/get', data)
+  },
+  settlementDetail(data) {
+    return baseFetch('/inventory/settlement/detail', data)
   }
 }
