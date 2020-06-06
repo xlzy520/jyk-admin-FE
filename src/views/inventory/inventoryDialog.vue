@@ -45,7 +45,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="默认地址" v-if="!isProduce || formData.userId">
+        <el-form-item label="默认地址" v-if="!isProduce && !userType">
           姓名：{{defaultAddress.consignee}}<div style="width: 40px;display: inline-block"></div>
           手机号：{{defaultAddress.mobile}}<div style="width: 40px;display: inline-block"></div>
           地址：{{defaultAddress.address}}
