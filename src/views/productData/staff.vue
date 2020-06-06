@@ -42,17 +42,17 @@
         @close="close"
     >
       <el-form ref="form" :model="produceUSerData" label-width="80px" :rules="rules">
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="produceUSerData.mobile" placeholder="输入员工微信手机号"/>
+        <el-form-item label="微信ID" prop="openId">
+          <el-input v-model="produceUSerData.openId" placeholder="输入员工微信openId"/>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="searchUser">查询员工信息</el-button>
         </el-form-item>
-        <el-form-item label="微信ID" prop="openid">
-          {{produceUSerData.openId?produceUSerData.openId: '请先查询手机号'}}
+        <el-form-item label="手机号" prop="mobile">
+          {{produceUSerData.mobile?produceUSerData.mobile: '请先查询'}}
         </el-form-item>
         <el-form-item label="真实姓名" prop="username">
-          {{produceUSerData.realName?produceUSerData.realName: '请先查询手机号'}}
+          {{produceUSerData.realName?produceUSerData.realName: '请先查询'}}
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
@@ -89,9 +89,8 @@ export default {
       },
       reporters: [],
       rules: {
-        mobile: [
-          this.$rules.required('请输入手机号'),
-          this.$rules.phone
+        openId: [
+          this.$rules.required('请输入微信openId'),
         ]
       },
       submitLoading: false,
@@ -101,7 +100,7 @@ export default {
         {label: '微信昵称', prop: 'username', showOverflowTooltip: true,},
         {label: '微信唯一ID',prop: 'openId',showOverflowTooltip: true},
         {label: '员工名', prop: 'realName',showOverflowTooltip: true,},
-        {label: '手机号', prop: 'addressMobile'},
+        {label: '手机号', prop: 'mobile'},
         {label: '添加时间', prop: 'saveDate', sortable: true},
         { label: '操作',width: '120', render: (h, { props: { row }}) => {
             return (
@@ -122,13 +121,13 @@ export default {
     searchUser(){
       this.$refs.form.validate((valid) => {
         if (valid) {
-          userApi.getUserByMobile({
-            mobile: this.produceUSerData.mobile
+          userApi.getUserByOpenId({
+            openId: this.produceUSerData.openId
           }).then(res=>{
             this.$message1000('查询成功')
             this.produceUSerData = res
           }).catch(err=>{
-            this.$message1000('请让该员工在小程序中添加带手机号的地址', 'error', 3000)
+            // this.$message1000('请让该员工在小程序中添加带手机号的地址', 'error', 3000)
           })
         } else {
           return false

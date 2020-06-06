@@ -7,6 +7,9 @@ export default {
   getUserByMobile(data) {
     return fetch('/user/getProduceUserByMobile', data)
   },
+  getUserByOpenId(data) {
+    return fetch('/user/getProduceUserByOpenId', data)
+  },
   markUser(data) {
     return fetch('/user/mark/update', data)
   },
