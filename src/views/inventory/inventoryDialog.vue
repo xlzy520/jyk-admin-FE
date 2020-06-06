@@ -13,7 +13,7 @@
         <el-tab-pane label="回收数据" name="1" v-if="isAdd || updateType == 1"></el-tab-pane>
       </el-tabs>
 
-      <el-form v-if="!isSmallScreen" ref="form" :model="formData" label-width="80px" :rules="rules">
+      <el-form v-if="!isSmallScreen" ref="form" :model="formData" label-width="100px" :rules="rules">
         <el-form-item label="所属车辆" prop="vehicle" v-if="activeName === '4' || activeName==='1'">
           <el-select v-model="formData.vehicle" placeholder="请选择所属车辆">
             <el-option v-for="car in cars" :label="car.carNum + '——'+car.mark" :value="car.carId"/>
@@ -29,11 +29,14 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="用户" prop="userId" v-if="!userType">
-              <el-select v-model="formData.userId" placeholder="请选择用户,可筛选查询" filterable @change="userChange">
-                <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>
-              </el-select>
+            <el-form-item label="用户手机号" prop="mobile" v-if="!userType">
+              <el-input v-model="formData.mobile" maxLength="11" @change="mobileChange" />
             </el-form-item>
+<!--            <el-form-item label="用户手机号" prop="userId" v-if="!userType">-->
+<!--              <el-select v-model="formData.userId" placeholder="请输入用户,可筛选查询" filterable @change="userChange">-->
+<!--                <el-option v-for="user in userList" :key="user.userId" :label="user.username" :value="user.userId"/>-->
+<!--              </el-select>-->
+<!--            </el-form-item>-->
             <el-form-item label="学校" prop="schoolId" v-else>
               <el-select v-model="formData.schoolId" placeholder="请选择学校" filterable>
                 <el-option v-for="school in schoolList" :key="school.schoolId"
@@ -165,6 +168,7 @@
   import {deepClone} from "../../utils";
 
   const initForm = {
+    mobile: '',
     userId: '',
     specsId: '',
     schoolId: '',
@@ -232,6 +236,10 @@
           ],
           boxNum: [
             this.$rules.required('请输入中转箱数量', 'change'),
+          ],
+          mobile: [
+            this.$rules.required('请输入手机号', 'change'),
+            this.$rules.phone
           ],
           num: [
             // this.$rules.required('请输入数量', 'change'),
@@ -309,8 +317,10 @@
         this.formData.useTypeId = ''
         this.curTableWare.useType = ''
       },
-      userChange (){
-        this.getDefaultAddress()
+      mobileChange(value){
+        if (value.length === 11) {
+          this.getDefaultAddress(value)
+        }
       },
       specChange(val){
         this.specsId = val
@@ -393,12 +403,13 @@
           }
         })
       },
-      getDefaultAddress(){
-        inventoryApi.defaultAddress({
-          userId: this.formData.userId
+      getDefaultAddress(value){
+        inventoryApi.defaultAddressByMobile({
+          mobile: value
         }).then(res => {
           if (res) {
             this.defaultAddress = res
+            this.formData.userId = res.operatorId
           }
         })
       },

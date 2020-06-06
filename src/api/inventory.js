@@ -28,6 +28,9 @@ export default {
   defaultAddress(data) {
     return baseFetch('/address/user/default/get', data)
   },
+  defaultAddressByMobile(data) {
+    return baseFetch('/address/user/default/getByMobile', data)
+  },
   settlementDetail(data) {
     return baseFetch('/inventory/settlement/detail', data)
   }
