@@ -183,7 +183,7 @@ export default {
     },
     fetchData() {
       this.loading = true
-      goodsApi.getGoods({ ...this.pageOption, ...this.searchForm }).then(res => {
+      goodsApi.getGoods({ ...this.pageOption,pageSize: 100, ...this.searchForm }).then(res => {
         this.goodsData = res.list
       }).finally(_ => {
         this.loading = false
