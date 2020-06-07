@@ -39,19 +39,19 @@
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel">
-        <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="visit" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-            日 访 问 量
-          </div>
-          <count-to :start-val="0" :end-val="visitPv" :duration="1000" class="card-panel-num" />
-        </div>
-      </div>
-    </el-col>
+<!--    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">-->
+<!--      <div class="card-panel">-->
+<!--        <div class="card-panel-icon-wrapper icon-shopping">-->
+<!--          <svg-icon icon-class="visit" class-name="card-panel-icon" />-->
+<!--        </div>-->
+<!--        <div class="card-panel-description">-->
+<!--          <div class="card-panel-text">-->
+<!--            日 访 问 量-->
+<!--          </div>-->
+<!--          <count-to :start-val="0" :end-val="visitPv" :duration="1000" class="card-panel-num" />-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </el-col>-->
   </el-row>
 </template>
 

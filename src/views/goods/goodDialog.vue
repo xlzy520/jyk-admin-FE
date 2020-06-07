@@ -117,6 +117,7 @@
 import guigeApi from '../../api/guige'
 import goodsApi from '../../api/goods'
 import schoolApi from "../../api/school";
+import {deepClone} from "../../utils";
 
 const initFormData = {
   goodsName: '',
@@ -179,7 +180,7 @@ export default {
       uploadLoadingBigImg: false,
       dialogLoading: false,
       submitLoading: false,
-      form: initFormData,
+      form: deepClone(initFormData),
       dialogVisible: false,
       specData: [],
       rules: {
@@ -287,6 +288,7 @@ export default {
       }
     },
     close() {
+      console.log(3333, initFormData);
       this.form = initFormData
       this.fileList = []
       this.$emit('close')

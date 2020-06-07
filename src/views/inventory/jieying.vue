@@ -20,6 +20,8 @@
               @click="()=>fetchData(true)"
           >查询</el-button>
           <el-button type="info" @click="resetForm">清空</el-button>
+<!--          <el-button type="success" @click="downloadExcel">导出记录</el-button>-->
+
         </el-form-item>
       </el-form>
     </div>
@@ -60,9 +62,10 @@
 <script>
   import AddButton from '../../components/AddButton'
   import schoolApi from '../../api/school'
-  import { deepClone } from '../../utils'
+  import {deepClone, downloadFile} from '../../utils'
   import inventoryApi from "../../api/inventory";
   import pagination from '../../mixins/pagination'
+  import axios from "axios";
 
   export default {
     name: 'School',
@@ -181,7 +184,14 @@
           count: 5
         }
       },
-
+      downloadExcel(){
+        axios.post('/market/inventory/settlement/list/export', this.searchForm, {
+          responseType: 'blob'
+        }).then(res=>{
+          const url = URL.createObjectURL(res.data)
+          downloadFile(url, '每日结营.xlsx')
+        })
+      },
       detail(row){
         const startDate = row.saveDate + ' 00:00:00'
         const endDate = row.saveDate + ' 23:59:59'
