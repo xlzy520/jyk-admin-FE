@@ -103,7 +103,14 @@ export default {
         },
         { label: '价格', prop: 'priceStr' },
         { label: '销量', prop: 'sales' },
-        { label: '所属学校', prop: 'schoolName' },
+        { label: '地址类型', prop: 'schoolName',render: (h, { props: { row }}) => {
+            return (
+              <div>
+                <el-tag size={'medium'} type={row.schoolId === -9999 ? 'danger' : ''}>
+                  {row.schoolId === -9999? '商家' : row.schoolName}</el-tag>
+              </div>
+            )
+          } },
         { label: '添加时间', width: '240', prop: 'saveDate' },
         {
           label: '操作', prop: 'region', width: 240,

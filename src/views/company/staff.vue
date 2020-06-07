@@ -76,14 +76,25 @@ export default {
         },
         { label: '负责区域', prop: 'area' },
         { label: '操作', render: (h, { props: { row }}) => {
-          return (
-            <div class='table-action'>
-              <span onClick={() => this.update(row)}>编 辑</span>
-              <el-divider direction={'vertical'}/>
-              <span onClick={() => this.delete(row.userId)}>删 除</span>
-            </div>
-          )
-        }
+            const canEdit = this.userData.roleCode === 'super' ||
+              (this.userData.roleCode === 'admin' && row.roleCode==='staff')
+            const superAdmin = (
+              <div class='table-action'>
+                <span onClick={() => this.update(row)}>编 辑</span>
+                <el-divider direction={'vertical'}/>
+                <span onClick={() => this.delete(row.userId)}>删 除</span>
+              </div>
+            )
+            if (canEdit) {
+              return superAdmin
+            }
+
+            return (
+              <div class='table-action'>
+                <span onClick={() => this.update(row)}>编 辑</span>
+              </div>
+            )
+          }
         }
       ],
       pageOption: {
