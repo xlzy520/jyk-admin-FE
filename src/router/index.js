@@ -90,12 +90,12 @@ export const asyncRoutes = [
         component: () => import('@/views/productData/list'),
         meta: { title: '生产数据', icon: 'goods',roles: ['admin', 'super'] }
       },
-      {
-        path: 'send',
-        name: '发货与回收',
-        component: () => import('@/views/inventory/sendAndRecycle'),
-        meta: { title: '发货与回收', icon: 'goods',roles: ['admin', 'super'] }
-      },
+      // {
+      //   path: 'send',
+      //   name: '发货与回收',
+      //   component: () => import('@/views/inventory/sendAndRecycle'),
+      //   meta: { title: '发货与回收', icon: 'goods',roles: ['admin', 'super'] }
+      // },
     ]
   },
   {

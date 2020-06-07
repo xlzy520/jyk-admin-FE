@@ -10,25 +10,26 @@
                        :label="tableware.useType" :value="tableware.useTypeId"/>
           </el-select>
         </el-form-item>
+        <el-form-item prop="vehicle" label="所属车辆">
+          <el-select v-model="searchForm.vehicle" placeholder="所属车辆" clearable>
+            <el-option label="全部" value="" />
+            <el-option v-for="car in cars" :label="car.carNum+'---'+car.mark" :value="car.carId" />
+          </el-select>
+        </el-form-item>
 
-        <el-form-item prop="saveDate" label="生产日期">
+        <el-form-item prop="saveDate" label="日期">
           <el-date-picker
             v-model="searchForm.saveDate"
             type="daterange"
             align="center"
-            start-placeholder="注册时间起"
-            end-placeholder="注册时间止"
+            start-placeholder="添加时间起"
+            end-placeholder="添加时间止"
             :default-time="['00:00:00', '23:59:59']"
             value-format="yyyy-MM-dd HH:mm:ss"
             :clearable="false"
           />
         </el-form-item>
-        <el-form-item prop="keyword" label="填报人">
-          <el-select v-model="searchForm.realName" placeholder="填报人" clearable>
-            <el-option label="全部" value="" />
-            <el-option v-for="reporter in reporters" :label="reporter.realName" :value="reporter.userId" />
-          </el-select>
-        </el-form-item>
+
         <el-form-item>
           <el-button
             type="primary"
@@ -65,31 +66,6 @@
       @change-page="pageChange"
       @size-change="sizeChange"
     />
-    <el-dialog
-        :title="isAdd?'新增今日生产数据' : '数据更新'"
-        :close-on-click-modal="true"
-        :visible.sync="visible"
-        @close="close"
-    >
-      <el-form ref="form" :model="produceDayData" label-width="80px" :rules="rules">
-        <el-form-item prop="produceTypeId" label="规格">
-          <el-select v-model="produceDayData.produceTypeId" placeholder="规格" clearable>
-            <el-option v-for="option in typeOptions" :label="option.label" :value="option.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="生产数量" prop="produceCount">
-          <el-input v-model="produceDayData.produceCount" />
-        </el-form-item>
-        <el-form-item label="出货数量" prop="sendCount">
-          <el-input v-model="produceDayData.sendCount" />
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer">
-        <el-button v-loading="submitLoading" type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
-      </div>
-    </el-dialog>
-
   </div>
 </template>
 
@@ -102,6 +78,7 @@ import {mapGetters} from "vuex";
 import {deepClone} from "../../utils";
 import staffApi from "../../api/staff";
 import inventoryApi from "../../api/inventory";
+import carApi from "../../api/cars";
 
 export default {
   name: 'ProductList',
@@ -122,7 +99,7 @@ export default {
         sendCount: ''
       },
       searchForm: {
-        produceTypeId: '',
+        useTypeId: '',
         saveDate: []
       },
       rules: {
@@ -187,16 +164,13 @@ export default {
         //     )
         //   }},
       ],
-      loading: false
+      loading: false,
+      cars: []
     }
   },
   created() {
-    this.getReporters()
-    this.fetchData()
+    this.getCars()
     this.getTablewareList()
-    if (!this.hasAuth) {
-      this.columns.pop()
-    }
   },
   computed: {
     ...mapGetters([
@@ -208,6 +182,12 @@ export default {
     }
   },
   methods: {
+    getCars(){
+      carApi.getCar().then(res=>{
+        this.cars = res
+        this.fetchData()
+      })
+    },
     getTablewareList(){
       inventoryApi.tablewareList().then(res => {
         this.tablewareList = res
@@ -245,12 +225,18 @@ export default {
       inventoryApi.list({
         ...data,
         ...this.pageOption,
-        inventoryType: 3
+        inventoryType: 4
       }).then(res => {
         if (search) {
           this.$message1000('请求成功')
         }
-        this.produceData = res.list
+        this.produceData = res.list.map(v=>{
+          const item= this.cars.find(f=> f.carId == v.vehicle)
+          if (item) {
+            v.vehicle = item.carNum+ '---' + item.mark
+          }
+          return v
+        })
         this.count = res.count
       }).finally(_ => {
         this.loading = false

@@ -16,7 +16,6 @@
         </el-form-item>
         <el-form-item label="记录类型" prop="inventoryType">
           <el-select v-model="searchForm.inventoryType" placeholder="请选择记录类型" clearable>
-            <el-option label="全部" value="" />
             <el-option label="生产" :value="3" />
             <el-option label="发货" :value="4" />
             <el-option label="回收" :value="1" />
@@ -27,6 +26,11 @@
           <el-select v-model="searchForm.useTypeId" placeholder="请选择餐具类型" clearable>
             <el-option v-for="tableware in tablewareList" :key="tableware.useTypeId"
                        :label="tableware.useType" :value="tableware.useTypeId"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="vehicle" label="所属车辆">
+          <el-select v-model="searchForm.vehicle" placeholder="所属车辆" clearable>
+            <el-option v-for="car in cars" :label="car.carNum+'---'+car.mark" :value="car.carId" />
           </el-select>
         </el-form-item>
         <el-form-item prop="mobile" label="手机号">
@@ -80,6 +84,7 @@ import axios from 'axios'
 import { downloadFile} from '../../utils/index'
 import pagination from '../../mixins/pagination'
 import InventoryDialog from "./inventoryDialog";
+import carApi from "../../api/cars";
 
 export default {
   name: 'Inventory',
@@ -95,8 +100,10 @@ export default {
         userId: '',
         schoolId: '',
         inventoryType: '',
-        useTypeId: ''
+        useTypeId: '',
+        vehicle: ''
       },
+      cars: [],
       inventoryData: [],
       columns: [
         {label: '用户', prop: 'username', width: 100,showOverflowTooltip: true,},
@@ -115,6 +122,7 @@ export default {
             )
           }
         },
+        {label: '所属车辆', prop: 'vehicleText'},
         {label: '餐具类型', prop: 'useType', width: 100},
         {label: '餐具详情', prop: 'detail',width: 360, render: (h, { props: { row }}) => {
             return (
@@ -237,6 +245,12 @@ export default {
         this.tablewareList = res
       })
     },
+    getCars(){
+      carApi.getCar().then(res=>{
+        this.cars = res
+        this.fetchData()
+      })
+    },
     fetchData() {
       let data = this.searchForm
       this.loading = true
@@ -251,7 +265,13 @@ export default {
         ...data,
         ...this.pageOption
       }).then(res => {
-        this.inventoryData = res.list
+        this.inventoryData = res.list.map(v=>{
+          const item= this.cars.find(f=> f.carId == v.vehicle)
+          if (item) {
+            v.vehicleText = item.carNum+ '---' + item.mark
+          }
+          return v
+        })
         this.count = res.count
       }).finally(_ => {
         this.loading = false
@@ -325,7 +345,7 @@ export default {
     }
   },
   created() {
-    this.fetchData()
+    this.getCars()
     this.getUserList()
     this.getSchoolList()
     this.getTablewareList()
