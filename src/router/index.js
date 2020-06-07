@@ -68,9 +68,15 @@ export const asyncRoutes = [
     children: [
       {
         path: 'index',
-        name: '进销存管理',
+        name: '总览',
         component: () => import('@/views/inventory/index'),
         meta: { title: '总览', icon: 'stores',roles: ['admin', 'super'] }
+      },
+      {
+        path: 'staff',
+        name: '授权人员',
+        component: () => import('@/views/productData/staff'),
+        meta: { title: '授权人员', icon: 'staff',roles: ['admin', 'super'] }
       },
       {
         path: 'jieying',
@@ -89,13 +95,6 @@ export const asyncRoutes = [
         name: '发货与回收',
         component: () => import('@/views/inventory/sendAndRecycle'),
         meta: { title: '发货与回收', icon: 'goods',roles: ['admin', 'super'] }
-      },
-     
-      {
-        path: 'staff',
-        name: '授权人员',
-        component: () => import('@/views/productData/staff'),
-        meta: { title: '授权人员', icon: 'staff',roles: ['admin', 'super'] }
       },
     ]
   },
