@@ -94,6 +94,7 @@
               {label: '不锈钢勺', prop: 'StainlessSteelSpoon',},
               {label: '不锈钢餐盘(22cm)',width: 160, prop: 'StainlessSteelPlate',},
               {label: '餐碗(18cm)', width: 120,prop: 'Plate18',},
+              {label: '餐碗(20cm)', width: 120,prop: 'Plate20',},
             ],
           },
 
@@ -139,10 +140,11 @@
           {
             label: '学生餐具',
             columns: [
-              {label: '不锈钢碗(4.5cm)', width: 160, prop: 'StainlessSteelBowl',},
+              {label: '不锈钢碗(4.5cm)', width: 150, prop: 'StainlessSteelBowl',},
               {label: '不锈钢勺', prop: 'StainlessSteelSpoon',},
-              {label: '不锈钢餐盘(22cm)',width: 160, prop: 'StainlessSteelPlate',},
-              {label: '餐碗(18cm)', width: 120,prop: 'Plate18',},
+              {label: '不锈钢餐盘(22cm)',width: 150, prop: 'StainlessSteelPlate',},
+              {label: '餐碗(18cm)', width: 100,prop: 'Plate18',},
+              {label: '餐碗(20cm)', width: 100,prop: 'Plate20',},
             ]
           },
         ],

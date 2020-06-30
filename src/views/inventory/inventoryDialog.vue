@@ -60,10 +60,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="规格" prop="specsId" v-if="curTableWare.useType === '幼儿园餐具'">
+            <el-form-item label="规格" prop="specsId" v-if="isMultiSpec">
               <el-select v-model="formData.specsId" placeholder="请选择规格类型" @change="specChange">
                 <el-option v-for="spec in specsList" :key="spec.specsId"
-                           :label="spec.specsName + ':'+spec.specsStr" :value="spec.specsId"/>
+                           :label="specsLabel(spec)" :value="spec.specsId"/>
               </el-select>
             </el-form-item>
           </el-col>
@@ -281,6 +281,10 @@
       isProduce(){
         return this.activeName === '3'
       },
+      isMultiSpec(){
+        const multiSpec = ['幼儿园餐具', '学生餐具']
+        return multiSpec.includes(this.curTableWare.useType)
+      },
       firstCol(){
         if (this.isProduce) {
           return '生产'
@@ -299,6 +303,12 @@
       },
       handleTabClick(){
         this.resetForm()
+      },
+      specsLabel(spec){
+        if (spec.useTypeId === 4) {
+          return spec.specsName + '，'+spec.specsStr
+        }
+        return spec.specsName + ':'+spec.specsStr
       },
       myFilter(list){
         let arr = ['餐馆餐具','宴席餐具']
@@ -332,7 +342,7 @@
       },
       setSpecsList(val){
         this.curTableWare = deepClone(this.tablewareList).find(v=>v.useTypeId === val)
-        if (this.curTableWare.useType === '幼儿园餐具') {
+        if (this.isMultiSpec) {
           this.specsList = this.curTableWare.specsList
         } else {
           this.formData.specsId = this.curTableWare.specsList.find(v=>v.specsStr.includes('*1')).specsId
