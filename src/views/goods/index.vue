@@ -8,7 +8,6 @@
       <el-form-item label="商品类型：" prop="useTypeId">
         <el-select v-model="searchForm.useTypeId">
           <el-option label="全部" value="" />
-
           <el-option
               v-for="option in useType"
               :key="option.useType"
@@ -71,7 +70,7 @@ export default {
   data() {
     return {
       searchForm: {
-        useTypeId: '',
+        useTypeId: 3,
         schoolId: ''
       },
       useType: [],
